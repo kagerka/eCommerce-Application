@@ -13,6 +13,6 @@ Users can browse through a vast range of products, view detailed descriptions, a
 - [Evgeny Zalogin](https://github.com/evg-zlg)
 
 ## Links:
-[Deploy]() [in progress]
-[Video review]() [in progress]
-[Final Pull request]() [in progress]
+- [Deploy]() [in progress]
+- [Video review]() [in progress]
+- [Final pull request]() [in progress]
