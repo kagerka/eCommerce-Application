@@ -3,7 +3,7 @@
 - [ ] New Feature
 - [ ] Refactoring
 - [ ] Bug Fix
-- [ ] Perfomance Optimization
+- [ ] Performance Optimization
 - [ ] Test  Case
 - [ ] Documentation Update
 - [ ] Other
