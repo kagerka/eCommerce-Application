@@ -1,4 +1,5 @@
 # Git Flow
+![image](https://github.com/kagerka/eCommerce-Application/assets/52308117/c00e5bb1-a41f-4799-bc7b-9bedbbf500b3)
 
 ## Sprint 1
 1. От ветки `main` создается ветка `develop`.
