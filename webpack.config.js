@@ -13,9 +13,11 @@ console.log(mode + ' mode');
 module.exports = {
   mode: mode,
 	entry: path.resolve(__dirname, './src/index'),
+	resolve: {
+    extensions: ['.ts', '.js'],
+  },
 	output: {
     filename: '[name].[contenthash].js',
-    assetModuleFilename: 'assets/[hash][ext][query]',
     clean: true
   },
 	devtool: 'source-map',
@@ -28,8 +30,8 @@ module.exports = {
 		new CopyWebpackPlugin({
       patterns: [
         {
-          from: path.resolve(__dirname, 'src/images'),
-          to: path.resolve(__dirname, 'dist/images')
+          from: path.resolve(__dirname, 'src/assets/images'),
+          to: path.resolve(__dirname, 'dist/assets/images')
         }
       ]
     }),
@@ -67,14 +69,6 @@ module.exports = {
           },
           'sass-loader',
         ]
-      },
-			{
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
-        type: 'asset/resource'
-      },
-			{
-        test: /\.(woff|woff2|eot|ttf|otf)$/i,
-        type: 'asset/resource',
       },
 		]
 	},
