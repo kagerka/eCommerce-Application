@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "coverage": "vitest run --coverage",
+    "format": "npx prettier . --write",
+    "ci:format": "npx prettier . --check",
     "lint": "eslint ./src",
     "lint:fix": "npx eslint ./src --fix"
   },
