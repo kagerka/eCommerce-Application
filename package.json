@@ -35,6 +35,6 @@
   },
   "lint-staged": {
     "*.ts": "npm run lint",
-    "*.{ts,html,scss}": "npm run ci:format"
+    "*.{html,scss,ts}": "npm run format"
   }
 }
