@@ -20,6 +20,20 @@ Users can browse through a vast range of products, view detailed descriptions, a
 - [Video review]() [in progress]
 - [Final pull request]() [in progress]
 
+## Setting up the project
+
+Prerequisites to run your project locally:
+
+- Installed npm
+- Installed .git
+- Code Editor
+- Node version is 18.x or higher
+
+If you have all the prerequisites installed to run our project locally, you should download zip file with our repository or run git clone.
+
+Then navigate into project folder and run 
+`npm install`
+
 ## Scripts:
 - `npm run dev`  start dev server
 - `npm run build`  build for production
