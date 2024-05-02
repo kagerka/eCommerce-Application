@@ -6,7 +6,7 @@ Users can browse through a vast range of products, view detailed descriptions, a
 
 ## Project Description:
 
-This project is part of the RSSchooll educational process for front-end developers.In this project is created the front-end part of the eCommerce application from scratch and deployment to GitHub pages.
+This project is a part of the RSSchool educational process for front-end developers. In this project the front-end part of the eCommerce application was created from scratch and deployed to GitHub pages.
 
 ## Project goals:
 
