@@ -4,6 +4,18 @@ eCommerce application replicates real-world shopping experiences in a digital en
 
 Users can browse through a vast range of products, view detailed descriptions, add their favorite items to the basket, and proceed to checkout. It includes features such as user registration and login, product search, product categorization, and sorting to make the shopping experience more streamlined and convenient.
 
+## Project Description:
+
+This project is part of the RSSchooll educational process for front-end developers.In this project is created the front-end part of the eCommerce application from scratch and deployment to GitHub pages.
+
+## Project goals:
+
+The main goal of the project is to gain development skills in a team.
+
+## Technology stack:
+
+HTML, CSS, SCSS, TypeScript, Vite, Vitest, Git.
+
 ## Team:
 
 - [Aleksandr Krivoshein](https://github.com/wood85)
@@ -21,6 +33,7 @@ Users can browse through a vast range of products, view detailed descriptions, a
 - [Final pull request]() [in progress]
 
 ## Scripts:
+
 - `npm run dev`  start dev server
 - `npm run build`  build for production
 - `npm run preview` locally preview production build
