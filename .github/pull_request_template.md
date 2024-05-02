@@ -4,27 +4,27 @@
 - [ ] Refactoring
 - [ ] Bug Fix
 - [ ] Performance Optimization
-- [ ] Test  Case
+- [ ] Test Case
 - [ ] Documentation Update
 - [ ] Other
 
 ### Description
 
-*Add description of changes*
+_Add description of changes_
 
 ### Related issue link
 
-*Describe the source of requirement, like related issue link*
+_Describe the source of requirement, like related issue link_
 
 ### Background and solution
 
-*If your change has a visual impact, please provide a screenshot of the work*
+_If your change has a visual impact, please provide a screenshot of the work_
 
 ### Have you added/updated tests?
 
 - [ ] Yes
 - [ ] No, because they aren't needed
-- [ ] No, and this is why: *replace this line with details on why tests have not been included*
+- [ ] No, and this is why: _replace this line with details on why tests have not been included_
 - [ ] No, because I need help
 
 ### [optional] Are there any post deployment tasks we need to perform?
