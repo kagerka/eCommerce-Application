@@ -19,3 +19,14 @@ Users can browse through a vast range of products, view detailed descriptions, a
 - [Deploy]() [in progress]
 - [Video review]() [in progress]
 - [Final pull request]() [in progress]
+
+## Scripts:
+- `npm run dev`  start dev server
+- `npm run build`  build for production
+- `npm run preview` locally preview production build
+- `npm run test` start tests
+- `npm run coverage` display test coverage
+- `npm run format` start Prettier check
+- `npm run ci:format` formatting code
+- `npm run lint` start ESLint check
+- `npm run lint:fix` fix issues that can be fixed ESLint
