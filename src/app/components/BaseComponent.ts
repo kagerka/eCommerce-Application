@@ -33,7 +33,7 @@ class BaseComponent {
 
   protected addText(): void {
     if (this.options.text) {
-      this.element.innerText = this.options.text;
+      this.element.textContent = this.options.text;
     }
   }
 
