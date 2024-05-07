@@ -16,12 +16,12 @@ const spanComponent = new BaseComponent({
 
 describe('HTML element', () => {
   it('has a type attribute with the value password', () => {
-    expect(inputComponent.htmlElement).toHaveAttribute('type', 'password');
+    expect(inputComponent.html).toHaveAttribute('type', 'password');
   });
   it('has classes input-password and input', () => {
-    expect(inputComponent.htmlElement).toHaveClass('input-password', 'input');
+    expect(inputComponent.html).toHaveClass('input-password', 'input');
   });
   it('has a text content ', () => {
-    expect(spanComponent.htmlElement).toHaveTextContent('Content');
+    expect(spanComponent.html).toHaveTextContent('Content');
   });
 });
