@@ -37,7 +37,7 @@ class BaseComponent {
     }
   }
 
-  public get htmlElement(): TagType {
+  public get html(): TagType {
     return this.element;
   }
 }
