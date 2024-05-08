@@ -1,0 +1,26 @@
+@import './../../../styles/colors.scss';
+
+.login {
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-container {
+  width: 390px;
+  height: 500px;
+}
+
+.login-title {
+  font-weight: 500;
+  line-height: 16px;
+  color: $green;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}

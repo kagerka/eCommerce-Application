@@ -15,6 +15,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   rules: {
     'linebreak-style': 0,
+    'operator-linebreak': 0,
     'no-param-reassign': [
       'error',
       {
