@@ -43,7 +43,73 @@
   width: 300px;
   border-radius: 5px;
   padding-left: 5px;
-  border-color: $lightGray;
+  border: 2px solid $lightGray;
+}
+
+.login-input-email:focus,
+.login-input-password:focus {
+  outline: none;
+}
+
+.success {
+  border: 2px solid $green;
+}
+
+.error {
+  border: 2px solid $red;
+}
+
+.login-error {
+  padding-top: 3px;
+  font-size: 13px;
+  font-weight: 500;
+  color: $red;
+}
+
+.error-message {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.tooltip-container {
+  position: relative;
+}
+
+.tooltip-icon {
+  width: 15px;
+  height: 15px;
+  margin: 0 5px;
+  background-image: url('./../../../assets/images/info-icon.svg');
+  background-size: cover;
+  cursor: pointer;
+}
+
+.tooltip-icon:hover + .tooltip-message,
+.tooltip-icon:focus + .tooltip-message {
+  display: block;
+}
+
+.tooltip-message {
+  background-color: $gray;
+  color: $white;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 400;
+  text-transform: none;
+  padding: 10px 10px 10px 0px;
+  border-radius: 5px;
+  width: 256px;
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  z-index: 100;
+  transform: translateX(-50%);
+  display: none;
+}
+
+.tooltip-item {
+  font-weight: 400;
+  font-size: 13px;
 }
 
 .show-password-btn {
@@ -55,6 +121,7 @@
   background-image: url('./../../../assets/images/eye.svg');
   background-size: cover;
   border: 0;
+  cursor: pointer;
 }
 
 .show-password-btn.hidden-eye {
