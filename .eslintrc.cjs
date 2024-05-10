@@ -30,11 +30,12 @@ module.exports = {
     {
       files: ['*.ts', '*.tsx'],
       parserOptions: {
-        project: 'tsconfig.json',
+        project: ['tsconfig.json'],
       },
     },
   ],
   plugins: ['@typescript-eslint'],
   root: true,
   noInlineConfig: true,
+	ignorePatterns: ["vite.config.ts", "vitest.config.ts"]
 };

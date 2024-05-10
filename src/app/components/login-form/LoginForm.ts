@@ -5,6 +5,7 @@ import Input from '../input/Input';
 import validateLength from '../../utils/validation/validateLength';
 import validateRegExp from '../../utils/validation/validateRegExp';
 import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
+import apiRoot from '../../api/Client';
 
 const MIN_PASSWORD_LENGTH = 8;
 const RULE_FORMAT = 'Email address must be properly formatted (e.g., user@example.com).';
@@ -103,6 +104,7 @@ class LoginForm {
     this.handlePasswordInput();
     this.handleEmailInput();
     this.handleShowPswBtn();
+    this.submitLoginForm();
   }
 
   private composeView(): void {
@@ -366,6 +368,34 @@ class LoginForm {
     this.passwordInput.view.html.addEventListener('input', () => {
       this.validatePasswordInput();
       this.checkStatuses();
+    });
+  }
+
+  private submitLoginForm(): void {
+    document.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (
+        this.emailInput.view.html instanceof HTMLInputElement &&
+        this.passwordInput.view.html instanceof HTMLInputElement
+      ) {
+        const customer: { email: string; password: string } = {
+          email: this.emailInput.view.html.value,
+          password: this.passwordInput.view.html.value,
+        };
+        this.emailInput.view.html.value = '';
+        this.passwordInput.view.html.value = '';
+        this.emailInputStatus = false;
+        this.passwordInputStatus = false;
+        this.checkStatuses();
+        this.emailInput.view.html.classList.remove('success');
+        this.passwordInput.view.html.classList.remove('success');
+        apiRoot
+          .login()
+          .post({
+            body: customer,
+          })
+          .execute();
+      }
     });
   }
 
