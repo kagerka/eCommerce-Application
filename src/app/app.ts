@@ -1,22 +1,22 @@
 import './app.scss';
 import BaseComponent from './components/BaseComponent';
-import Login from './pages/login/Login';
+import Registration from './pages/registation/Registration';
 
 class App {
   private static container: HTMLElement = document.body;
 
   private content: BaseComponent;
 
-  private loginPage: Login;
+  private regPage: Registration;
 
   constructor() {
     this.content = new BaseComponent({ tag: 'div', class: ['app'] });
-    this.loginPage = new Login();
+    this.regPage = new Registration();
   }
 
   run(): void {
     App.container.append(this.content.html);
-    this.content.html.append(this.loginPage.view.html);
+    this.content.html.append(this.regPage.view.html);
   }
 }
 

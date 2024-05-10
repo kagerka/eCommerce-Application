@@ -17,13 +17,13 @@ const RULE_CHAR =
 const RULE_PSW_SPACE = '🚫 Password must not contain leading or trailing whitespace.';
 
 class LoginForm {
-  private passwordInputStatus: boolean;
+  public passwordInputStatus: boolean;
 
-  private emailInputStatus: boolean;
+  public emailInputStatus: boolean;
 
   private loginFormContainer: BaseComponent;
 
-  private loginInputs: BaseComponent;
+  public loginInputs: BaseComponent;
 
   private emailField: BaseComponent;
 
@@ -47,7 +47,7 @@ class LoginForm {
 
   private passwordError: BaseComponent;
 
-  private loginButton: Button;
+  public loginButton: Button;
 
   private tooltipContainer: BaseComponent;
 
@@ -278,7 +278,7 @@ class LoginForm {
     });
   }
 
-  private checkStatuses(): void {
+  checkStatuses(): void {
     if (this.passwordInputStatus && this.emailInputStatus) {
       this.loginButton.view.html.removeAttribute('disabled');
     } else {
