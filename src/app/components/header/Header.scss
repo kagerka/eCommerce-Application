@@ -1,0 +1,130 @@
+@import './../../../styles/colors';
+
+.header {
+  width: 100%;
+  height: 80px;
+  padding: 10px 20px;
+  border-bottom: 1px solid $green;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo-container {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo-icon {
+  height: 60px;
+  width: 60px;
+  background: url('../../../assets/images/sport-logo.svg') no-repeat;
+}
+
+.header-logo-title {
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 28px;
+  color: $gray;
+}
+
+.header-logo-title-shop {
+  color: $green;
+}
+
+.nav-container {
+  height: 35px;
+  display: flex;
+  align-items: center;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  gap: 50px;
+  padding-left: 0;
+}
+
+.nav-list-link {
+  position: relative;
+  text-decoration: none;
+  font-size: 16px;
+  color: $gray;
+
+  &::after {
+    display: block;
+    position: absolute;
+    top: 46px;
+    left: 0;
+    width: 0;
+    height: 4px;
+    background-color: $green;
+    content: '';
+    transition: width 0.3s ease-out;
+  }
+
+  &:hover::after,
+  &:focus::after {
+    font-weight: 700;
+    width: 100%;
+  }
+
+  &.active {
+    font-weight: 700;
+
+    &::after {
+      width: 100%;
+    }
+  }
+}
+
+.buttons-container {
+  height: 35px;
+  display: flex;
+  justify-content: right;
+  gap: 20px;
+}
+
+.login-btn {
+  border-radius: 5px;
+  background-color: $green;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: $white;
+  text-align: center;
+  transition: 0.5s all;
+  outline: none;
+  border: none;
+
+  &:hover {
+    background-color: $darkGreen;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .header-logo-title {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .header {
+    height: 60px;
+  }
+
+  .logo-container {
+    display: none;
+  }
+
+  .nav-list-link {
+    &::after {
+      top: 36px;
+      left: 0;
+      width: 0;
+      height: 4px;
+    }
+  }
+}

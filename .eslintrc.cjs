@@ -25,6 +25,7 @@ module.exports = {
     'no-magic-numbers': ['error', { ignoreArrayIndexes: true }],
     '@typescript-eslint/explicit-function-return-type': 'error',
     'max-lines-per-function': ['error', { max: 40, skipBlankLines: true }],
+    'max-len': ['error', { code: 120, ignoreStrings: true, ignoreRegExpLiterals: true }],
   },
   overrides: [
     {
