@@ -1,3 +1,11 @@
+import fetch from 'node-fetch';
+import {
+  ClientBuilder,
+  type PasswordAuthMiddlewareOptions,
+  type HttpMiddlewareOptions,
+} from '@commercetools/sdk-client-v2';
+import { createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
+import { sportStore } from '../../api/data/api-clients';
 import './LoginForm.scss';
 import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
@@ -5,7 +13,7 @@ import Input from '../input/Input';
 import validateLength from '../../utils/validation/validateLength';
 import validateRegExp from '../../utils/validation/validateRegExp';
 import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
-import apiRoot from '../../api/Client';
+// import apiRoot from '../../api/Client';
 
 const MIN_PASSWORD_LENGTH = 8;
 const RULE_FORMAT = 'Email address must be properly formatted (e.g., user@example.com).';
@@ -16,6 +24,7 @@ const RULE_MIN_LENGTH = `🚫 Password must be at least ${MIN_PASSWORD_LENGTH} c
 const RULE_CHAR =
   '🚫 Password must contain at least one uppercase letter (A-Z), one lowercase letter (a-z), one digit (0-9), one special character(e.g., !@#$%^&*)';
 const RULE_PSW_SPACE = '🚫 Password must not contain leading or trailing whitespace.';
+const INCORRECTLY_ENTER = '🚫 Email or password entered incorrectly';
 
 class LoginForm {
   private passwordInputStatus: boolean;
@@ -382,21 +391,75 @@ class LoginForm {
           email: this.emailInput.view.html.value,
           password: this.passwordInput.view.html.value,
         };
-        this.emailInput.view.html.value = '';
-        this.passwordInput.view.html.value = '';
-        this.emailInputStatus = false;
-        this.passwordInputStatus = false;
-        this.checkStatuses();
-        this.emailInput.view.html.classList.remove('success');
-        this.passwordInput.view.html.classList.remove('success');
-        apiRoot
-          .login()
-          .post({
-            body: customer,
-          })
-          .execute();
+        this.passwordAuth(customer);
       }
     });
+  }
+
+  private clearFields(): void {
+    if (
+      this.emailInput.view.html instanceof HTMLInputElement &&
+      this.passwordInput.view.html instanceof HTMLInputElement
+    ) {
+      this.emailInput.view.html.value = '';
+      this.passwordInput.view.html.value = '';
+      this.emailInputStatus = false;
+      this.passwordInputStatus = false;
+      this.checkStatuses();
+      this.emailInput.view.html.classList.remove('success');
+      this.passwordInput.view.html.classList.remove('success');
+    }
+  }
+
+  private displayErrorEnter(): void {
+    this.emailInput.view.html.classList.remove('success');
+    this.passwordInput.view.html.classList.remove('success');
+    this.emailInput.view.html.classList.add('error');
+    this.passwordInput.view.html.classList.add('error');
+    const errorEnter = new BaseComponent({
+      tag: 'div',
+      class: ['error-enter'],
+      text: INCORRECTLY_ENTER,
+    });
+    this.emailError.html.append(errorEnter.html);
+    this.loginButton.view.html.setAttribute('disabled', '');
+  }
+
+  private passwordAuth(user: { email: string; password: string }): void {
+    const options: PasswordAuthMiddlewareOptions = {
+      host: sportStore.AuthURL,
+      projectKey: sportStore.projectKey,
+      credentials: {
+        clientId: sportStore.clientId,
+        clientSecret: sportStore.secret,
+        user: {
+          username: user.email,
+          password: user.password,
+        },
+      },
+      scopes: ['view_products:tea-team-app manage_customers:tea-team-app'],
+      fetch,
+    };
+    const httpMiddlewareOptions: HttpMiddlewareOptions = {
+      host: sportStore.APIURL,
+      fetch,
+    };
+    const ctpClient = new ClientBuilder()
+      .withPasswordFlow(options)
+      .withHttpMiddleware(httpMiddlewareOptions)
+      .withLoggerMiddleware()
+      .build();
+    const apiRoot = createApiBuilderFromCtpClient(ctpClient).withProjectKey({ projectKey: 'tea-team-app' });
+    apiRoot
+      .login()
+      .post({ body: user })
+      .execute()
+      .then(() => {
+        this.clearFields();
+      })
+      .catch(() => {
+        this.displayErrorEnter();
+      });
   }
 
   get view(): BaseComponent {

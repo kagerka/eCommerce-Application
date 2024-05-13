@@ -37,5 +37,5 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   root: true,
   noInlineConfig: true,
-	ignorePatterns: ["vite.config.ts", "vitest.config.ts"]
+  ignorePatterns: ['vite.config.ts', 'vitest.config.ts'],
 };
