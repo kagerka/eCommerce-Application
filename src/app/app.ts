@@ -7,16 +7,16 @@ class App {
 
   private content: BaseComponent;
 
-  private regPage: Registration;
+  private loginPage: Registration;
 
   constructor() {
     this.content = new BaseComponent({ tag: 'div', class: ['app'] });
-    this.regPage = new Registration();
+    this.loginPage = new Registration();
   }
 
   run(): void {
     App.container.append(this.content.html);
-    this.content.html.append(this.regPage.view.html);
+    this.content.html.append(this.loginPage.view.html);
   }
 }
 

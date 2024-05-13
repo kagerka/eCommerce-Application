@@ -1,22 +1,5 @@
 @import './../../../styles/colors';
 
-.reg-form {
-  width: 100%;
-  height: 400px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.reg-inputs {
-  height: 250px;
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
 .reg-field {
   display: flex;
   flex-direction: column;
