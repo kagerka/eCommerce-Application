@@ -1,4 +1,4 @@
-export type InputTypesType = 'email' | 'password' | 'text' | 'date';
+type InputTypesType = 'email' | 'password' | 'text';
 export interface IInputOptions {
   type: InputTypesType;
   class?: string[];

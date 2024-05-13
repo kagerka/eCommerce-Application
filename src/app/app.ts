@@ -1,3 +1,4 @@
+import apiRoot from './api/anonymousAuth/Client';
 import './app.scss';
 import BaseComponent from './components/BaseComponent';
 import Registration from './pages/registation/Registration';
@@ -7,16 +8,17 @@ class App {
 
   private content: BaseComponent;
 
-  private loginPage: Registration;
+  private registrationPage: Registration;
 
   constructor() {
     this.content = new BaseComponent({ tag: 'div', class: ['app'] });
-    this.loginPage = new Registration();
+    this.registrationPage = new Registration();
   }
 
   run(): void {
     App.container.append(this.content.html);
-    this.content.html.append(this.loginPage.view.html);
+    apiRoot.get().execute();
+    this.content.html.append(this.registrationPage.view.html);
   }
 }
 

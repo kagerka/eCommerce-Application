@@ -37,12 +37,12 @@ class BaseComponent {
     }
   }
 
-  public get html(): TagType {
-    return this.element;
-  }
-
   public append(child: TagType): void {
     this.element.appendChild(child);
+  }
+
+  public get html(): TagType {
+    return this.element;
   }
 }
 

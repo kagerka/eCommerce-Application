@@ -1,0 +1,35 @@
+@import './../../../styles/colors.scss';
+
+.main-page {
+  max-width: 1440px;
+  height: 100vh;
+  padding: 0 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100vh;
+}
+
+.main-content {
+  display: flex;
+
+  flex-grow: 1;
+}
+
+@media screen and (max-width: 1000px) {
+  .main-page {
+    padding: 0 60px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .main-page {
+    padding: 0 40px;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .main-page {
+    padding: 0 20px;
+  }
+}

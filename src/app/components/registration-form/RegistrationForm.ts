@@ -11,6 +11,10 @@ class RegistrationForm extends LoginInfo {
 
   private cityInputStatus: boolean;
 
+  private postInputStatus: boolean;
+
+  private countryInputStatus: boolean;
+
   private dateInputStatus: boolean;
 
   private dateField: BaseComponent;
@@ -57,6 +61,8 @@ class RegistrationForm extends LoginInfo {
     super();
     this.streetInputStatus = false;
     this.cityInputStatus = false;
+    this.postInputStatus = false;
+    this.countryInputStatus = false;
     this.dateInputStatus = false;
     this.dateField = RegistrationForm.createFieldElement('reg-field-date');
     this.dateLabel = RegistrationForm.createLabelElement('date', 'Date of Birth');
@@ -82,7 +88,9 @@ class RegistrationForm extends LoginInfo {
     this.composeViewNew();
     this.handleCityInput();
     this.handleStreetInput();
+    this.handlePostInput();
     this.handleDateInput();
+    this.handleCountryInput();
   }
 
   private composeViewNew(): void {
@@ -121,12 +129,26 @@ class RegistrationForm extends LoginInfo {
     return select;
   }
 
+  static getSelectedValue(): string | null {
+    const selectedOption = <HTMLSelectElement>document.querySelector('option:checked');
+    return selectedOption ? selectedOption.value : null;
+  }
+
+  private handleCountryInput(): void {
+    this.countryInputContainer.html.addEventListener('change', () => {
+      this.countryInputStatus = true;
+      this.postInputStatus = false;
+      this.validatePostInput();
+      this.checkStatuses();
+    });
+  }
+
   checkStatuses(): void {
     const loginValid = this.passwordInputStatus && this.emailInputStatus;
     const nameValid = this.nameInputStatus && this.surnameInputStatus;
-    const placeValid = this.cityInputStatus && this.streetInputStatus;
+    const placeValid = this.cityInputStatus && this.streetInputStatus && this.postInputStatus;
 
-    if (loginValid && nameValid && placeValid && this.dateInputStatus) {
+    if (loginValid && nameValid && placeValid && this.dateInputStatus && this.countryInputStatus) {
       this.loginButton.view.html.removeAttribute('disabled');
     } else {
       this.loginButton.view.html.setAttribute('disabled', '');
@@ -168,6 +190,39 @@ class RegistrationForm extends LoginInfo {
   private handleStreetInput(): void {
     this.streetInput.view.html.addEventListener('input', () => {
       this.validateStreetInput();
+      this.checkStatuses();
+    });
+  }
+
+  private validatePostInput(): void {
+    if (this.postInput.view.html instanceof HTMLInputElement) {
+      const reg = RegistrationForm.getSelectedValue();
+
+      const { value } = this.postInput.view.html;
+
+      if (reg === 'US') {
+        const usCodeRegExp = /^\d{5}(-\d{4})?$/;
+        const isValidateUsCodeRegExp = validateRegExp(value, usCodeRegExp);
+        if (isValidateUsCodeRegExp) {
+          this.postInputStatus = true;
+        } else {
+          this.postInputStatus = false;
+        }
+      } else if (reg === 'RU') {
+        const rusCodeRegExp = /^\d{6}$/;
+        const isValidateRusCodeRegExp = validateRegExp(value, rusCodeRegExp);
+        if (isValidateRusCodeRegExp) {
+          this.postInputStatus = true;
+        } else {
+          this.postInputStatus = false;
+        }
+      }
+    }
+  }
+
+  private handlePostInput(): void {
+    this.postInput.view.html.addEventListener('input', () => {
+      this.validatePostInput();
       this.checkStatuses();
     });
   }
