@@ -422,6 +422,7 @@ class LoginForm {
       text: INCORRECTLY_ENTER,
     });
     this.emailError.html.append(errorEnter.html);
+    this.loginButton.view.html.setAttribute('disabled', '');
   }
 
   private passwordAuth(user: { email: string; password: string }): void {
