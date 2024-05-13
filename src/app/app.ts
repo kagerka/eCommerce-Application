@@ -1,3 +1,4 @@
+import apiRoot from './api/anonymousAuth/Client';
 import './app.scss';
 import BaseComponent from './components/BaseComponent';
 import Login from './pages/login/Login';
@@ -16,6 +17,7 @@ class App {
 
   run(): void {
     App.container.append(this.content.html);
+    apiRoot.get().execute();
     this.content.html.append(this.loginPage.view.html);
   }
 }
