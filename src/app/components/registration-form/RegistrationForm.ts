@@ -1,10 +1,21 @@
 import './RegistrationForm.scss';
+import '../login-form/LoginForm.scss';
 import BaseComponent from '../BaseComponent';
 import Input from '../input/Input';
 import validateRegExp from '../../utils/validation/validateRegExp';
 import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
 import validateDateOfBirth from '../../utils/validation/validateBirthDate';
 import LoginInfo from './LoginInfo';
+import {
+  AGE_ERROR,
+  CITY_ERROR,
+  CITY_RULES,
+  DATE_RULES,
+  POSTCODE_ERROR,
+  POSTCODE_RULES,
+  STREET_ERROR,
+  STREET_RULES,
+} from '../../utils/validation/inputErrorTexts';
 
 class RegistrationForm extends LoginInfo {
   private streetInputStatus: boolean;
@@ -86,11 +97,7 @@ class RegistrationForm extends LoginInfo {
     this.countryInputContainer = RegistrationForm.createSelectElement();
 
     this.composeViewNew();
-    this.handleCityInput();
-    this.handleStreetInput();
-    this.handlePostInput();
-    this.handleDateInput();
-    this.handleCountryInput();
+    this.handleRestInpurs();
   }
 
   private composeViewNew(): void {
@@ -157,6 +164,15 @@ class RegistrationForm extends LoginInfo {
 
   private validateCityInput(): void {
     if (this.cityInput.view.html instanceof HTMLInputElement) {
+      const errorFormat = new BaseComponent({
+        tag: 'div',
+        class: ['error-message'],
+        text: CITY_ERROR,
+      });
+      errorFormat.html.append(this.tooltipContainer.html);
+      LoginInfo.cleanInsideElement(this.tooltipMessage.html);
+      const rules = LoginInfo.createTooltipItemElement(CITY_RULES);
+      this.tooltipMessage.html.append(rules.html);
       const { value } = this.cityInput.view.html;
       const regExp = /^(?=.*[A-Za-z])[A-Za-z]{1,}$/;
       const isValidateRegExp = validateRegExp(value, regExp);
@@ -164,8 +180,13 @@ class RegistrationForm extends LoginInfo {
 
       if (isValidateRegExp && isValidateLeadingTrailingSpace) {
         this.cityInputStatus = true;
+        LoginInfo.addClassSuccess(this.cityInput.view.html);
+        LoginInfo.cleanInsideElement(this.cityError.html);
       } else {
         this.cityInputStatus = false;
+        LoginInfo.addClassError(this.cityInput.view.html);
+        LoginInfo.cleanInsideElement(this.cityError.html);
+        this.cityError.html.append(errorFormat.html);
       }
     }
   }
@@ -179,11 +200,29 @@ class RegistrationForm extends LoginInfo {
 
   private validateStreetInput(): void {
     if (this.streetInput.view.html instanceof HTMLInputElement) {
+      const errorFormat = new BaseComponent({
+        tag: 'div',
+        class: ['error-message'],
+        text: STREET_ERROR,
+      });
+      errorFormat.html.append(this.tooltipContainer.html);
+      LoginInfo.cleanInsideElement(this.tooltipMessage.html);
+      const rules = LoginInfo.createTooltipItemElement(STREET_RULES);
+      this.tooltipMessage.html.append(rules.html);
       const EMPTY_INPUT = 0;
       const { value } = this.streetInput.view.html;
       const hasAtLeastOneCharacter = value.trim().length > EMPTY_INPUT;
 
-      this.streetInputStatus = hasAtLeastOneCharacter;
+      if (hasAtLeastOneCharacter) {
+        this.streetInputStatus = true;
+        LoginInfo.addClassSuccess(this.streetInput.view.html);
+        LoginInfo.cleanInsideElement(this.streetError.html);
+      } else {
+        this.streetInputStatus = false;
+        LoginInfo.addClassError(this.streetInput.view.html);
+        LoginInfo.cleanInsideElement(this.streetError.html);
+        this.streetError.html.append(errorFormat.html);
+      }
     }
   }
 
@@ -195,28 +234,33 @@ class RegistrationForm extends LoginInfo {
   }
 
   private validatePostInput(): void {
-    if (this.postInput.view.html instanceof HTMLInputElement) {
-      const reg = RegistrationForm.getSelectedValue();
+    if (!(this.postInput.view.html instanceof HTMLInputElement)) return;
 
-      const { value } = this.postInput.view.html;
+    const errorFormat = new BaseComponent({
+      tag: 'div',
+      class: ['error-message'],
+      text: POSTCODE_ERROR,
+    });
+    errorFormat.html.append(this.tooltipContainer.html);
+    LoginInfo.cleanInsideElement(this.tooltipMessage.html);
+    const rules = LoginInfo.createTooltipItemElement(POSTCODE_RULES);
+    this.tooltipMessage.html.append(rules.html);
 
-      if (reg === 'US') {
-        const usCodeRegExp = /^\d{5}(-\d{4})?$/;
-        const isValidateUsCodeRegExp = validateRegExp(value, usCodeRegExp);
-        if (isValidateUsCodeRegExp) {
-          this.postInputStatus = true;
-        } else {
-          this.postInputStatus = false;
-        }
-      } else if (reg === 'RU') {
-        const rusCodeRegExp = /^\d{6}$/;
-        const isValidateRusCodeRegExp = validateRegExp(value, rusCodeRegExp);
-        if (isValidateRusCodeRegExp) {
-          this.postInputStatus = true;
-        } else {
-          this.postInputStatus = false;
-        }
-      }
+    const reg = RegistrationForm.getSelectedValue();
+    const { value } = this.postInput.view.html;
+    const isValidCode = reg === 'US' ? /^\d{5}(-\d{4})?$/.test(value) : /^\d{6}$/.test(value);
+
+    this.postInputStatus = isValidCode;
+    const targetElement = this.postInput.view.html;
+    const targetErrorElement = this.postError.html;
+
+    if (isValidCode) {
+      LoginInfo.addClassSuccess(targetElement);
+      LoginInfo.cleanInsideElement(targetErrorElement);
+    } else {
+      LoginInfo.addClassError(targetElement);
+      LoginInfo.cleanInsideElement(targetErrorElement);
+      targetErrorElement.append(errorFormat.html);
     }
   }
 
@@ -229,14 +273,28 @@ class RegistrationForm extends LoginInfo {
 
   private validateDateInput(): void {
     if (this.dateInput.view.html instanceof HTMLInputElement) {
+      const errorFormat = new BaseComponent({
+        tag: 'div',
+        class: ['error-message'],
+        text: AGE_ERROR,
+      });
+      errorFormat.html.append(this.tooltipContainer.html);
+      LoginInfo.cleanInsideElement(this.tooltipMessage.html);
+      const rules = LoginInfo.createTooltipItemElement(DATE_RULES);
+      this.tooltipMessage.html.append(rules.html);
       const { value } = this.dateInput.view.html;
       const userBirthdate = new Date(value);
       const isValid = validateDateOfBirth(userBirthdate);
 
       if (isValid) {
         this.dateInputStatus = true;
+        LoginInfo.addClassSuccess(this.dateInput.view.html);
+        LoginInfo.cleanInsideElement(this.dateError.html);
       } else {
         this.dateInputStatus = false;
+        LoginInfo.addClassError(this.dateInput.view.html);
+        LoginInfo.cleanInsideElement(this.dateError.html);
+        this.dateError.html.append(errorFormat.html);
       }
     }
   }
@@ -246,6 +304,14 @@ class RegistrationForm extends LoginInfo {
       this.validateDateInput();
       this.checkStatuses();
     });
+  }
+
+  private handleRestInpurs(): void {
+    this.handleCityInput();
+    this.handleStreetInput();
+    this.handlePostInput();
+    this.handleDateInput();
+    this.handleCountryInput();
   }
 }
 
