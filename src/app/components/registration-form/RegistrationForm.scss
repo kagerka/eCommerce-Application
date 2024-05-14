@@ -1,0 +1,118 @@
+@import './../../../styles/colors';
+
+.reg-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reg-inputs {
+  height: 550px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.reg-field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.reg-field-password {
+  position: relative;
+}
+
+.reg-label {
+  font-family: Cera Pro;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 16px;
+  text-align: left;
+}
+
+.reg-input, .reg-select {
+  height: 40px;
+  width: 300px;
+  border-radius: 5px;
+  border: 2px solid $lightGray;
+}
+
+.reg-input {
+  padding-left: 5px;
+}
+
+.reg-select {
+  cursor: pointer;
+}
+
+.reg-input-name:focus,
+.reg-input-password:focus,
+.reg-input-email:focus,
+.reg-input-surname:focus,
+.reg-input-date:focus,
+.reg-select:focus,
+.reg-input-city:focus,
+.reg-input-post:focus,
+.reg-input-street:focus {
+  outline: none;
+}
+
+.tooltip-message {
+  background-color: $gray;
+  color: $white;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 400;
+  text-transform: none;
+  padding: 10px 10px 10px 0px;
+  border-radius: 5px;
+  width: 256px;
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  z-index: 100;
+  transform: translateX(-50%);
+  display: none;
+}
+
+.tooltip-item {
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.show-password-btn {
+  position: absolute;
+  top: 28px;
+  right: 10px;
+  width: 18px;
+  height: 18px;
+  background-image: url('./../../../assets/images/eye.svg');
+  background-size: cover;
+  border: 0;
+  cursor: pointer;
+}
+
+.show-password-btn.hidden-eye {
+  background-image: url('./../../../assets/images/eye-off.svg');
+}
+
+.reg-btn {
+  height: 45px;
+  width: 300px;
+  background: $green;
+  color: $white;
+  border-radius: 5px;
+  border: 0;
+  transition: all 0.3s;
+  margin: 30px 0;
+}
+
+.reg-btn:disabled {
+  background: $lightGreen;
+}
