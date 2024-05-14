@@ -13,18 +13,17 @@ import Input from '../input/Input';
 import validateLength from '../../utils/validation/validateLength';
 import validateRegExp from '../../utils/validation/validateRegExp';
 import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
-// import apiRoot from '../../api/Client';
-
-const MIN_PASSWORD_LENGTH = 8;
-const RULE_FORMAT = 'Email address must be properly formatted (e.g., user@example.com).';
-const RULE_SPACE = 'Email address must not contain leading or trailing whitespace.';
-const RULE_DOMAIN_NAME = 'Email address must contain a domain name (e.g., example.com).';
-const RULE_SEPARATOR = 'Email address must contain an @ symbol separating local part and domain name.';
-const RULE_MIN_LENGTH = `🚫 Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`;
-const RULE_CHAR =
-  '🚫 Password must contain at least one uppercase letter (A-Z), one lowercase letter (a-z), one digit (0-9), one special character(e.g., !@#$%^&*)';
-const RULE_PSW_SPACE = '🚫 Password must not contain leading or trailing whitespace.';
-const INCORRECTLY_ENTER = '🚫 Email or password entered incorrectly';
+import {
+  INCORRECTLY_ENTER,
+  MIN_PASSWORD_LENGTH,
+  RULE_CHAR,
+  RULE_DOMAIN_NAME,
+  RULE_FORMAT,
+  RULE_MIN_LENGTH,
+  RULE_PSW_SPACE,
+  RULE_SEPARATOR,
+  RULE_SPACE,
+} from '../../utils/validation/inputErrorTexts';
 
 class LoginForm {
   private passwordInputStatus: boolean;

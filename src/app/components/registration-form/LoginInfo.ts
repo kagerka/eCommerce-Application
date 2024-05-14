@@ -7,17 +7,17 @@ import validateRegExp from '../../utils/validation/validateRegExp';
 import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
 import Input from '../input/Input';
-
-const MIN_PASSWORD_LENGTH = 8;
-const EMAIL_RULES = [
-  'Email address must be properly formatted (user@example.com).',
-  'Email address must not contain leading or trailing whitespace.',
-].join('\n');
-const PASSWORD_RULES = [
-  `Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`,
-  'Password must contain at least one uppercase letter (A-Z), one lowercase letter (a-z), one digit (0-9), one special character(e.g., !@#$%^&*)',
-  'Password must not contain leading or trailing whitespace.',
-].join('\n');
+import {
+  EMAIL_ERROR,
+  EMAIL_RULES,
+  MIN_PASSWORD_LENGTH,
+  NAME_ERROR,
+  NAME_RULES,
+  PASSWORD_ERROR,
+  PASSWORD_RULES,
+  SURNAME_ERROR,
+  SURNAME_RULES,
+} from '../../utils/validation/inputErrorTexts';
 
 class LoginInfo {
   public nameInputStatus: boolean;
@@ -76,11 +76,11 @@ class LoginInfo {
 
   public loginButton: Button;
 
-  private tooltipContainer: BaseComponent;
+  public tooltipContainer: BaseComponent;
 
   private tooltipIcon: BaseComponent;
 
-  private tooltipMessage: BaseComponent;
+  public tooltipMessage: BaseComponent;
 
   constructor() {
     this.nameInputStatus = false;
@@ -133,6 +133,7 @@ class LoginInfo {
     this.loginInputs.html.append(this.emailField.html, this.passwordField.html);
     this.loginFormContainer.html.append(this.loginInputs.html, this.loginButton.view.html);
     this.tooltipContainer.html.append(this.tooltipIcon.html);
+    this.tooltipContainer.html.append(this.tooltipMessage.html);
   }
 
   static createFieldElement(className: string): BaseComponent {
@@ -215,7 +216,7 @@ class LoginInfo {
     });
   }
 
-  private static createTooltipItemElement(text: string): BaseComponent {
+  public static createTooltipItemElement(text: string): BaseComponent {
     return new BaseComponent({
       tag: 'div',
       class: ['tooltip-item'],
@@ -223,7 +224,7 @@ class LoginInfo {
     });
   }
 
-  private static cleanInsideElement(element: HTMLElement): void {
+  public static cleanInsideElement(element: HTMLElement): void {
     while (element.firstChild) {
       element.removeChild(element.firstChild);
     }
@@ -244,18 +245,27 @@ class LoginInfo {
     });
   }
 
-  private static addClassError(elemen: HTMLElement): void {
+  public static addClassError(elemen: HTMLElement): void {
     elemen.classList.remove('success');
     elemen.classList.add('error');
   }
 
-  private static addClassSuccess(elemen: HTMLElement): void {
+  public static addClassSuccess(elemen: HTMLElement): void {
     elemen.classList.remove('error');
     elemen.classList.add('success');
   }
 
   private validateNameInput(): void {
     if (this.nameInput.view.html instanceof HTMLInputElement) {
+      const errorFormat = new BaseComponent({
+        tag: 'div',
+        class: ['error-message'],
+        text: NAME_ERROR,
+      });
+      errorFormat.html.append(this.tooltipContainer.html);
+      LoginInfo.cleanInsideElement(this.tooltipMessage.html);
+      const rules = LoginInfo.createTooltipItemElement(NAME_RULES);
+      this.tooltipMessage.html.append(rules.html);
       const { value } = this.nameInput.view.html;
       const regExp = /^(?=.*[A-Za-z])[A-Za-z]{1,}$/;
       const isValidateRegExp = validateRegExp(value, regExp);
@@ -263,8 +273,13 @@ class LoginInfo {
 
       if (isValidateRegExp && isValidateLeadingTrailingSpace) {
         this.nameInputStatus = true;
+        LoginInfo.addClassSuccess(this.nameInput.view.html);
+        LoginInfo.cleanInsideElement(this.nameError.html);
       } else {
         this.nameInputStatus = false;
+        LoginInfo.addClassError(this.nameInput.view.html);
+        LoginInfo.cleanInsideElement(this.nameError.html);
+        this.nameError.html.append(errorFormat.html);
       }
     }
   }
@@ -278,6 +293,15 @@ class LoginInfo {
 
   private validateSurnameInput(): void {
     if (this.surnameInput.view.html instanceof HTMLInputElement) {
+      const errorFormat = new BaseComponent({
+        tag: 'div',
+        class: ['error-message'],
+        text: SURNAME_ERROR,
+      });
+      errorFormat.html.append(this.tooltipContainer.html);
+      LoginInfo.cleanInsideElement(this.tooltipMessage.html);
+      const rules = LoginInfo.createTooltipItemElement(SURNAME_RULES);
+      this.tooltipMessage.html.append(rules.html);
       const { value } = this.surnameInput.view.html;
       const regExp = /^(?=.*[A-Za-z])[A-Za-z]{1,}$/;
       const isValidateRegExp = validateRegExp(value, regExp);
@@ -285,8 +309,13 @@ class LoginInfo {
 
       if (isValidateRegExp && isValidateLeadingTrailingSpace) {
         this.surnameInputStatus = true;
+        LoginInfo.addClassSuccess(this.surnameInput.view.html);
+        LoginInfo.cleanInsideElement(this.surnameError.html);
       } else {
         this.surnameInputStatus = false;
+        LoginInfo.addClassError(this.surnameInput.view.html);
+        LoginInfo.cleanInsideElement(this.surnameError.html);
+        this.surnameError.html.append(errorFormat.html);
       }
     }
   }
@@ -303,10 +332,9 @@ class LoginInfo {
       const errorFormat = new BaseComponent({
         tag: 'div',
         class: ['error-message'],
-        text: '🚫 Incorrect email address format',
+        text: EMAIL_ERROR,
       });
       errorFormat.html.append(this.tooltipContainer.html);
-      this.tooltipContainer.html.append(this.tooltipMessage.html);
       LoginInfo.cleanInsideElement(this.tooltipMessage.html);
       const rules = LoginInfo.createTooltipItemElement(EMAIL_RULES);
       this.tooltipMessage.html.append(rules.html);
@@ -341,12 +369,11 @@ class LoginInfo {
       const errorFormat = new BaseComponent({
         tag: 'div',
         class: ['error-message'],
-        text: '🚫 Weak password',
+        text: PASSWORD_ERROR,
       });
       errorFormat.html.append(this.tooltipContainer.html);
-      this.tooltipContainer.html.append(this.tooltipMessage.html);
-      const rules = LoginInfo.createTooltipItemElement(PASSWORD_RULES);
       LoginInfo.cleanInsideElement(this.tooltipMessage.html);
+      const rules = LoginInfo.createTooltipItemElement(PASSWORD_RULES);
       this.tooltipMessage.html.append(rules.html);
 
       const { value } = this.passwordInput.view.html;
