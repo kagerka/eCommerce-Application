@@ -1,6 +1,6 @@
 @import './../../../styles/colors.scss';
 
-.main-page {
+.about-page {
   width: 100%;
   max-width: 1440px;
   height: 100vh;
@@ -11,26 +11,30 @@
   min-height: 100vh;
 }
 
-.main-content {
+.about-content {
   display: flex;
-
+  flex-direction: column;
+  gap: 20px;
   flex-grow: 1;
 }
 
+.heading {
+  text-align: center;
+}
 @media screen and (max-width: 1000px) {
-  .main-page {
+  .about-page {
     padding: 0 60px;
   }
 }
 
 @media screen and (max-width: 600px) {
-  .main-page {
+  .about-page {
     padding: 0 40px;
   }
 }
 
 @media screen and (max-width: 500px) {
-  .main-page {
+  .about-page {
     padding: 0 20px;
   }
 }

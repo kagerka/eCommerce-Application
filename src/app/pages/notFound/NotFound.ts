@@ -47,7 +47,10 @@ class NotFound {
     return new BaseComponent({
       tag: 'a',
       class: ['button-to-main-page'],
-      attribute: [['href', '/']],
+      attribute: [
+        ['href', '/'],
+        ['data-navigo', ''],
+      ],
       text: 'Go to the main page',
     });
   }

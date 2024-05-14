@@ -1,5 +1,4 @@
 import BaseComponent from '../BaseComponent';
-import Button from '../button/Button';
 import './Header.scss';
 
 class Header {
@@ -27,11 +26,11 @@ class Header {
 
   private aboutNavListItem: BaseComponent;
 
-  private aboutNavListLink: BaseComponent;
+  public aboutNavListLink: BaseComponent;
 
   private headerButtonsContainer: BaseComponent;
 
-  private loginButton: Button;
+  private loginButton: BaseComponent;
 
   constructor() {
     this.headerContainer = Header.createHeaderContainerElement();
@@ -68,7 +67,7 @@ class Header {
     this.navList.html.append(this.homeNavListItem.html, this.aboutNavListItem.html);
     this.homeNavListItem.html.append(this.homeNavListLink.html);
     this.aboutNavListItem.html.append(this.aboutNavListLink.html);
-    this.headerButtonsContainer.html.append(this.loginButton.view.html);
+    this.headerButtonsContainer.html.append(this.loginButton.html);
   }
 
   private static createHeaderContainerElement(): BaseComponent {
@@ -76,7 +75,14 @@ class Header {
   }
 
   private static createHeaderLogoContainerElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['logo-container'] });
+    return new BaseComponent({
+      tag: 'a',
+      class: ['logo-container'],
+      attribute: [
+        ['href', '/'],
+        ['data-navigo', ''],
+      ],
+    });
   }
 
   private static createHeaderLogoElement(): BaseComponent {
@@ -122,8 +128,11 @@ class Header {
   private static createHomeNavListLinkElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
-      class: ['nav-list-link', 'active'],
-      attribute: [['href', '/']],
+      class: ['nav-list-link'],
+      attribute: [
+        ['href', '/'],
+        ['data-navigo', ''],
+      ],
       text: 'Home',
     });
   }
@@ -132,11 +141,14 @@ class Header {
     return new BaseComponent({ tag: 'li', class: ['nav-list-item'] });
   }
 
-  private static createAboutNavListLinkElement(): BaseComponent {
+  public static createAboutNavListLinkElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
       class: ['nav-list-link'],
-      attribute: [['href', '/about']],
+      attribute: [
+        ['href', '/about'],
+        ['data-navigo', ''],
+      ],
       text: 'About',
     });
   }
@@ -145,12 +157,15 @@ class Header {
     return new BaseComponent({ tag: 'div', class: ['buttons-container'] });
   }
 
-  private static createLoginButtonElement(): Button {
-    return new Button({
-      type: 'submit',
-      class: ['login-btn'],
+  private static createLoginButtonElement(): BaseComponent {
+    return new BaseComponent({
+      tag: 'a',
+      class: ['login-button'],
+      attribute: [
+        ['href', '/login'],
+        ['data-navigo', ''],
+      ],
       text: 'Login',
-      disabled: false,
     });
   }
 

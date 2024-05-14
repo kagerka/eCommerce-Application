@@ -26,6 +26,7 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'error',
     'max-lines-per-function': ['error', { max: 40, skipBlankLines: true }],
     'max-len': ['error', { code: 120, ignoreStrings: true, ignoreRegExpLiterals: true }],
+    'import/no-extraneous-dependencies': 0,
   },
   overrides: [
     {
