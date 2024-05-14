@@ -1,3 +1,4 @@
+import '../login-form/LoginForm.scss';
 import './RegistrationForm.scss';
 import { InputTypesType } from '../../type/interfaces/InputOptions.interface';
 import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
@@ -8,6 +9,15 @@ import Button from '../button/Button';
 import Input from '../input/Input';
 
 const MIN_PASSWORD_LENGTH = 8;
+const EMAIL_RULES = [
+  'Email address must be properly formatted (user@example.com).',
+  'Email address must not contain leading or trailing whitespace.',
+].join('\n');
+const PASSWORD_RULES = [
+  `Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`,
+  'Password must contain at least one uppercase letter (A-Z), one lowercase letter (a-z), one digit (0-9), one special character(e.g., !@#$%^&*)',
+  'Password must not contain leading or trailing whitespace.',
+].join('\n');
 
 class LoginInfo {
   public nameInputStatus: boolean;
@@ -66,6 +76,12 @@ class LoginInfo {
 
   public loginButton: Button;
 
+  private tooltipContainer: BaseComponent;
+
+  private tooltipIcon: BaseComponent;
+
+  private tooltipMessage: BaseComponent;
+
   constructor() {
     this.nameInputStatus = false;
     this.surnameInputStatus = false;
@@ -95,14 +111,12 @@ class LoginInfo {
     this.passwordError = LoginInfo.createErrorElement('reg-field-password');
     this.showPswBtn = LoginInfo.createShowPasswordBtnElement();
     this.loginButton = LoginInfo.createLoginButtonElement();
+    this.tooltipContainer = LoginInfo.createTooltipContainerElement();
+    this.tooltipIcon = LoginInfo.createTooltipIconElement();
+    this.tooltipMessage = LoginInfo.createTooltipMessageElement();
 
     this.composeView();
-
-    this.handleNameInput();
-    this.handleSurnameInput();
-    this.handlePasswordInput();
-    this.handleEmailInput();
-    this.handleShowPswBtn();
+    this.handleInputs();
   }
 
   private composeView(): void {
@@ -118,6 +132,7 @@ class LoginInfo {
     this.loginInputs.html.append(this.nameField.html, this.surnameField.html);
     this.loginInputs.html.append(this.emailField.html, this.passwordField.html);
     this.loginFormContainer.html.append(this.loginInputs.html, this.loginButton.view.html);
+    this.tooltipContainer.html.append(this.tooltipIcon.html);
   }
 
   static createFieldElement(className: string): BaseComponent {
@@ -179,6 +194,41 @@ class LoginInfo {
     });
   }
 
+  private static createTooltipContainerElement(): BaseComponent {
+    return new BaseComponent({
+      tag: 'div',
+      class: ['tooltip-container'],
+    });
+  }
+
+  private static createTooltipIconElement(): BaseComponent {
+    return new BaseComponent({
+      tag: 'div',
+      class: ['tooltip-icon'],
+    });
+  }
+
+  private static createTooltipMessageElement(): BaseComponent {
+    return new BaseComponent({
+      tag: 'div',
+      class: ['tooltip-message'],
+    });
+  }
+
+  private static createTooltipItemElement(text: string): BaseComponent {
+    return new BaseComponent({
+      tag: 'div',
+      class: ['tooltip-item'],
+      text,
+    });
+  }
+
+  private static cleanInsideElement(element: HTMLElement): void {
+    while (element.firstChild) {
+      element.removeChild(element.firstChild);
+    }
+  }
+
   private handleShowPswBtn(): void {
     this.showPswBtn.html.addEventListener('click', (event: Event) => {
       event.preventDefault();
@@ -192,6 +242,16 @@ class LoginInfo {
         }
       }
     });
+  }
+
+  private static addClassError(elemen: HTMLElement): void {
+    elemen.classList.remove('success');
+    elemen.classList.add('error');
+  }
+
+  private static addClassSuccess(elemen: HTMLElement): void {
+    elemen.classList.remove('error');
+    elemen.classList.add('success');
   }
 
   private validateNameInput(): void {
@@ -240,6 +300,16 @@ class LoginInfo {
 
   private validateEmailInput(): void {
     if (this.emailInput.view.html instanceof HTMLInputElement) {
+      const errorFormat = new BaseComponent({
+        tag: 'div',
+        class: ['error-message'],
+        text: '🚫 Incorrect email address format',
+      });
+      errorFormat.html.append(this.tooltipContainer.html);
+      this.tooltipContainer.html.append(this.tooltipMessage.html);
+      LoginInfo.cleanInsideElement(this.tooltipMessage.html);
+      const rules = LoginInfo.createTooltipItemElement(EMAIL_RULES);
+      this.tooltipMessage.html.append(rules.html);
       const { value } = this.emailInput.view.html;
       const regExp =
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -248,8 +318,13 @@ class LoginInfo {
 
       if (isValidateRegExp && isValidateLeadingTrailingSpace) {
         this.emailInputStatus = true;
+        LoginInfo.addClassSuccess(this.emailInput.view.html);
+        LoginInfo.cleanInsideElement(this.emailError.html);
       } else {
         this.emailInputStatus = false;
+        LoginInfo.addClassError(this.emailInput.view.html);
+        LoginInfo.cleanInsideElement(this.emailError.html);
+        this.emailError.html.append(errorFormat.html);
       }
     }
   }
@@ -263,6 +338,17 @@ class LoginInfo {
 
   private validatePasswordInput(): void {
     if (this.passwordInput.view.html instanceof HTMLInputElement) {
+      const errorFormat = new BaseComponent({
+        tag: 'div',
+        class: ['error-message'],
+        text: '🚫 Weak password',
+      });
+      errorFormat.html.append(this.tooltipContainer.html);
+      this.tooltipContainer.html.append(this.tooltipMessage.html);
+      const rules = LoginInfo.createTooltipItemElement(PASSWORD_RULES);
+      LoginInfo.cleanInsideElement(this.tooltipMessage.html);
+      this.tooltipMessage.html.append(rules.html);
+
       const { value } = this.passwordInput.view.html;
       const passwordLength = value.length;
       const regExp = /(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z])/g;
@@ -272,8 +358,14 @@ class LoginInfo {
 
       if (isValidateLength && isValidateRegExp && isValidateLeadingTrailingSpace) {
         this.passwordInputStatus = true;
+        LoginInfo.addClassSuccess(this.passwordInput.view.html);
+        LoginInfo.cleanInsideElement(this.passwordError.html);
       } else {
         this.passwordInputStatus = false;
+        LoginInfo.addClassError(this.passwordInput.view.html);
+        LoginInfo.cleanInsideElement(this.passwordError.html);
+        LoginInfo.createTooltipItemElement(PASSWORD_RULES);
+        this.passwordError.html.append(errorFormat.html);
       }
     }
   }
@@ -283,6 +375,14 @@ class LoginInfo {
       this.validatePasswordInput();
       this.checkStatuses();
     });
+  }
+
+  private handleInputs(): void {
+    this.handleNameInput();
+    this.handleSurnameInput();
+    this.handlePasswordInput();
+    this.handleEmailInput();
+    this.handleShowPswBtn();
   }
 
   public checkStatuses(): void {

@@ -1,4 +1,5 @@
 import './RegistrationForm.scss';
+import '../login-form/LoginForm.scss';
 import BaseComponent from '../BaseComponent';
 import Input from '../input/Input';
 import validateRegExp from '../../utils/validation/validateRegExp';
@@ -86,11 +87,7 @@ class RegistrationForm extends LoginInfo {
     this.countryInputContainer = RegistrationForm.createSelectElement();
 
     this.composeViewNew();
-    this.handleCityInput();
-    this.handleStreetInput();
-    this.handlePostInput();
-    this.handleDateInput();
-    this.handleCountryInput();
+    this.handleRestInpurs();
   }
 
   private composeViewNew(): void {
@@ -246,6 +243,14 @@ class RegistrationForm extends LoginInfo {
       this.validateDateInput();
       this.checkStatuses();
     });
+  }
+
+  private handleRestInpurs(): void {
+    this.handleCityInput();
+    this.handleStreetInput();
+    this.handlePostInput();
+    this.handleDateInput();
+    this.handleCountryInput();
   }
 }
 

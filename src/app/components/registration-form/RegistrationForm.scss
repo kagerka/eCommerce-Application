@@ -36,7 +36,8 @@
   text-align: left;
 }
 
-.reg-input, .reg-select {
+.reg-input,
+.reg-select {
   height: 40px;
   width: 300px;
   border-radius: 5px;
@@ -84,6 +85,7 @@
 .tooltip-item {
   font-weight: 400;
   font-size: 13px;
+  list-style-type: none;
 }
 
 .show-password-btn {
@@ -115,4 +117,13 @@
 
 .reg-btn:disabled {
   background: $lightGreen;
+}
+
+.reg-error {
+  font-size: 11px;
+  margin: 4px 0 0 5px;
+}
+
+.tooltip-item {
+  padding: 1px 15px;
 }
