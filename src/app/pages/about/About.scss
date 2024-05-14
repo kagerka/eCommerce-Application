@@ -1,46 +1,40 @@
 @import './../../../styles/colors.scss';
 
-.reg {
+.about-page {
   width: 100%;
   max-width: 1440px;
+  height: 100vh;
   padding: 0 120px;
-  height: 100dvh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  gap: 12px;
+  min-height: 100vh;
 }
 
-.reg-container {
-  height: 100%;
-  width: 390px;
-}
-
-.reg-title {
-  font-weight: 500;
-  line-height: 16px;
-  color: $green;
-  height: 100px;
+.about-content {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0;
+  flex-direction: column;
+  gap: 20px;
+  flex-grow: 1;
 }
 
+.heading {
+  text-align: center;
+}
 @media screen and (max-width: 1000px) {
-  .reg {
+  .about-page {
     padding: 0 60px;
   }
 }
 
 @media screen and (max-width: 600px) {
-  .reg {
+  .about-page {
     padding: 0 40px;
   }
 }
 
 @media screen and (max-width: 500px) {
-  .reg {
+  .about-page {
     padding: 0 20px;
   }
 }
