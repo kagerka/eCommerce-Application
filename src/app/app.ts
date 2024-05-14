@@ -6,6 +6,7 @@ import About from './pages/about/About';
 import Login from './pages/login/Login';
 import MainPage from './pages/main/MainPage';
 import NotFound from './pages/notFound/NotFound';
+import Registration from './pages/registation/Registration';
 
 class App {
   private static container: HTMLElement = document.body;
@@ -13,6 +14,8 @@ class App {
   private content: BaseComponent;
 
   private loginPage: Login;
+
+  private registrationPage: Registration;
 
   private mainPage: MainPage;
 
@@ -26,6 +29,7 @@ class App {
     this.mainPage = new MainPage();
     this.aboutPage = new About();
     this.notFound = new NotFound();
+    this.registrationPage = new Registration();
   }
 
   run(): void {
@@ -53,6 +57,7 @@ class App {
         this.content.html.append(this.notFound.view.html);
       })
       .resolve();
+    this.content.html.append(this.registrationPage.view.html);
   }
 }
 
