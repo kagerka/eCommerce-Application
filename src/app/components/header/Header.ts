@@ -32,6 +32,8 @@ class Header {
 
   private loginButton: BaseComponent;
 
+  private registrationButton: BaseComponent;
+
   constructor() {
     this.headerContainer = Header.createHeaderContainerElement();
     this.headerLogoContainer = Header.createHeaderLogoContainerElement();
@@ -50,6 +52,7 @@ class Header {
 
     this.headerButtonsContainer = Header.createHeaderButtonsContainerElement();
     this.loginButton = Header.createLoginButtonElement();
+    this.registrationButton = Header.createRegistrationButtonElement();
     this.composeView();
   }
 
@@ -67,7 +70,7 @@ class Header {
     this.navList.html.append(this.homeNavListItem.html, this.aboutNavListItem.html);
     this.homeNavListItem.html.append(this.homeNavListLink.html);
     this.aboutNavListItem.html.append(this.aboutNavListLink.html);
-    this.headerButtonsContainer.html.append(this.loginButton.html);
+    this.headerButtonsContainer.html.append(this.loginButton.html, this.registrationButton.html);
   }
 
   private static createHeaderContainerElement(): BaseComponent {
@@ -166,6 +169,18 @@ class Header {
         ['data-navigo', ''],
       ],
       text: 'Login',
+    });
+  }
+
+  private static createRegistrationButtonElement(): BaseComponent {
+    return new BaseComponent({
+      tag: 'a',
+      class: ['registration-button'],
+      attribute: [
+        ['href', '/registration'],
+        ['data-navigo', ''],
+      ],
+      text: 'Registration',
     });
   }
 

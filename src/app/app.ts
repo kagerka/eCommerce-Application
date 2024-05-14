@@ -48,6 +48,10 @@ class App {
         this.content.html.innerHTML = '';
         this.content.html.append(this.loginPage.view.html);
       })
+      .on('/registration', () => {
+        this.content.html.innerHTML = '';
+        this.content.html.append(this.registrationPage.view.html);
+      })
       .on('/', () => {
         this.content.html.innerHTML = '';
         this.content.html.append(this.mainPage.view.html);
@@ -57,7 +61,6 @@ class App {
         this.content.html.append(this.notFound.view.html);
       })
       .resolve();
-    this.content.html.append(this.registrationPage.view.html);
   }
 }
 

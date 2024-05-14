@@ -1,6 +1,8 @@
-import './Login.scss';
 import BaseComponent from '../../components/BaseComponent';
+import Footer from '../../components/footer/Footer';
+import Header from '../../components/header/Header';
 import LoginForm from '../../components/login-form/LoginForm';
+import './Login.scss';
 
 class Login {
   private loginPage: BaseComponent;
@@ -11,17 +13,23 @@ class Login {
 
   private loginForm: LoginForm;
 
+  private header: Header;
+
+  private footer: Footer;
+
   constructor() {
     this.loginPage = Login.createLoginPageElement();
     this.loginPageContainer = Login.createLoginPageContainerElement();
     this.loginPageTitle = Login.createLoginPageTitleElement();
     this.loginForm = new LoginForm();
+    this.header = new Header();
+    this.footer = new Footer();
     this.composeView();
   }
 
   private composeView(): void {
     this.loginPageContainer.html.append(this.loginPageTitle.html, this.loginForm.view.html);
-    this.loginPage.html.append(this.loginPageContainer.html);
+    this.loginPage.html.append(this.header.view.html, this.loginPageContainer.html, this.footer.view.html);
   }
 
   private static createLoginPageElement(): BaseComponent {

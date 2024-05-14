@@ -1,6 +1,8 @@
-import './Registration.scss';
 import BaseComponent from '../../components/BaseComponent';
+import Footer from '../../components/footer/Footer';
+import Header from '../../components/header/Header';
 import RegistrationForm from '../../components/registration-form/RegistrationForm';
+import './Registration.scss';
 
 class Registration {
   private regPage: BaseComponent;
@@ -11,17 +13,23 @@ class Registration {
 
   private regForm: RegistrationForm;
 
+  private header: Header;
+
+  private footer: Footer;
+
   constructor() {
     this.regPage = Registration.createRegPageElement();
     this.regPageContainer = Registration.createRegPageContainerElement();
     this.regPageTitle = Registration.createRegPageTitleElement();
     this.regForm = new RegistrationForm();
+    this.header = new Header();
+    this.footer = new Footer();
     this.composeView();
   }
 
   private composeView(): void {
     this.regPageContainer.html.append(this.regPageTitle.html, this.regForm.view.html);
-    this.regPage.html.append(this.regPageContainer.html);
+    this.regPage.html.append(this.header.view.html, this.regPageContainer.html, this.footer.view.html);
   }
 
   private static createRegPageElement(): BaseComponent {
