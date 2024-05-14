@@ -1,4 +1,6 @@
 import BaseComponent from '../../components/BaseComponent';
+import Footer from '../../components/footer/Footer';
+import Header from '../../components/header/Header';
 import './NotFound.scss';
 
 class NotFound {
@@ -12,19 +14,25 @@ class NotFound {
 
   private buttonToMainPage: BaseComponent;
 
+  private header: Header;
+
+  private footer: Footer;
+
   constructor() {
     this.notFoundPage = NotFound.createNotFoundPageElement();
     this.notFoundPageContainer = NotFound.createNotFoundPageContainerElement();
     this.notFoundPageTitle = NotFound.createNotFoundPageTitleElement();
     this.notFoundPageText = NotFound.createNotFoundPageTextElement();
     this.buttonToMainPage = NotFound.createButtonToMainPageElement();
+    this.header = new Header();
+    this.footer = new Footer();
     this.composeView();
   }
 
   private composeView(): void {
     this.notFoundPageContainer.html.append(this.notFoundPageTitle.html, this.notFoundPageText.html);
     this.notFoundPageContainer.html.append(this.buttonToMainPage.html);
-    this.notFoundPage.html.append(this.notFoundPageContainer.html);
+    this.notFoundPage.html.append(this.header.view.html, this.notFoundPageContainer.html, this.footer.view.html);
   }
 
   private static createNotFoundPageElement(): BaseComponent {

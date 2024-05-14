@@ -1,9 +1,14 @@
 @import './../../../styles/colors.scss';
 
+.header {
+  background: $white;
+}
+
 .not-found {
   width: 100%;
   height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   background:
     url('../../../assets/images/bg-el5.svg') top 65% left 85%/60px no-repeat,
@@ -20,6 +25,7 @@
   flex-direction: column;
   justify-content: center;
   padding: 20px;
+  flex-grow: 1;
 }
 
 .not-found-title {
