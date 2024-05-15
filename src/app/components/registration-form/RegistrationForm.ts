@@ -356,16 +356,16 @@ class RegistrationForm extends LoginInfo {
     }
   }
 
-  static addNotification(): void {
+  static addNotification(notificationText: string, className: string[]): void {
     const time = 3000;
-    const errorFormat = new BaseComponent({
+    const notificationFormat = new BaseComponent({
       tag: 'div',
-      class: ['notification'],
-      text: 'Your account has been created successfully!',
+      class: className,
+      text: notificationText,
     });
-    document.body.append(errorFormat.html);
+    document.body.append(notificationFormat.html);
     setTimeout(() => {
-      document.body.removeChild(errorFormat.html);
+      document.body.removeChild(notificationFormat.html);
     }, time);
   }
 
@@ -381,7 +381,10 @@ class RegistrationForm extends LoginInfo {
         passwordInput.view.html instanceof HTMLInputElement &&
         nameInput.view.html instanceof HTMLInputElement &&
         surnameInput.view.html instanceof HTMLInputElement &&
-        dateInput.view.html instanceof HTMLInputElement
+        dateInput.view.html instanceof HTMLInputElement &&
+        cityInput.view.html instanceof HTMLInputElement &&
+        postInput.view.html instanceof HTMLInputElement &&
+        streetInput.view.html instanceof HTMLInputElement
       ) {
         const customer: IRegForm = {
           email: emailInput.view.html.value,
@@ -391,9 +394,9 @@ class RegistrationForm extends LoginInfo {
           dateOfBirth: dateInput.view.html.value,
           addresses: [
             {
-              city: (cityInput.view.html as HTMLInputElement).value,
-              streetName: (streetInput.view.html as HTMLInputElement).value,
-              postalCode: (postInput.view.html as HTMLInputElement).value,
+              city: cityInput.view.html.value,
+              streetName: streetInput.view.html.value,
+              postalCode: postInput.view.html.value,
               country: RegistrationForm.getSelectedValue() || '',
             },
           ],
@@ -403,6 +406,15 @@ class RegistrationForm extends LoginInfo {
     });
   }
 
+  private displayErrorEnter(): void {
+    this.emailInput.view.html.classList.remove('success');
+    this.emailInput.view.html.classList.add('error');
+    RegistrationForm.addNotification(
+      'An account with this email address already exists. You can go to the Login Page, or use a different email address.',
+      ['error-popup'],
+    );
+  }
+
   private signupCustomer(customer: IRegForm): void {
     apiRoot
       .me()
@@ -410,8 +422,11 @@ class RegistrationForm extends LoginInfo {
       .post({ body: customer })
       .execute()
       .then(() => {
-        RegistrationForm.addNotification();
+        RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
         this.clearFields();
+      })
+      .catch(() => {
+        this.displayErrorEnter();
       });
   }
 }

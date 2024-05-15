@@ -60,7 +60,7 @@ class LoginInfo {
 
   public emailInput: Input;
 
-  private emailError: BaseComponent;
+  public emailError: BaseComponent;
 
   private passwordField: BaseComponent;
 
