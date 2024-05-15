@@ -16,6 +16,7 @@ import {
   STREET_ERROR,
   STREET_RULES,
 } from '../../utils/validation/inputErrorTexts';
+import apiRoot from '../../api/Client';
 
 class RegistrationForm extends LoginInfo {
   private streetInputStatus: boolean;
@@ -98,6 +99,7 @@ class RegistrationForm extends LoginInfo {
 
     this.composeViewNew();
     this.handleRestInpurs();
+    this.submitRegForm();
   }
 
   private composeViewNew(): void {
@@ -312,6 +314,92 @@ class RegistrationForm extends LoginInfo {
     this.handlePostInput();
     this.handleDateInput();
     this.handleCountryInput();
+  }
+
+  private clearFields(): void {
+    if (
+      this.emailInput.view.html instanceof HTMLInputElement &&
+      this.passwordInput.view.html instanceof HTMLInputElement &&
+      this.nameInput.view.html instanceof HTMLInputElement &&
+      this.surnameInput.view.html instanceof HTMLInputElement &&
+      this.dateInput.view.html instanceof HTMLInputElement &&
+      this.postInput.view.html instanceof HTMLInputElement &&
+      this.cityInput.view.html instanceof HTMLInputElement &&
+      this.streetInput.view.html instanceof HTMLInputElement
+    ) {
+      this.emailInput.view.html.value = '';
+      this.passwordInput.view.html.value = '';
+      this.nameInput.view.html.value = '';
+      this.surnameInput.view.html.value = '';
+      this.dateInput.view.html.value = '';
+      this.postInput.view.html.value = '';
+      this.cityInput.view.html.value = '';
+      this.streetInput.view.html.value = '';
+      this.emailInputStatus = false;
+      this.passwordInputStatus = false;
+      this.nameInputStatus = false;
+      this.surnameInputStatus = false;
+      this.dateInputStatus = false;
+      this.postInputStatus = false;
+      this.cityInputStatus = false;
+      this.streetInputStatus = false;
+      this.checkStatuses();
+      this.emailInput.view.html.classList.remove('success');
+      this.passwordInput.view.html.classList.remove('success');
+      this.nameInput.view.html.classList.remove('success');
+      this.surnameInput.view.html.classList.remove('success');
+      this.dateInput.view.html.classList.remove('success');
+      this.postInput.view.html.classList.remove('success');
+      this.cityInput.view.html.classList.remove('success');
+      this.streetInput.view.html.classList.remove('success');
+    }
+  }
+
+  static addNotification(): void {
+    const time = 3000;
+    const errorFormat = new BaseComponent({
+      tag: 'div',
+      class: ['notification'],
+      text: 'Your account has been created successfully!',
+    });
+    document.body.append(errorFormat.html);
+    setTimeout(() => {
+      document.body.removeChild(errorFormat.html);
+    }, time);
+  }
+
+  private submitRegForm(): void {
+    document.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (
+        this.emailInput.view.html instanceof HTMLInputElement &&
+        this.passwordInput.view.html instanceof HTMLInputElement &&
+        this.nameInput.view.html instanceof HTMLInputElement &&
+        this.surnameInput.view.html instanceof HTMLInputElement &&
+        this.dateInput.view.html instanceof HTMLInputElement &&
+        this.postInput.view.html instanceof HTMLInputElement &&
+        this.cityInput.view.html instanceof HTMLInputElement &&
+        this.streetInput.view.html instanceof HTMLInputElement
+      ) {
+        const customer: { email: string; password: string; name: string; surname: string } = {
+          email: this.emailInput.view.html.value,
+          password: this.passwordInput.view.html.value,
+          name: this.nameInput.view.html.value,
+          surname: this.surnameInput.view.html.value,
+        };
+        apiRoot
+          .me()
+          .signup()
+          .post({
+            body: customer,
+          })
+          .execute()
+          .then(() => {
+            RegistrationForm.addNotification();
+            this.clearFields();
+          });
+      }
+    });
   }
 }
 

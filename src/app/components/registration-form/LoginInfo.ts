@@ -38,7 +38,7 @@ class LoginInfo {
 
   private nameInputContainer: BaseComponent;
 
-  private nameInput: Input;
+  public nameInput: Input;
 
   private nameError: BaseComponent;
 
@@ -48,7 +48,7 @@ class LoginInfo {
 
   private surnameInputContainer: BaseComponent;
 
-  private surnameInput: Input;
+  public surnameInput: Input;
 
   private surnameError: BaseComponent;
 
@@ -58,7 +58,7 @@ class LoginInfo {
 
   private emailInputContainer: BaseComponent;
 
-  private emailInput: Input;
+  public emailInput: Input;
 
   private emailError: BaseComponent;
 
@@ -68,7 +68,7 @@ class LoginInfo {
 
   private passwordInputContainer: BaseComponent;
 
-  private passwordInput: Input;
+  public passwordInput: Input;
 
   private showPswBtn: BaseComponent;
 
