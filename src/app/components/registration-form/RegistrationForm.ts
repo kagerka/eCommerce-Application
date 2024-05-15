@@ -17,6 +17,7 @@ import {
   STREET_RULES,
 } from '../../utils/validation/inputErrorTexts';
 import apiRoot from '../../api/Client';
+import IRegForm from '../../type/interfaces/RegistrationForm.interface';
 
 class RegistrationForm extends LoginInfo {
   private streetInputStatus: boolean;
@@ -369,37 +370,49 @@ class RegistrationForm extends LoginInfo {
   }
 
   private submitRegForm(): void {
-    document.addEventListener('submit', (event) => {
+    const form = this.loginFormContainer.html;
+    form.addEventListener('submit', (event) => {
       event.preventDefault();
+
+      const { emailInput, passwordInput, nameInput, surnameInput, dateInput, cityInput, streetInput, postInput } = this;
+
       if (
-        this.emailInput.view.html instanceof HTMLInputElement &&
-        this.passwordInput.view.html instanceof HTMLInputElement &&
-        this.nameInput.view.html instanceof HTMLInputElement &&
-        this.surnameInput.view.html instanceof HTMLInputElement &&
-        this.dateInput.view.html instanceof HTMLInputElement &&
-        this.postInput.view.html instanceof HTMLInputElement &&
-        this.cityInput.view.html instanceof HTMLInputElement &&
-        this.streetInput.view.html instanceof HTMLInputElement
+        emailInput.view.html instanceof HTMLInputElement &&
+        passwordInput.view.html instanceof HTMLInputElement &&
+        nameInput.view.html instanceof HTMLInputElement &&
+        surnameInput.view.html instanceof HTMLInputElement &&
+        dateInput.view.html instanceof HTMLInputElement
       ) {
-        const customer: { email: string; password: string; name: string; surname: string } = {
-          email: this.emailInput.view.html.value,
-          password: this.passwordInput.view.html.value,
-          name: this.nameInput.view.html.value,
-          surname: this.surnameInput.view.html.value,
+        const customer: IRegForm = {
+          email: emailInput.view.html.value,
+          password: passwordInput.view.html.value,
+          firstName: nameInput.view.html.value,
+          lastName: surnameInput.view.html.value,
+          dateOfBirth: dateInput.view.html.value,
+          addresses: [
+            {
+              city: (cityInput.view.html as HTMLInputElement).value,
+              streetName: (streetInput.view.html as HTMLInputElement).value,
+              postalCode: (postInput.view.html as HTMLInputElement).value,
+              country: RegistrationForm.getSelectedValue() || '',
+            },
+          ],
         };
-        apiRoot
-          .me()
-          .signup()
-          .post({
-            body: customer,
-          })
-          .execute()
-          .then(() => {
-            RegistrationForm.addNotification();
-            this.clearFields();
-          });
+        this.signupCustomer(customer);
       }
     });
+  }
+
+  private signupCustomer(customer: IRegForm): void {
+    apiRoot
+      .me()
+      .signup()
+      .post({ body: customer })
+      .execute()
+      .then(() => {
+        RegistrationForm.addNotification();
+        this.clearFields();
+      });
   }
 }
 

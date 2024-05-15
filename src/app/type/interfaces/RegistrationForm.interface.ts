@@ -1,12 +1,10 @@
 interface IRegForm {
   email: string;
   password: string;
-  name: string;
-  surname: string;
-  date: string;
-  post: string;
-  city: string;
-  street: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  addresses: [{ country: string; city: string; streetName: string; postalCode: string }];
 }
 
 export default IRegForm;

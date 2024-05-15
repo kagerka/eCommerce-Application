@@ -148,11 +148,19 @@
   width: 60%;
   top: 35%;
   left: 20%;
-  color: $green;
-  font-size: 29px;
+  font-size: 35px;
   font-weight: 500;
   text-align: center;
-  background-color: white;
+  background:
+    url('/src/assets/images/bg-el5.svg') top 65% left 85%/60px no-repeat,
+    url('/src/assets/images/bg-el6.svg') top 18% left 95%/130px no-repeat,
+    url('/src/assets/images/bg-el2.svg') bottom 0 right 0/1000px no-repeat,
+    url('/src/assets/images/bg-el3.svg') top 0 left 0/280px no-repeat,
+    url('/src/assets/images/bg-el1.svg') top 0 right 0/500px no-repeat,
+    url('/src/assets/images/bg-el4.svg') top 45% left 65%/160px no-repeat,
+    url('/src/assets/images/bg-el7.svg') top 60% left 10%/60px no-repeat;
+  -webkit-text-stroke: 2px $green;
+  color: $white;
   border: 2px solid $green;
 }
 

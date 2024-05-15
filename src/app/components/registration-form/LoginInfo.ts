@@ -28,7 +28,7 @@ class LoginInfo {
 
   public emailInputStatus: boolean;
 
-  private loginFormContainer: BaseComponent;
+  public loginFormContainer: BaseComponent;
 
   public loginInputs: BaseComponent;
 
