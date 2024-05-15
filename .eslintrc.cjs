@@ -27,6 +27,7 @@ module.exports = {
     'max-lines-per-function': ['error', { max: 40, skipBlankLines: true }],
     'max-len': ['error', { code: 120, ignoreStrings: true, ignoreRegExpLiterals: true }],
     'import/no-extraneous-dependencies': 0,
+    'object-curly-newline': ['error', { multiline: true }],
   },
   overrides: [
     {

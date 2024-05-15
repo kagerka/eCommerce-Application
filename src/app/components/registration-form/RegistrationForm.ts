@@ -16,6 +16,8 @@ import {
   STREET_ERROR,
   STREET_RULES,
 } from '../../utils/validation/inputErrorTexts';
+import apiRoot from '../../api/Client';
+import IRegForm from '../../type/interfaces/RegistrationForm.interface';
 
 class RegistrationForm extends LoginInfo {
   private streetInputStatus: boolean;
@@ -98,6 +100,7 @@ class RegistrationForm extends LoginInfo {
 
     this.composeViewNew();
     this.handleRestInpurs();
+    this.submitRegForm();
   }
 
   private composeViewNew(): void {
@@ -312,6 +315,104 @@ class RegistrationForm extends LoginInfo {
     this.handlePostInput();
     this.handleDateInput();
     this.handleCountryInput();
+  }
+
+  private clearFields(): void {
+    if (
+      this.emailInput.view.html instanceof HTMLInputElement &&
+      this.passwordInput.view.html instanceof HTMLInputElement &&
+      this.nameInput.view.html instanceof HTMLInputElement &&
+      this.surnameInput.view.html instanceof HTMLInputElement &&
+      this.dateInput.view.html instanceof HTMLInputElement &&
+      this.postInput.view.html instanceof HTMLInputElement &&
+      this.cityInput.view.html instanceof HTMLInputElement &&
+      this.streetInput.view.html instanceof HTMLInputElement
+    ) {
+      this.emailInput.view.html.value = '';
+      this.passwordInput.view.html.value = '';
+      this.nameInput.view.html.value = '';
+      this.surnameInput.view.html.value = '';
+      this.dateInput.view.html.value = '';
+      this.postInput.view.html.value = '';
+      this.cityInput.view.html.value = '';
+      this.streetInput.view.html.value = '';
+      this.emailInputStatus = false;
+      this.passwordInputStatus = false;
+      this.nameInputStatus = false;
+      this.surnameInputStatus = false;
+      this.dateInputStatus = false;
+      this.postInputStatus = false;
+      this.cityInputStatus = false;
+      this.streetInputStatus = false;
+      this.checkStatuses();
+      this.emailInput.view.html.classList.remove('success');
+      this.passwordInput.view.html.classList.remove('success');
+      this.nameInput.view.html.classList.remove('success');
+      this.surnameInput.view.html.classList.remove('success');
+      this.dateInput.view.html.classList.remove('success');
+      this.postInput.view.html.classList.remove('success');
+      this.cityInput.view.html.classList.remove('success');
+      this.streetInput.view.html.classList.remove('success');
+    }
+  }
+
+  static addNotification(): void {
+    const time = 3000;
+    const errorFormat = new BaseComponent({
+      tag: 'div',
+      class: ['notification'],
+      text: 'Your account has been created successfully!',
+    });
+    document.body.append(errorFormat.html);
+    setTimeout(() => {
+      document.body.removeChild(errorFormat.html);
+    }, time);
+  }
+
+  private submitRegForm(): void {
+    const form = this.loginFormContainer.html;
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const { emailInput, passwordInput, nameInput, surnameInput, dateInput, cityInput, streetInput, postInput } = this;
+
+      if (
+        emailInput.view.html instanceof HTMLInputElement &&
+        passwordInput.view.html instanceof HTMLInputElement &&
+        nameInput.view.html instanceof HTMLInputElement &&
+        surnameInput.view.html instanceof HTMLInputElement &&
+        dateInput.view.html instanceof HTMLInputElement
+      ) {
+        const customer: IRegForm = {
+          email: emailInput.view.html.value,
+          password: passwordInput.view.html.value,
+          firstName: nameInput.view.html.value,
+          lastName: surnameInput.view.html.value,
+          dateOfBirth: dateInput.view.html.value,
+          addresses: [
+            {
+              city: (cityInput.view.html as HTMLInputElement).value,
+              streetName: (streetInput.view.html as HTMLInputElement).value,
+              postalCode: (postInput.view.html as HTMLInputElement).value,
+              country: RegistrationForm.getSelectedValue() || '',
+            },
+          ],
+        };
+        this.signupCustomer(customer);
+      }
+    });
+  }
+
+  private signupCustomer(customer: IRegForm): void {
+    apiRoot
+      .me()
+      .signup()
+      .post({ body: customer })
+      .execute()
+      .then(() => {
+        RegistrationForm.addNotification();
+        this.clearFields();
+      });
   }
 }
 
