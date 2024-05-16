@@ -1,6 +1,6 @@
 import './Input.scss';
 import BaseComponent from '../BaseComponent';
-import { IInputOptions } from '../../type/interfaces/InputOptions.interface';
+import { IInputOptions } from '../../interfaces/InputOptions.interface';
 
 const EMPTY_ARRAY_LENGTH = 0;
 

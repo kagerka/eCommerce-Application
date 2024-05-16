@@ -1,6 +1,6 @@
 import '../login-form/LoginForm.scss';
 import './RegistrationForm.scss';
-import { InputTypesType } from '../../type/interfaces/InputOptions.interface';
+import { InputTypesType } from '../../interfaces/InputOptions.interface';
 import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
 import validateLength from '../../utils/validation/validateLength';
 import validateRegExp from '../../utils/validation/validateRegExp';

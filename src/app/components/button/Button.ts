@@ -1,6 +1,6 @@
 import './Button.scss';
 import BaseComponent from '../BaseComponent';
-import { IButtonOptions } from '../../type/interfaces/ButtonOptions.interface';
+import { IButtonOptions } from '../../interfaces/ButtonOptions.interface';
 
 const EMPTY_ARRAY_LENGTH = 0;
 
