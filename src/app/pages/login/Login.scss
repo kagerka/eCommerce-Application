@@ -3,7 +3,7 @@
 .login {
   width: 100%;
   max-width: 1440px;
-  padding: 0 120px;
+  padding: 5% 120px 0;
   height: 100dvh;
   min-height: 100vh;
   display: flex;
@@ -28,15 +28,38 @@
   margin: 0;
 }
 
+.signup-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.signup-rest-text-container {
+  display: flex;
+}
+
+.signup-link {
+  text-decoration: none;
+  color: #000000;
+  &:hover {
+    color: $gray;
+  }
+}
+
+.signup-rest-text {
+  margin-left: 5px;
+}
+
 @media screen and (max-width: 1000px) {
   .login {
-    padding: 0 60px;
+    padding: 5% 60px 0;
   }
 }
 
 @media screen and (max-width: 600px) {
   .login {
-    padding: 0 40px;
+    padding: 5% 40px 0;
   }
 }
 
