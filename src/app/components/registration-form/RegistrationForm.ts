@@ -74,6 +74,12 @@ class RegistrationForm extends LoginInfo {
 
   private countryLabel: BaseComponent;
 
+  private defaultAddressField: BaseComponent;
+
+  private defaultAddressInput: Input;
+
+  private defaultAddressLabel: BaseComponent;
+
   constructor() {
     super();
     this.streetInputStatus = false;
@@ -101,6 +107,12 @@ class RegistrationForm extends LoginInfo {
     this.countryField = RegistrationForm.createFieldElement('reg-field-country');
     this.countryLabel = RegistrationForm.createLabelElement('address', 'Address');
     this.countryInputContainer = RegistrationForm.createSelectElement();
+    this.defaultAddressField = RegistrationForm.createFieldElement('reg-field-default');
+    this.defaultAddressInput = RegistrationForm.createInputElement('checkbox', 'checkbox-default', '');
+    this.defaultAddressLabel = RegistrationForm.createLabelElement(
+      'default',
+      'Use the same address as a billing and a shipping',
+    );
 
     this.composeViewNew();
     this.handleRestInputs();
@@ -117,8 +129,9 @@ class RegistrationForm extends LoginInfo {
     this.streetInputContainer.html.append(this.streetInput.view.html, this.streetError.html);
     this.streetField.html.append(this.streetInputContainer.html);
     this.countryField.html.append(this.countryLabel.html, this.countryInputContainer.html);
-    this.regInputs.html.append(this.dateField.html, this.countryField.html);
-    this.regInputs.html.append(this.postField.html, this.cityField.html, this.streetField.html);
+    this.regInputs.html.append(this.dateField.html, this.countryField.html, this.postField.html);
+    this.regInputs.html.append(this.cityField.html, this.streetField.html, this.defaultAddressField.html);
+    this.defaultAddressField.html.append(this.defaultAddressInput.view.html, this.defaultAddressLabel.html);
   }
 
   private static createSelectElement(): BaseComponent {
@@ -361,7 +374,7 @@ class RegistrationForm extends LoginInfo {
   }
 
   static addNotification(notificationText: string, className: string[]): void {
-    const time = 30000;
+    const time = 3000;
     const notificationFormat = new BaseComponent({
       tag: 'div',
       class: className,
@@ -424,11 +437,21 @@ class RegistrationForm extends LoginInfo {
   }
 
   private signupCustomer(customer: IRegForm): void {
+    if (localStorage.getItem('tokenAnonimus') || localStorage.getItem('tokenPassword')) {
+      localStorage.removeItem('tokenAnonimus');
+      localStorage.removeItem('tokenPassword');
+    }
+
     ECommerceApi.getAccessToken(currentClient).then((res) => {
       ECommerceApi.createCustomer(currentClient, res.access_token, customer)
         .then(() => {
-          RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
           this.clearFields();
+          localStorage.setItem('tokenPassword', res.access_token);
+          RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
+          ECommerceApi.authCustomer(currentClient, customer, res.access_token).then(() => {
+            window.history.pushState({}, '', '/');
+            this.regButton.view.html.setAttribute('login-success', 'true');
+          });
         })
         .catch((error) => {
           if (error.message === 'There is already an existing customer with the provided email.') {

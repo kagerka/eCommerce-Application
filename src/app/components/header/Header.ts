@@ -32,7 +32,7 @@ class Header {
 
   private loginButton: BaseComponent;
 
-  private registrationButton: BaseComponent;
+  private regButton: BaseComponent;
 
   constructor() {
     this.headerContainer = Header.createHeaderContainerElement();
@@ -52,7 +52,7 @@ class Header {
 
     this.headerButtonsContainer = Header.createHeaderButtonsContainerElement();
     this.loginButton = Header.createLoginButtonElement();
-    this.registrationButton = Header.createRegistrationButtonElement();
+    this.regButton = Header.createRegistrationButtonElement();
     this.composeView();
   }
 
@@ -70,7 +70,7 @@ class Header {
     this.navList.html.append(this.homeNavListItem.html, this.aboutNavListItem.html);
     this.homeNavListItem.html.append(this.homeNavListLink.html);
     this.aboutNavListItem.html.append(this.aboutNavListLink.html);
-    this.headerButtonsContainer.html.append(this.loginButton.html, this.registrationButton.html);
+    this.headerButtonsContainer.html.append(this.loginButton.html, this.regButton.html);
   }
 
   private static createHeaderContainerElement(): BaseComponent {
@@ -182,6 +182,14 @@ class Header {
       ],
       text: 'Registration',
     });
+  }
+
+  get loginBtn(): BaseComponent {
+    return this.loginButton;
+  }
+
+  get regBtn(): BaseComponent {
+    return this.regButton;
   }
 
   get view(): BaseComponent {
