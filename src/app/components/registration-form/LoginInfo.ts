@@ -431,3 +431,4 @@ class LoginInfo {
 }
 
 export default LoginInfo;
+
