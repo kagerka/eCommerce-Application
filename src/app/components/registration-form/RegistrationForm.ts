@@ -361,7 +361,7 @@ class RegistrationForm extends LoginInfo {
   }
 
   static addNotification(notificationText: string, className: string[]): void {
-    const time = 30000;
+    const time = 3000;
     const notificationFormat = new BaseComponent({
       tag: 'div',
       class: className,
@@ -424,20 +424,33 @@ class RegistrationForm extends LoginInfo {
   }
 
   private signupCustomer(customer: IRegForm): void {
-    ECommerceApi.getAccessToken(currentClient).then((res) => {
-      ECommerceApi.createCustomer(currentClient, res.access_token, customer)
-        .then(() => {
-          RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
-          this.clearFields();
-        })
-        .catch((error) => {
-          if (error.message === 'There is already an existing customer with the provided email.') {
-            this.displayErrorEnter(SAME_EMAIL_ERROR);
-          } else {
-            this.displayErrorEnter(error.message);
-          }
+    if (localStorage.getItem('tokenAnonimus') || localStorage.getItem('tokenPassword')) {
+      localStorage.removeItem('tokenAnonimus');
+      localStorage.removeItem('tokenPassword');
+    }
+
+    ECommerceApi.getAccessToken(currentClient)
+      .then((res) => {
+        this.clearFields();
+
+        localStorage.setItem('tokenPassword', res.access_token);
+
+        RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
+
+        ECommerceApi.createCustomer(currentClient, res.access_token, customer).then(() => {
+          ECommerceApi.authCustomer(currentClient, customer, res.access_token).then(() => {
+            window.history.pushState({}, '', '/');
+            this.regButton.view.html.setAttribute('login-success', 'true');
+          });
         });
-    });
+      })
+      .catch((error) => {
+        if (error.message === 'There is already an existing customer with the provided email.') {
+          this.displayErrorEnter(SAME_EMAIL_ERROR);
+        } else {
+          this.displayErrorEnter(error.message);
+        }
+      });
   }
 }
 

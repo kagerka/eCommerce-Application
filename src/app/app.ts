@@ -16,7 +16,7 @@ class App {
 
   private loginPage: Login;
 
-  private registrationPage: Registration;
+  private regPage: Registration;
 
   private mainPage: MainPage;
 
@@ -32,9 +32,10 @@ class App {
     this.mainPage = new MainPage();
     this.aboutPage = new About();
     this.notFound = new NotFound();
-    this.registrationPage = new Registration();
+    this.regPage = new Registration();
     this.router = new Navigo('/');
     this.observerLogin();
+    this.observerReg();
   }
 
   private observerLogin(): void {
@@ -52,6 +53,21 @@ class App {
     observer.observe(this.loginPage.loginBtn.view.html, { attributes: true });
   }
 
+  private observerReg(): void {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes') {
+          if (this.regPage.regBtn.view.html.getAttribute('login-success') === 'true') {
+            this.content.html.innerHTML = '';
+            this.content.html.append(this.mainPage.view.html);
+          }
+          this.regPage.regBtn.view.html.removeAttribute('login-success');
+        }
+      });
+    });
+    observer.observe(this.regPage.regBtn.view.html, { attributes: true });
+  }
+
   private createRouter(): void {
     this.router
       .on('/about', () => {
@@ -64,7 +80,7 @@ class App {
       })
       .on('/registration', () => {
         this.content.html.innerHTML = '';
-        this.content.html.append(this.registrationPage.view.html);
+        this.content.html.append(this.regPage.view.html);
       })
       .on('/', () => {
         this.content.html.innerHTML = '';
