@@ -16,8 +16,12 @@ import {
   STREET_ERROR,
   STREET_RULES,
 } from '../../utils/validation/inputErrorTexts';
-import apiRoot from '../../api/Client';
-import IRegForm from '../../type/interfaces/RegistrationForm.interface';
+import IRegForm from '../../interfaces/RegistrationForm.interface';
+import currentClient from '../../api/data/currentClient';
+import ECommerceApi from '../../api/ECommerceApi';
+
+const SAME_EMAIL_ERROR =
+  'There is already an existing customer with the provided email. Go to the Login Page, or use a different email address.';
 
 class RegistrationForm extends LoginInfo {
   private streetInputStatus: boolean;
@@ -99,7 +103,7 @@ class RegistrationForm extends LoginInfo {
     this.countryInputContainer = RegistrationForm.createSelectElement();
 
     this.composeViewNew();
-    this.handleRestInpurs();
+    this.handleRestInputs();
     this.submitRegForm();
   }
 
@@ -113,8 +117,8 @@ class RegistrationForm extends LoginInfo {
     this.streetInputContainer.html.append(this.streetInput.view.html, this.streetError.html);
     this.streetField.html.append(this.streetInputContainer.html);
     this.countryField.html.append(this.countryLabel.html, this.countryInputContainer.html);
-    this.loginInputs.html.append(this.dateField.html, this.countryField.html);
-    this.loginInputs.html.append(this.postField.html, this.cityField.html, this.streetField.html);
+    this.regInputs.html.append(this.dateField.html, this.countryField.html);
+    this.regInputs.html.append(this.postField.html, this.cityField.html, this.streetField.html);
   }
 
   private static createSelectElement(): BaseComponent {
@@ -159,9 +163,9 @@ class RegistrationForm extends LoginInfo {
     const placeValid = this.cityInputStatus && this.streetInputStatus && this.postInputStatus;
 
     if (loginValid && nameValid && placeValid && this.dateInputStatus && this.countryInputStatus) {
-      this.loginButton.view.html.removeAttribute('disabled');
+      this.regButton.view.html.removeAttribute('disabled');
     } else {
-      this.loginButton.view.html.setAttribute('disabled', '');
+      this.regButton.view.html.setAttribute('disabled', '');
     }
   }
 
@@ -309,7 +313,7 @@ class RegistrationForm extends LoginInfo {
     });
   }
 
-  private handleRestInpurs(): void {
+  private handleRestInputs(): void {
     this.handleCityInput();
     this.handleStreetInput();
     this.handlePostInput();
@@ -357,7 +361,7 @@ class RegistrationForm extends LoginInfo {
   }
 
   static addNotification(notificationText: string, className: string[]): void {
-    const time = 3000;
+    const time = 30000;
     const notificationFormat = new BaseComponent({
       tag: 'div',
       class: className,
@@ -370,8 +374,8 @@ class RegistrationForm extends LoginInfo {
   }
 
   private submitRegForm(): void {
-    const form = this.loginFormContainer.html;
-    form.addEventListener('submit', (event) => {
+    const form = this.regFormContainer.html;
+    form.addEventListener('submit', (event: Event) => {
       event.preventDefault();
 
       const { emailInput, passwordInput, nameInput, surnameInput, dateInput, cityInput, streetInput, postInput } = this;
@@ -382,9 +386,14 @@ class RegistrationForm extends LoginInfo {
         nameInput.view.html instanceof HTMLInputElement &&
         surnameInput.view.html instanceof HTMLInputElement &&
         dateInput.view.html instanceof HTMLInputElement &&
-        cityInput.view.html instanceof HTMLInputElement &&
-        postInput.view.html instanceof HTMLInputElement &&
-        streetInput.view.html instanceof HTMLInputElement
+        this.emailInputStatus === true &&
+        this.passwordInputStatus === true &&
+        this.nameInputStatus === true &&
+        this.surnameInputStatus === true &&
+        this.dateInputStatus === true &&
+        this.cityInputStatus === true &&
+        this.postInputStatus === true &&
+        this.streetInputStatus === true
       ) {
         const customer: IRegForm = {
           email: emailInput.view.html.value,
@@ -394,40 +403,41 @@ class RegistrationForm extends LoginInfo {
           dateOfBirth: dateInput.view.html.value,
           addresses: [
             {
-              city: cityInput.view.html.value,
-              streetName: streetInput.view.html.value,
-              postalCode: postInput.view.html.value,
+              city: (cityInput.view.html as HTMLInputElement).value,
+              streetName: (streetInput.view.html as HTMLInputElement).value,
+              postalCode: (postInput.view.html as HTMLInputElement).value,
               country: RegistrationForm.getSelectedValue() || '',
             },
           ],
         };
         this.signupCustomer(customer);
       }
+      this.checkStatuses();
     });
   }
 
-  private displayErrorEnter(): void {
+  private displayErrorEnter(error: string): void {
     this.emailInput.view.html.classList.remove('success');
-    this.emailInput.view.html.classList.add('error');
-    RegistrationForm.addNotification(
-      'An account with this email address already exists. You can go to the Login Page, or use a different email address.',
-      ['error-popup'],
-    );
+    this.emailInput.view.html.classList.remove('error');
+    RegistrationForm.addNotification(error, ['error-popup']);
+    this.regButton.view.html.setAttribute('disabled', '');
   }
 
   private signupCustomer(customer: IRegForm): void {
-    apiRoot
-      .me()
-      .signup()
-      .post({ body: customer })
-      .execute()
-      .then(() => {
-        RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
-        this.clearFields();
-      })
-      .catch(() => {
-        this.displayErrorEnter();
-      });
+    ECommerceApi.getAccessToken(currentClient).then((res) => {
+      ECommerceApi.createCustomer(currentClient, res.access_token, customer)
+        .then(() => {
+          RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
+          this.clearFields();
+        })
+        .catch((error) => {
+          if (error.message === 'There is already an existing customer with the provided email.') {
+            this.displayErrorEnter(SAME_EMAIL_ERROR);
+          } else {
+            this.displayErrorEnter(error.message);
+          }
+        });
+    });
   }
 }
 

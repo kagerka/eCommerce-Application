@@ -1,4 +1,5 @@
 import BaseComponent from '../../components/BaseComponent';
+import Button from '../../components/button/Button';
 import Footer from '../../components/footer/Footer';
 import Header from '../../components/header/Header';
 import LoginForm from '../../components/login-form/LoginForm';
@@ -13,6 +14,8 @@ class Login {
 
   private loginForm: LoginForm;
 
+  private loginButton: Button;
+
   private header: Header;
 
   private footer: Footer;
@@ -22,6 +25,7 @@ class Login {
     this.loginPageContainer = Login.createLoginPageContainerElement();
     this.loginPageTitle = Login.createLoginPageTitleElement();
     this.loginForm = new LoginForm();
+    this.loginButton = this.loginForm.loginBtn;
     this.header = new Header();
     this.footer = new Footer();
     this.composeView();
@@ -42,6 +46,10 @@ class Login {
 
   private static createLoginPageTitleElement(): BaseComponent {
     return new BaseComponent({ tag: 'h1', class: ['login-title'], text: 'Login' });
+  }
+
+  get loginBtn(): Button {
+    return this.loginButton;
   }
 
   get view(): BaseComponent {

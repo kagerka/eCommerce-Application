@@ -1,15 +1,9 @@
-import fetch from 'node-fetch';
-import {
-  ClientBuilder,
-  type PasswordAuthMiddlewareOptions,
-  type HttpMiddlewareOptions,
-} from '@commercetools/sdk-client-v2';
-import { createApiBuilderFromCtpClient } from '@commercetools/platform-sdk';
-import { sportStore } from '../../api/data/api-clients';
+import currentClient from '../../api/data/currentClient';
 import './LoginForm.scss';
 import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
 import Input from '../input/Input';
+import ECommerceApi from '../../api/ECommerceApi';
 import validateLength from '../../utils/validation/validateLength';
 import validateRegExp from '../../utils/validation/validateRegExp';
 import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
@@ -380,7 +374,7 @@ class LoginForm {
   }
 
   private submitLoginForm(): void {
-    this.loginFormContainer.html.addEventListener('submit', (event) => {
+    this.loginFormContainer.html.addEventListener('submit', (event: Event) => {
       event.preventDefault();
       if (
         this.emailInput.view.html instanceof HTMLInputElement &&
@@ -390,7 +384,28 @@ class LoginForm {
           email: this.emailInput.view.html.value,
           password: this.passwordInput.view.html.value,
         };
-        this.passwordAuth(customer);
+        if (!localStorage.getItem('tokenPassword')) {
+          ECommerceApi.getTokenPassword(currentClient, customer)
+            .then((res) => {
+              if (localStorage.getItem('tokenAnonimus')) {
+                localStorage.removeItem('tokenAnonimus');
+              }
+              this.clearFields();
+              localStorage.setItem('tokenPassword', res.access_token);
+              ECommerceApi.authCustomer(currentClient, customer, res.access_token).then(() => {
+                window.history.pushState({}, '', '/');
+                this.loginButton.view.html.setAttribute('login-success', 'true');
+              });
+            })
+            .catch(() => {
+              this.displayErrorEnter();
+            });
+        } else {
+          const token = localStorage.getItem('tokenPassword');
+          if (token) {
+            ECommerceApi.getCustomer(currentClient, token);
+          }
+        }
       }
     });
   }
@@ -407,6 +422,9 @@ class LoginForm {
       this.checkStatuses();
       this.emailInput.view.html.classList.remove('success');
       this.passwordInput.view.html.classList.remove('success');
+      this.emailInput.view.html.classList.remove('error');
+      this.passwordInput.view.html.classList.remove('error');
+      LoginForm.cleanInsideElement(this.emailError.html);
     }
   }
 
@@ -424,45 +442,12 @@ class LoginForm {
     this.loginButton.view.html.setAttribute('disabled', '');
   }
 
-  private passwordAuth(user: { email: string; password: string }): void {
-    const options: PasswordAuthMiddlewareOptions = {
-      host: sportStore.AuthURL,
-      projectKey: sportStore.projectKey,
-      credentials: {
-        clientId: sportStore.clientId,
-        clientSecret: sportStore.secret,
-        user: {
-          username: user.email,
-          password: user.password,
-        },
-      },
-      scopes: ['view_products:tea-team-app manage_customers:tea-team-app'],
-      fetch,
-    };
-    const httpMiddlewareOptions: HttpMiddlewareOptions = {
-      host: sportStore.APIURL,
-      fetch,
-    };
-    const ctpClient = new ClientBuilder()
-      .withPasswordFlow(options)
-      .withHttpMiddleware(httpMiddlewareOptions)
-      .withLoggerMiddleware()
-      .build();
-    const apiRoot = createApiBuilderFromCtpClient(ctpClient).withProjectKey({ projectKey: 'tea-team-app' });
-    apiRoot
-      .login()
-      .post({ body: user })
-      .execute()
-      .then(() => {
-        this.clearFields();
-      })
-      .catch(() => {
-        this.displayErrorEnter();
-      });
-  }
-
   get view(): BaseComponent {
     return this.loginFormContainer;
+  }
+
+  get loginBtn(): Button {
+    return this.loginButton;
   }
 }
 

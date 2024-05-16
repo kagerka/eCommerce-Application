@@ -1,4 +1,5 @@
 import BaseComponent from '../../components/BaseComponent';
+import Button from '../../components/button/Button';
 import Footer from '../../components/footer/Footer';
 import Header from '../../components/header/Header';
 import RegistrationForm from '../../components/registration-form/RegistrationForm';
@@ -13,6 +14,8 @@ class Registration {
 
   private regForm: RegistrationForm;
 
+  private regButton: Button;
+
   private header: Header;
 
   private footer: Footer;
@@ -22,6 +25,7 @@ class Registration {
     this.regPageContainer = Registration.createRegPageContainerElement();
     this.regPageTitle = Registration.createRegPageTitleElement();
     this.regForm = new RegistrationForm();
+    this.regButton = this.regForm.regBtn;
     this.header = new Header();
     this.footer = new Footer();
     this.composeView();
@@ -42,6 +46,10 @@ class Registration {
 
   private static createRegPageTitleElement(): BaseComponent {
     return new BaseComponent({ tag: 'h1', class: ['reg-title'], text: 'Registration' });
+  }
+
+  get regBtn(): Button {
+    return this.regButton;
   }
 
   get view(): BaseComponent {
