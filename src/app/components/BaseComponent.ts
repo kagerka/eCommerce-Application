@@ -1,6 +1,7 @@
-import { IHtmlElement } from '../type/interfaces/HtmlElement.interface';
+import { IHtmlElement } from '../interfaces/HtmlElement.interface';
 
-import { TagType } from '../type/types/TagType';
+type FormElementsType = HTMLFormElement | HTMLInputElement;
+type TagType = HTMLDivElement | HTMLButtonElement | FormElementsType | HTMLElement;
 
 class BaseComponent {
   protected options: IHtmlElement;

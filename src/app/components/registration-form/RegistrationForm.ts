@@ -17,7 +17,7 @@ import {
   STREET_RULES,
 } from '../../utils/validation/inputErrorTexts';
 import apiRoot from '../../api/Client';
-import IRegForm from '../../type/interfaces/RegistrationForm.interface';
+import IRegForm from '../../interfaces/RegistrationForm.interface';
 
 class RegistrationForm extends LoginInfo {
   private streetInputStatus: boolean;

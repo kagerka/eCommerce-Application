@@ -1,4 +1,4 @@
-interface IAccessAndRefreshTokens {
+interface ITokenPassword {
   access_token: string;
   expires_in: number;
   scope: string;
@@ -6,4 +6,4 @@ interface IAccessAndRefreshTokens {
   token_type: 'Bearer';
 }
 
-export default IAccessAndRefreshTokens;
+export default ITokenPassword;
