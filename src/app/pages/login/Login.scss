@@ -3,7 +3,7 @@
 .login {
   width: 100%;
   max-width: 1440px;
-  padding: 5% 120px 0;
+  padding: 0 120px;
   height: 100dvh;
   min-height: 100vh;
   display: flex;
@@ -42,8 +42,10 @@
 .signup-link {
   text-decoration: none;
   color: #000000;
+  transition: 0.3s;
   &:hover {
-    color: $gray;
+    color: $green;
+    transition: 0.3s;
   }
 }
 
@@ -53,13 +55,13 @@
 
 @media screen and (max-width: 1000px) {
   .login {
-    padding: 5% 60px 0;
+    padding: 0 60px;
   }
 }
 
 @media screen and (max-width: 600px) {
   .login {
-    padding: 5% 40px 0;
+    padding: 0 40px;
   }
 }
 

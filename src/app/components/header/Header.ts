@@ -184,6 +184,10 @@ class Header {
     });
   }
 
+  get loginBtn(): BaseComponent {
+    return this.loginButton;
+  }
+
   get view(): BaseComponent {
     return this.headerContainer;
   }
