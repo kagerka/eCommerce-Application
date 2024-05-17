@@ -26,6 +26,26 @@
   margin: 0;
 }
 
+.signin-text-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 30px;
+}
+
+.signin-text {
+  margin-right: 5px;
+}
+
+.signin-link {
+  text-decoration: none;
+  color: #000000;
+  font-weight: 600;
+  &:hover {
+    color: $green;
+  }
+}
+
 @media screen and (max-width: 1000px) {
   .reg {
     padding: 0 60px;

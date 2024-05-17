@@ -3,7 +3,7 @@
 .login {
   width: 100%;
   max-width: 1440px;
-  padding: 0 120px;
+  padding: 5% 120px 0;
   height: 100dvh;
   min-height: 100vh;
   display: flex;
@@ -13,7 +13,7 @@
 
 .login-container {
   width: 390px;
-  height: 500px;
+  height: 600px;
   flex-grow: 1;
 }
 
@@ -25,7 +25,31 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0;
+  margin: 20px 0 0;
+}
+
+.signup-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 25px 0 40px;
+}
+
+.signup-rest-text-container {
+  display: flex;
+}
+
+.signup-link {
+  text-decoration: none;
+  color: #000000;
+  font-weight: 600;
+  &:hover {
+    color: $green;
+  }
+}
+
+.signup-rest-text {
+  margin-left: 5px;
 }
 
 .signup-text-container {
@@ -55,13 +79,13 @@
 
 @media screen and (max-width: 1000px) {
   .login {
-    padding: 0 60px;
+    padding: 5% 60px 0;
   }
 }
 
 @media screen and (max-width: 600px) {
   .login {
-    padding: 0 40px;
+    padding: 5% 40px 0;
   }
 }
 

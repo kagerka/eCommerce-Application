@@ -374,7 +374,7 @@ class LoginForm {
   }
 
   private submitLoginForm(): void {
-    this.loginFormContainer.html.addEventListener('submit', (event) => {
+    this.loginFormContainer.html.addEventListener('submit', (event: Event) => {
       event.preventDefault();
       if (
         this.emailInput.view.html instanceof HTMLInputElement &&

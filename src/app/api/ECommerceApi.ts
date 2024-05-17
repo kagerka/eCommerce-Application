@@ -58,8 +58,11 @@ class ECommerceApi {
       },
       body: JSON.stringify(customerData),
     });
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.json();
+      const errorMessage = errorText.message;
+      throw new Error(errorMessage);
     } else {
       const json = await response.json();
       return json;

@@ -1,6 +1,6 @@
 import '../login-form/LoginForm.scss';
 import './RegistrationForm.scss';
-import { InputTypesType } from '../../interfaces/InputOptions.interface';
+
 import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
 import validateLength from '../../utils/validation/validateLength';
 import validateRegExp from '../../utils/validation/validateRegExp';
@@ -18,6 +18,7 @@ import {
   SURNAME_ERROR,
   SURNAME_RULES,
 } from '../../utils/validation/inputErrorTexts';
+import { InputTypesType } from '../../interfaces/InputOptions.interface';
 
 class LoginInfo {
   public nameInputStatus: boolean;
@@ -28,9 +29,9 @@ class LoginInfo {
 
   public emailInputStatus: boolean;
 
-  public loginFormContainer: BaseComponent;
+  public regFormContainer: BaseComponent;
 
-  public loginInputs: BaseComponent;
+  public regInputs: BaseComponent;
 
   private nameField: BaseComponent;
 
@@ -60,7 +61,7 @@ class LoginInfo {
 
   public emailInput: Input;
 
-  private emailError: BaseComponent;
+  public emailError: BaseComponent;
 
   private passwordField: BaseComponent;
 
@@ -74,7 +75,7 @@ class LoginInfo {
 
   private passwordError: BaseComponent;
 
-  public loginButton: Button;
+  public regButton: Button;
 
   public tooltipContainer: BaseComponent;
 
@@ -87,8 +88,8 @@ class LoginInfo {
     this.surnameInputStatus = false;
     this.passwordInputStatus = false;
     this.emailInputStatus = false;
-    this.loginFormContainer = LoginInfo.createLoginFormContainerElement();
-    this.loginInputs = LoginInfo.createLoginInputsElement();
+    this.regFormContainer = LoginInfo.createLoginFormContainerElement();
+    this.regInputs = LoginInfo.createLoginInputsElement();
     this.nameField = LoginInfo.createFieldElement('reg-field-name');
     this.nameLabel = LoginInfo.createLabelElement('name', 'Name');
     this.nameInputContainer = LoginInfo.createInputContainerElement('reg-field-name');
@@ -110,7 +111,7 @@ class LoginInfo {
     this.passwordInput = LoginInfo.createInputElement('password', 'password', 'Create password');
     this.passwordError = LoginInfo.createErrorElement('reg-field-password');
     this.showPswBtn = LoginInfo.createShowPasswordBtnElement();
-    this.loginButton = LoginInfo.createLoginButtonElement();
+    this.regButton = LoginInfo.createLoginButtonElement();
     this.tooltipContainer = LoginInfo.createTooltipContainerElement();
     this.tooltipIcon = LoginInfo.createTooltipIconElement();
     this.tooltipMessage = LoginInfo.createTooltipMessageElement();
@@ -129,9 +130,9 @@ class LoginInfo {
     this.passwordInputContainer.html.append(this.passwordInput.view.html);
     this.passwordInputContainer.html.append(this.showPswBtn.html, this.passwordError.html);
     this.passwordField.html.append(this.passwordLabel.html, this.passwordInputContainer.html);
-    this.loginInputs.html.append(this.nameField.html, this.surnameField.html);
-    this.loginInputs.html.append(this.emailField.html, this.passwordField.html);
-    this.loginFormContainer.html.append(this.loginInputs.html, this.loginButton.view.html);
+    this.regInputs.html.append(this.nameField.html, this.surnameField.html);
+    this.regInputs.html.append(this.emailField.html, this.passwordField.html);
+    this.regFormContainer.html.append(this.regInputs.html, this.regButton.view.html);
     this.tooltipContainer.html.append(this.tooltipIcon.html);
     this.tooltipContainer.html.append(this.tooltipMessage.html);
   }
@@ -414,14 +415,18 @@ class LoginInfo {
 
   public checkStatuses(): void {
     if (this.passwordInputStatus && this.emailInputStatus) {
-      this.loginButton.view.html.removeAttribute('disabled');
+      this.regButton.view.html.removeAttribute('disabled');
     } else {
-      this.loginButton.view.html.setAttribute('disabled', '');
+      this.regButton.view.html.setAttribute('disabled', '');
     }
   }
 
   get view(): BaseComponent {
-    return this.loginFormContainer;
+    return this.regFormContainer;
+  }
+
+  get regBtn(): Button {
+    return this.regButton;
   }
 }
 
