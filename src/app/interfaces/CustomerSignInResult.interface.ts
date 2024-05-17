@@ -1,6 +1,6 @@
 interface ICustomerSignInResult {
   customer: {
-    addresses: [];
+    addresses: [{ country: string; city: string; streetName: string; postalCode: string; id?: string }];
     email: string;
     firstName: string;
     id: string;
@@ -12,6 +12,8 @@ interface ICustomerSignInResult {
     lastModifiedAt: string;
     authenticationMode: string;
     stores: [];
+    shippingAddressIds: [];
+    billingAddressIds: [];
   };
 }
 

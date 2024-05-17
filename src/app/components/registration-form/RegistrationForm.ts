@@ -16,7 +16,7 @@ import {
   STREET_ERROR,
   STREET_RULES,
 } from '../../utils/validation/inputErrorTexts';
-import IRegForm from '../../interfaces/RegistrationForm.interface';
+import { IRegForm } from '../../interfaces/RegistrationForm.interface';
 import currentClient from '../../api/data/currentClient';
 import ECommerceApi from '../../api/ECommerceApi';
 
@@ -386,6 +386,24 @@ class RegistrationForm extends LoginInfo {
     }, time);
   }
 
+  private validateFormInputs(): boolean {
+    return (
+      this.emailInput.view.html instanceof HTMLInputElement &&
+      this.passwordInput.view.html instanceof HTMLInputElement &&
+      this.nameInput.view.html instanceof HTMLInputElement &&
+      this.surnameInput.view.html instanceof HTMLInputElement &&
+      this.dateInput.view.html instanceof HTMLInputElement &&
+      this.emailInputStatus === true &&
+      this.passwordInputStatus === true &&
+      this.nameInputStatus === true &&
+      this.surnameInputStatus === true &&
+      this.dateInputStatus === true &&
+      this.cityInputStatus === true &&
+      this.postInputStatus === true &&
+      this.streetInputStatus === true
+    );
+  }
+
   private submitRegForm(): void {
     const form = this.regFormContainer.html;
     form.addEventListener('submit', (event: Event) => {
@@ -393,28 +411,22 @@ class RegistrationForm extends LoginInfo {
 
       const { emailInput, passwordInput, nameInput, surnameInput, dateInput, cityInput, streetInput, postInput } = this;
 
-      if (
-        emailInput.view.html instanceof HTMLInputElement &&
-        passwordInput.view.html instanceof HTMLInputElement &&
-        nameInput.view.html instanceof HTMLInputElement &&
-        surnameInput.view.html instanceof HTMLInputElement &&
-        dateInput.view.html instanceof HTMLInputElement &&
-        this.emailInputStatus === true &&
-        this.passwordInputStatus === true &&
-        this.nameInputStatus === true &&
-        this.surnameInputStatus === true &&
-        this.dateInputStatus === true &&
-        this.cityInputStatus === true &&
-        this.postInputStatus === true &&
-        this.streetInputStatus === true
-      ) {
+      if (this.validateFormInputs()) {
         const customer: IRegForm = {
-          email: emailInput.view.html.value,
-          password: passwordInput.view.html.value,
-          firstName: nameInput.view.html.value,
-          lastName: surnameInput.view.html.value,
-          dateOfBirth: dateInput.view.html.value,
+          email: (emailInput.view.html as HTMLInputElement).value,
+          password: (passwordInput.view.html as HTMLInputElement).value,
+          firstName: (nameInput.view.html as HTMLInputElement).value,
+          lastName: (surnameInput.view.html as HTMLInputElement).value,
+          dateOfBirth: (dateInput.view.html as HTMLInputElement).value,
           addresses: [
+            {
+              city: (cityInput.view.html as HTMLInputElement).value,
+              streetName: (streetInput.view.html as HTMLInputElement).value,
+              postalCode: (postInput.view.html as HTMLInputElement).value,
+              country: RegistrationForm.getSelectedValue() || '',
+            },
+          ],
+          shippingAddressIds: [
             {
               city: (cityInput.view.html as HTMLInputElement).value,
               streetName: (streetInput.view.html as HTMLInputElement).value,
@@ -456,6 +468,8 @@ class RegistrationForm extends LoginInfo {
         .catch((error) => {
           if (error.message === 'There is already an existing customer with the provided email.') {
             this.displayErrorEnter(SAME_EMAIL_ERROR);
+          } else if (error.message === 'Failed to fetch') {
+            this.displayErrorEnter('Something went wrong during the registration process. Please try again later!');
           } else {
             this.displayErrorEnter(error.message);
           }
