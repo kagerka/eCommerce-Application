@@ -429,28 +429,25 @@ class RegistrationForm extends LoginInfo {
       localStorage.removeItem('tokenPassword');
     }
 
-    ECommerceApi.getAccessToken(currentClient)
-      .then((res) => {
-        this.clearFields();
-
-        localStorage.setItem('tokenPassword', res.access_token);
-
-        RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
-
-        ECommerceApi.createCustomer(currentClient, res.access_token, customer).then(() => {
+    ECommerceApi.getAccessToken(currentClient).then((res) => {
+      ECommerceApi.createCustomer(currentClient, res.access_token, customer)
+        .then(() => {
+          this.clearFields();
+          localStorage.setItem('tokenPassword', res.access_token);
+          RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
           ECommerceApi.authCustomer(currentClient, customer, res.access_token).then(() => {
             window.history.pushState({}, '', '/');
             this.regButton.view.html.setAttribute('login-success', 'true');
           });
+        })
+        .catch((error) => {
+          if (error.message === 'There is already an existing customer with the provided email.') {
+            this.displayErrorEnter(SAME_EMAIL_ERROR);
+          } else {
+            this.displayErrorEnter(error.message);
+          }
         });
-      })
-      .catch((error) => {
-        if (error.message === 'There is already an existing customer with the provided email.') {
-          this.displayErrorEnter(SAME_EMAIL_ERROR);
-        } else {
-          this.displayErrorEnter(error.message);
-        }
-      });
+    });
   }
 }
 
