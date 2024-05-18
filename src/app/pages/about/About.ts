@@ -1,7 +1,5 @@
 import BaseComponent from '../../components/BaseComponent';
 import Banner from '../../components/banner/Banner';
-import Footer from '../../components/footer/Footer';
-import Header from '../../components/header/Header';
 import './About.scss';
 
 const ABOUT_TEXT1 =
@@ -10,10 +8,6 @@ const ABOUT_TEXT2 =
   'The employees of SportShop work out every day just for you. They are ready to answer all your difficult questions and they are happy to give you advice. When your order arrives we run as fast as we can to collect the items and ship them to you. Some of our colleagues are continuously looking to find the best products just for you!';
 
 class About {
-  private about: BaseComponent;
-
-  private header: Header;
-
   private aboutContent: BaseComponent;
 
   private aboutHeading: BaseComponent;
@@ -24,33 +18,23 @@ class About {
 
   private banner: Banner;
 
-  private footer: Footer;
-
   constructor() {
-    this.about = About.createAboutElement();
-    this.header = new Header();
     this.aboutContent = About.createAboutContentElement();
     this.aboutHeading = About.createAboutHeadingElement();
     this.aboutText1 = About.createAboutText1Element();
     this.aboutText2 = About.createAboutText2Element();
     this.banner = new Banner();
-    this.footer = new Footer();
 
     this.composeView();
   }
 
   private composeView(): void {
-    this.about.html.append(this.header.view.html, this.aboutContent.html, this.footer.view.html);
     this.aboutContent.html.append(
       this.banner.view.html,
       this.aboutHeading.html,
       this.aboutText1.html,
       this.aboutText2.html,
     );
-  }
-
-  private static createAboutElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['about-page'] });
   }
 
   private static createAboutContentElement(): BaseComponent {
@@ -70,7 +54,7 @@ class About {
   }
 
   get view(): BaseComponent {
-    return this.about;
+    return this.aboutContent;
   }
 }
 
