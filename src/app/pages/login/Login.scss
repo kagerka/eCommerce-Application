@@ -52,31 +52,6 @@
   margin-left: 5px;
 }
 
-.signup-text-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 15px;
-}
-
-.signup-rest-text-container {
-  display: flex;
-}
-
-.signup-link {
-  text-decoration: none;
-  color: #000000;
-  transition: 0.3s;
-  &:hover {
-    color: $green;
-    transition: 0.3s;
-  }
-}
-
-.signup-rest-text {
-  margin-left: 5px;
-}
-
 @media screen and (max-width: 1000px) {
   .login {
     padding: 5% 60px 0;

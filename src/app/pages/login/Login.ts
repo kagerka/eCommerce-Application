@@ -1,8 +1,8 @@
 import BaseComponent from '../../components/BaseComponent';
 import Button from '../../components/button/Button';
 import Footer from '../../components/footer/Footer';
-import LoginForm from '../../components/login-form/LoginForm';
 import Header from '../../components/header/Header';
+import LoginForm from '../../components/login-form/LoginForm';
 import './Login.scss';
 
 class Login {
