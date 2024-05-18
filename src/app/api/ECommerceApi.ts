@@ -65,9 +65,6 @@ class ECommerceApi {
       throw new Error(errorMessage);
     } else {
       const json = await response.json();
-      const addressId = json.customer.addresses[0].id;
-      json.customer.shippingAddressIds = [{ id: addressId }];
-      console.log(json);
       return json;
     }
   }

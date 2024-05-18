@@ -5,12 +5,8 @@ export interface IRegForm {
   lastName: string;
   dateOfBirth: string;
   addresses: [{ country: string; city: string; streetName: string; postalCode: string }];
-  shippingAddressIds?: [{ country: string; city: string; streetName: string; postalCode: string }];
-  billingAddressIds?: [{ country: string; city: string; streetName: string; postalCode: string }];
-}
-
-export interface IAddresses {
-  addresses: [{ id?: string; country: string; city: string; streetName: string; postalCode: string }];
+  defaultShippingAddress?: number;
+  defaultBillingAddress?: number;
 }
 
 export interface IUser {
@@ -43,10 +39,10 @@ export interface IUser {
   dateOfBirth: string;
   password: string;
   addresses: [{ country: string; city: string; streetName: string; postalCode: string }];
-  defaultShippingAddressId: string;
-  defaultBillingAddressId: string;
-  shippingAddressIds: string;
-  billingAddressIds: string;
+  billingAddresses: number[];
+  shippingAddresses: number[];
+  defaultShippingAddress?: number;
+  defaultBillingAddress?: number;
   isEmailVerified: false;
   stores: [];
   authenticationMode: string;

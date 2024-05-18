@@ -26,6 +26,8 @@ const SAME_EMAIL_ERROR =
 class RegistrationForm extends LoginInfo {
   private streetInputStatus: boolean;
 
+  private defaultAddressStatus: boolean;
+
   private cityInputStatus: boolean;
 
   private postInputStatus: boolean;
@@ -82,6 +84,7 @@ class RegistrationForm extends LoginInfo {
 
   constructor() {
     super();
+    this.defaultAddressStatus = false;
     this.streetInputStatus = false;
     this.cityInputStatus = false;
     this.postInputStatus = false;
@@ -326,12 +329,23 @@ class RegistrationForm extends LoginInfo {
     });
   }
 
+  private handleDefaultAddressInput(): void {
+    this.defaultAddressInput.view.html.addEventListener('input', () => {
+      if (this.defaultAddressStatus) {
+        this.defaultAddressStatus = false;
+      } else {
+        this.defaultAddressStatus = true;
+      }
+    });
+  }
+
   private handleRestInputs(): void {
     this.handleCityInput();
     this.handleStreetInput();
     this.handlePostInput();
     this.handleDateInput();
     this.handleCountryInput();
+    this.handleDefaultAddressInput();
   }
 
   private clearFields(): void {
@@ -426,15 +440,11 @@ class RegistrationForm extends LoginInfo {
               country: RegistrationForm.getSelectedValue() || '',
             },
           ],
-          shippingAddressIds: [
-            {
-              city: (cityInput.view.html as HTMLInputElement).value,
-              streetName: (streetInput.view.html as HTMLInputElement).value,
-              postalCode: (postInput.view.html as HTMLInputElement).value,
-              country: RegistrationForm.getSelectedValue() || '',
-            },
-          ],
         };
+        if (this.defaultAddressStatus) {
+          customer.defaultShippingAddress = 0;
+          customer.defaultBillingAddress = 0;
+        }
         this.signupCustomer(customer);
       }
       this.checkStatuses();
@@ -468,7 +478,7 @@ class RegistrationForm extends LoginInfo {
         .catch((error) => {
           if (error.message === 'There is already an existing customer with the provided email.') {
             this.displayErrorEnter(SAME_EMAIL_ERROR);
-          } else if (error.message === 'Failed to fetch') {
+          } else if (error.message === 'Failed to fetch' || error.message === 'Not found') {
             this.displayErrorEnter('Something went wrong during the registration process. Please try again later!');
           } else {
             this.displayErrorEnter(error.message);
