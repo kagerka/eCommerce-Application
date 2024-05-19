@@ -9,7 +9,6 @@
 }
 
 .reg-inputs {
-  height: 590px;
   width: 300px;
   display: flex;
   flex-direction: column;
@@ -50,6 +49,7 @@
 
 .reg-select {
   cursor: pointer;
+  margin-bottom: 8px;
 }
 
 .reg-input-name:focus,
@@ -230,6 +230,11 @@ input[type='checkbox']:checked::before {
   height: 90%;
   width: 30%;
   transform: rotate(50deg) translateY(-20%) translateX(-10%);
+}
+
+.reg-field-default {
+  margin-bottom: 10px;
+  order: 2;
 }
 
 .reg-label-default {

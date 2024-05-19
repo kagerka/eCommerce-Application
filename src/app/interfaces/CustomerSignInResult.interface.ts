@@ -11,7 +11,7 @@ interface ICustomerSignInResult {
     lastModifiedAt: string;
     authenticationMode: string;
     stores: [];
-    addresses: [{ country: string; city: string; streetName: string; postalCode: string; id?: string }];
+    addresses: { country: string; city: string; streetName: string; postalCode: string }[];
     shippingAddressIds: number[];
     billingAddressIds: number[];
     defaultShippingAddress?: number;
