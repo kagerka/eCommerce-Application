@@ -462,19 +462,18 @@ class RegistrationForm extends SecondAddress {
   }
 
   private createOneAddressForm(): void {
-    const { emailInput, passwordInput, nameInput, surnameInput, dateInput, cityInput, streetInput, postInput } = this;
     if (this.validateFormInputs() && !this.validateSecAddressInputs()) {
       const customer: IRegForm = {
-        email: (emailInput.view.html as HTMLInputElement).value,
-        password: (passwordInput.view.html as HTMLInputElement).value,
-        firstName: (nameInput.view.html as HTMLInputElement).value,
-        lastName: (surnameInput.view.html as HTMLInputElement).value,
-        dateOfBirth: (dateInput.view.html as HTMLInputElement).value,
+        email: (this.emailInput.view.html as HTMLInputElement).value,
+        password: (this.passwordInput.view.html as HTMLInputElement).value,
+        firstName: (this.nameInput.view.html as HTMLInputElement).value,
+        lastName: (this.surnameInput.view.html as HTMLInputElement).value,
+        dateOfBirth: (this.dateInput.view.html as HTMLInputElement).value,
         addresses: [
           {
-            city: (cityInput.view.html as HTMLInputElement).value,
-            streetName: (streetInput.view.html as HTMLInputElement).value,
-            postalCode: (postInput.view.html as HTMLInputElement).value,
+            city: (this.cityInput.view.html as HTMLInputElement).value,
+            streetName: (this.streetInput.view.html as HTMLInputElement).value,
+            postalCode: (this.postInput.view.html as HTMLInputElement).value,
             country: RegistrationForm.getSelectedValue() || '',
           },
         ],
@@ -488,19 +487,18 @@ class RegistrationForm extends SecondAddress {
   }
 
   private createTwoAddressesForm(): void {
-    const { emailInput, passwordInput, nameInput, surnameInput, dateInput, cityInput, streetInput, postInput } = this;
     if (this.validateFormInputs() && this.validateSecAddressInputs()) {
       const customer: IRegForm = {
-        email: (emailInput.view.html as HTMLInputElement).value,
-        password: (passwordInput.view.html as HTMLInputElement).value,
-        firstName: (nameInput.view.html as HTMLInputElement).value,
-        lastName: (surnameInput.view.html as HTMLInputElement).value,
-        dateOfBirth: (dateInput.view.html as HTMLInputElement).value,
+        email: (this.emailInput.view.html as HTMLInputElement).value,
+        password: (this.passwordInput.view.html as HTMLInputElement).value,
+        firstName: (this.nameInput.view.html as HTMLInputElement).value,
+        lastName: (this.surnameInput.view.html as HTMLInputElement).value,
+        dateOfBirth: (this.dateInput.view.html as HTMLInputElement).value,
         addresses: [
           {
-            city: (cityInput.view.html as HTMLInputElement).value,
-            streetName: (streetInput.view.html as HTMLInputElement).value,
-            postalCode: (postInput.view.html as HTMLInputElement).value,
+            city: (this.cityInput.view.html as HTMLInputElement).value,
+            streetName: (this.streetInput.view.html as HTMLInputElement).value,
+            postalCode: (this.postInput.view.html as HTMLInputElement).value,
             country: RegistrationForm.getSelectedValue() || '',
           },
           {
