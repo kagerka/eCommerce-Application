@@ -3,6 +3,8 @@ import ECommerceApi from './api/ECommerceApi';
 import currentClient from './api/data/currentClient';
 import './app.scss';
 import BaseComponent from './components/BaseComponent';
+import Header from './components/header/Header';
+import Footer from './components/footer/Footer';
 import About from './pages/about/About';
 import Login from './pages/login/Login';
 import MainPage from './pages/main/MainPage';
@@ -13,6 +15,12 @@ class App {
   private static container: HTMLElement = document.body;
 
   private content: BaseComponent;
+
+  private header: Header;
+
+  private footer: Footer;
+
+  private pageContent: BaseComponent;
 
   private loginPage: Login;
 
@@ -28,14 +36,23 @@ class App {
 
   constructor() {
     this.content = new BaseComponent({ tag: 'div', class: ['app'] });
+    this.header = new Header();
+    this.pageContent = new BaseComponent({ tag: 'div', class: ['content'] });
+    this.footer = new Footer();
     this.loginPage = new Login();
     this.mainPage = new MainPage();
     this.aboutPage = new About();
     this.notFound = new NotFound();
     this.regPage = new Registration();
     this.router = new Navigo('/');
+    this.composeView();
     this.observerLogin();
     this.observerReg();
+    this.setLoginBtnHref();
+  }
+
+  private composeView(): void {
+    this.content.html.append(this.header.view.html, this.pageContent.html, this.footer.view.html);
   }
 
   private observerLogin(): void {
@@ -43,8 +60,10 @@ class App {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes') {
           if (this.loginPage.loginBtn.view.html.getAttribute('login-success') === 'true') {
-            this.content.html.innerHTML = '';
-            this.content.html.append(this.mainPage.view.html);
+            this.pageContent.html.innerHTML = '';
+            this.pageContent.html.append(this.mainPage.view.html);
+            this.checkLoginAndRegBtns();
+            this.header.loginBtn.html.setAttribute('href', '/');
           }
           this.loginPage.loginBtn.view.html.removeAttribute('login-success');
         }
@@ -58,8 +77,9 @@ class App {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes') {
           if (this.regPage.regBtn.view.html.getAttribute('login-success') === 'true') {
-            this.content.html.innerHTML = '';
-            this.content.html.append(this.mainPage.view.html);
+            this.pageContent.html.innerHTML = '';
+            this.pageContent.html.append(this.mainPage.view.html);
+            this.checkLoginAndRegBtns();
           }
           this.regPage.regBtn.view.html.removeAttribute('login-success');
         }
@@ -71,26 +91,63 @@ class App {
   private createRouter(): void {
     this.router
       .on('/about', () => {
-        this.content.html.innerHTML = '';
-        this.content.html.append(this.aboutPage.view.html);
+        this.pageContent.html.innerHTML = '';
+        this.pageContent.html.append(this.aboutPage.view.html);
+        this.checkLoginAndRegBtns();
       })
       .on('/login', () => {
-        this.content.html.innerHTML = '';
-        this.content.html.append(this.loginPage.view.html);
+        if (localStorage.getItem('isAuth')) {
+          this.pageContent.html.innerHTML = '';
+          this.pageContent.html.append(this.mainPage.view.html);
+          window.location.assign(
+            `${window.location.protocol}//${window.location.hostname}`, // :5173
+          );
+          this.checkLoginAndRegBtns();
+        } else {
+          this.pageContent.html.innerHTML = '';
+          this.pageContent.html.append(this.loginPage.view.html);
+          this.checkLoginAndRegBtns();
+        }
       })
       .on('/registration', () => {
-        this.content.html.innerHTML = '';
-        this.content.html.append(this.regPage.view.html);
+        this.pageContent.html.innerHTML = '';
+        this.pageContent.html.append(this.regPage.view.html);
+        this.checkLoginAndRegBtns();
       })
       .on('/', () => {
-        this.content.html.innerHTML = '';
-        this.content.html.append(this.mainPage.view.html);
+        this.pageContent.html.innerHTML = '';
+        this.pageContent.html.append(this.mainPage.view.html);
+        this.checkLoginAndRegBtns();
       })
       .notFound(() => {
-        this.content.html.innerHTML = '';
-        this.content.html.append(this.notFound.view.html);
+        this.pageContent.html.innerHTML = '';
+        this.pageContent.html.append(this.notFound.view.html);
+        this.checkLoginAndRegBtns();
       })
       .resolve();
+  }
+
+  private setLoginBtnHref(): void {
+    if (localStorage.getItem('isAuth')) {
+      this.header.loginBtn.html.setAttribute('href', '/');
+    }
+  }
+
+  private checkLoginAndRegBtns(): void {
+    if (this.pageContent.html.firstElementChild) {
+      if (this.pageContent.html.firstElementChild.classList.contains('login')) {
+        this.header.loginBtn.html.classList.add('hide');
+      }
+      if (!this.pageContent.html.firstElementChild.classList.contains('login')) {
+        this.header.loginBtn.html.classList.remove('hide');
+      }
+      if (this.pageContent.html.firstElementChild.classList.contains('reg')) {
+        this.header.regBtn.html.classList.add('hide');
+      }
+      if (!this.pageContent.html.firstElementChild.classList.contains('reg')) {
+        this.header.regBtn.html.classList.remove('hide');
+      }
+    }
   }
 
   run(): void {
@@ -100,34 +157,8 @@ class App {
         localStorage.setItem('tokenAnonimus', res.access_token);
       });
     }
-    this.content.html.append(this.loginPage.view.html);
 
     this.createRouter();
-
-    // const router = new Navigo('/');
-
-    // this.router
-    //   .on('/about', () => {
-    //     this.content.html.innerHTML = '';
-    //     this.content.html.append(this.aboutPage.view.html);
-    //   })
-    //   .on('/login', () => {
-    //     this.content.html.innerHTML = '';
-    //     this.content.html.append(this.loginPage.view.html);
-    //   })
-    //   .on('/registration', () => {
-    //     this.content.html.innerHTML = '';
-    //     this.content.html.append(this.registrationPage.view.html);
-    //   })
-    //   .on('/', () => {
-    //     this.content.html.innerHTML = '';
-    //     this.content.html.append(this.mainPage.view.html);
-    //   })
-    //   .notFound(() => {
-    //     this.content.html.innerHTML = '';
-    //     this.content.html.append(this.notFound.view.html);
-    //   })
-    //   .resolve();
   }
 }
 

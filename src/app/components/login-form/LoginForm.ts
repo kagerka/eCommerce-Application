@@ -330,6 +330,12 @@ class LoginForm {
   private handleEmailInput(): void {
     this.emailInput.view.html.addEventListener('input', () => {
       this.validateEmailInput();
+      if (this.passwordInput.view.html instanceof HTMLInputElement) {
+        if (this.passwordInput.view.html.value) {
+          this.validatePasswordInput();
+        }
+      }
+
       this.checkStatuses();
     });
   }
@@ -369,6 +375,11 @@ class LoginForm {
   private handlePasswordInput(): void {
     this.passwordInput.view.html.addEventListener('input', () => {
       this.validatePasswordInput();
+      if (this.emailInput.view.html instanceof HTMLInputElement) {
+        if (this.emailInput.view.html.value) {
+          this.validateEmailInput();
+        }
+      }
       this.checkStatuses();
     });
   }
@@ -395,6 +406,7 @@ class LoginForm {
               ECommerceApi.authCustomer(currentClient, customer, res.access_token).then(() => {
                 window.history.pushState({}, '', '/');
                 this.loginButton.view.html.setAttribute('login-success', 'true');
+                localStorage.setItem('isAuth', JSON.stringify(true));
               });
             })
             .catch(() => {
