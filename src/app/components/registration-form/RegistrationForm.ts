@@ -197,7 +197,7 @@ class RegistrationForm extends LoginInfo {
       const rules = LoginInfo.createTooltipItemElement(CITY_RULES);
       this.tooltipMessage.html.append(rules.html);
       const { value } = this.cityInput.view.html;
-      const regExp = /^(?=.*[A-Za-z])[A-Za-z]{1,}$/;
+      const regExp = /^[A-Za-z ]+$/;
       const isValidateRegExp = validateRegExp(value, regExp);
       const isValidateLeadingTrailingSpace = validateLeadingTrailingSpace(value);
 
@@ -469,6 +469,7 @@ class RegistrationForm extends LoginInfo {
         .then(() => {
           this.clearFields();
           localStorage.setItem('tokenPassword', res.access_token);
+          localStorage.setItem('isAuth', JSON.stringify(true));
           RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
           ECommerceApi.authCustomer(currentClient, customer, res.access_token).then(() => {
             window.history.pushState({}, '', '/');
