@@ -1,3 +1,5 @@
+import ECommerceApi from '../../api/ECommerceApi';
+import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../BaseComponent';
 import './Header.scss';
 
@@ -32,6 +34,8 @@ class Header {
 
   private loginButton: BaseComponent;
 
+  private logoutButton: BaseComponent;
+
   private regButton: BaseComponent;
 
   constructor() {
@@ -52,8 +56,10 @@ class Header {
 
     this.headerButtonsContainer = Header.createHeaderButtonsContainerElement();
     this.loginButton = Header.createLoginButtonElement();
+    this.logoutButton = Header.createLogoutButtonElement();
     this.regButton = Header.createRegistrationButtonElement();
     this.composeView();
+    this.submitLogoutButton();
   }
 
   private composeView(): void {
@@ -70,7 +76,7 @@ class Header {
     this.navList.html.append(this.homeNavListItem.html, this.aboutNavListItem.html);
     this.homeNavListItem.html.append(this.homeNavListLink.html);
     this.aboutNavListItem.html.append(this.aboutNavListLink.html);
-    this.headerButtonsContainer.html.append(this.loginButton.html, this.regButton.html);
+    this.headerButtonsContainer.html.append(this.loginButton.html, this.logoutButton.html, this.regButton.html);
   }
 
   private static createHeaderContainerElement(): BaseComponent {
@@ -172,6 +178,18 @@ class Header {
     });
   }
 
+  private static createLogoutButtonElement(): BaseComponent {
+    return new BaseComponent({
+      tag: 'a',
+      class: ['logout-button', 'hide'],
+      attribute: [
+        ['href', '/logout'],
+        ['data-navigo', ''],
+      ],
+      text: 'Logout',
+    });
+  }
+
   private static createRegistrationButtonElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
@@ -184,8 +202,29 @@ class Header {
     });
   }
 
+  private submitLogoutButton(): void {
+    this.logoutButton.html.addEventListener('click', (event: Event) => {
+      event.preventDefault();
+      if (localStorage.getItem('tokenPassword')) {
+        ECommerceApi.getAccessToken(currentClient).then((res) => {
+          localStorage.setItem('tokenAnonimus', res.access_token);
+          localStorage.removeItem('tokenPassword');
+          localStorage.removeItem('isAuth');
+          this.loginButton.html.classList.remove('hide');
+          this.loginButton.html.setAttribute('href', '/login');
+          this.logoutButton.html.classList.add('hide');
+          this.regButton.html.classList.remove('hide');
+        });
+      }
+    });
+  }
+
   get loginBtn(): BaseComponent {
     return this.loginButton;
+  }
+
+  get logoutBtn(): BaseComponent {
+    return this.logoutButton;
   }
 
   get regBtn(): BaseComponent {

@@ -3,8 +3,8 @@ import ECommerceApi from './api/ECommerceApi';
 import currentClient from './api/data/currentClient';
 import './app.scss';
 import BaseComponent from './components/BaseComponent';
-import Header from './components/header/Header';
 import Footer from './components/footer/Footer';
+import Header from './components/header/Header';
 import About from './pages/about/About';
 import Login from './pages/login/Login';
 import MainPage from './pages/main/MainPage';
@@ -49,6 +49,7 @@ class App {
     this.observerLogin();
     this.observerReg();
     this.setLoginBtnHref();
+    this.setLogoutBtnHref();
   }
 
   private composeView(): void {
@@ -96,18 +97,12 @@ class App {
         this.checkLoginAndRegBtns();
       })
       .on('/login', () => {
-        if (localStorage.getItem('isAuth')) {
-          this.pageContent.html.innerHTML = '';
-          this.pageContent.html.append(this.mainPage.view.html);
-          window.location.assign(
-            `${window.location.protocol}//${window.location.hostname}`, // :5173
-          );
-          this.checkLoginAndRegBtns();
-        } else {
-          this.pageContent.html.innerHTML = '';
-          this.pageContent.html.append(this.loginPage.view.html);
-          this.checkLoginAndRegBtns();
-        }
+        this.onLogin();
+      })
+      .on('/logout', () => {
+        this.pageContent.html.innerHTML = '';
+        this.pageContent.html.append(this.mainPage.view.html);
+        this.checkLoginAndRegBtns();
       })
       .on('/registration', () => {
         this.pageContent.html.innerHTML = '';
@@ -127,26 +122,45 @@ class App {
       .resolve();
   }
 
+  private onLogin(): void {
+    if (localStorage.getItem('isAuth')) {
+      this.pageContent.html.innerHTML = '';
+      this.pageContent.html.append(this.mainPage.view.html);
+      window.location.assign(
+        `${window.location.protocol}//${window.location.hostname}`, // :5173
+      );
+      this.checkLoginAndRegBtns();
+    } else {
+      this.pageContent.html.innerHTML = '';
+      this.pageContent.html.append(this.loginPage.view.html);
+      this.checkLoginAndRegBtns();
+    }
+  }
+
   private setLoginBtnHref(): void {
     if (localStorage.getItem('isAuth')) {
       this.header.loginBtn.html.setAttribute('href', '/');
+    } else {
+      this.header.loginBtn.html.setAttribute('href', '/login');
+    }
+  }
+
+  private setLogoutBtnHref(): void {
+    if (!localStorage.getItem('isAuth')) {
+      this.header.logoutBtn.html.setAttribute('href', '/');
     }
   }
 
   private checkLoginAndRegBtns(): void {
-    if (this.pageContent.html.firstElementChild) {
-      if (this.pageContent.html.firstElementChild.classList.contains('login')) {
-        this.header.loginBtn.html.classList.add('hide');
-      }
-      if (!this.pageContent.html.firstElementChild.classList.contains('login')) {
-        this.header.loginBtn.html.classList.remove('hide');
-      }
-      if (this.pageContent.html.firstElementChild.classList.contains('reg')) {
-        this.header.regBtn.html.classList.add('hide');
-      }
-      if (!this.pageContent.html.firstElementChild.classList.contains('reg')) {
-        this.header.regBtn.html.classList.remove('hide');
-      }
+    if (localStorage.getItem('isAuth') === 'true') {
+      this.header.loginBtn.html.classList.add('hide');
+      this.header.regBtn.html.classList.add('hide');
+      this.header.logoutBtn.html.classList.remove('hide');
+    }
+    if (localStorage.getItem('tokenAnonimus')) {
+      this.header.loginBtn.html.classList.remove('hide');
+      this.header.regBtn.html.classList.remove('hide');
+      this.header.logoutBtn.html.classList.add('hide');
     }
   }
 
