@@ -19,15 +19,18 @@ import {
 import { IRegForm } from '../../interfaces/RegistrationForm.interface';
 import currentClient from '../../api/data/currentClient';
 import ECommerceApi from '../../api/ECommerceApi';
+import SecondAddress from './SecondAddress';
 
 const SAME_EMAIL_ERROR =
   'There is already an existing customer with the provided email. Go to the Login Page, or use a different email address.';
 
 const DEF_ADDRESS_MSG = 'Add address as billing and shipping by default';
-const DIF_ADDRESSES_MSG = 'Set different addresses for billing and shipping';
+const DIF_ADDRESSES_MSG = 'Set different addresses';
 
-class RegistrationForm extends LoginInfo {
+class RegistrationForm extends SecondAddress {
   private streetInputStatus: boolean;
+
+  private differentAddressStatus: boolean;
 
   private defaultAddressStatus: boolean;
 
@@ -94,6 +97,7 @@ class RegistrationForm extends LoginInfo {
   constructor() {
     super();
     this.defaultAddressStatus = false;
+    this.differentAddressStatus = false;
     this.streetInputStatus = false;
     this.cityInputStatus = false;
     this.postInputStatus = false;
@@ -146,28 +150,6 @@ class RegistrationForm extends LoginInfo {
     this.defaultAddressField.html.append(this.defaultAddressInput.view.html, this.defaultAddressLabel.html);
   }
 
-  private static createSelectElement(): BaseComponent {
-    const select = new BaseComponent({ tag: 'select', class: ['reg-select'] });
-
-    const chooseOption = document.createElement('option');
-    chooseOption.text = 'Country';
-    chooseOption.disabled = true;
-    chooseOption.selected = true;
-    select.append(chooseOption);
-
-    const russiaOption = document.createElement('option');
-    russiaOption.value = 'RU';
-    russiaOption.text = 'Russia';
-    select.append(russiaOption);
-
-    const usaOption = document.createElement('option');
-    usaOption.value = 'US';
-    usaOption.text = 'United States';
-    select.append(usaOption);
-
-    return select;
-  }
-
   static getSelectedValue(): string | null {
     const selectedOption = <HTMLSelectElement>document.querySelector('option:checked');
     return selectedOption ? selectedOption.value : null;
@@ -186,11 +168,20 @@ class RegistrationForm extends LoginInfo {
     const loginValid = this.passwordInputStatus && this.emailInputStatus;
     const nameValid = this.nameInputStatus && this.surnameInputStatus;
     const placeValid = this.cityInputStatus && this.streetInputStatus && this.postInputStatus;
+    const secPlaceValid = this.secCityInputStatus && this.secStreetInputStatus && this.secPostInputStatus;
 
-    if (loginValid && nameValid && placeValid && this.dateInputStatus && this.countryInputStatus) {
-      this.regButton.view.html.removeAttribute('disabled');
-    } else {
-      this.regButton.view.html.setAttribute('disabled', '');
+    if (this.differentAddressStatus) {
+      if (loginValid && nameValid && placeValid && this.dateInputStatus && this.countryInputStatus && secPlaceValid) {
+        this.regButton.view.html.removeAttribute('disabled');
+      } else {
+        this.regButton.view.html.setAttribute('disabled', '');
+      }
+    } else if (!this.differentAddressStatus) {
+      if (loginValid && nameValid && placeValid && this.dateInputStatus && this.countryInputStatus) {
+        this.regButton.view.html.removeAttribute('disabled');
+      } else {
+        this.regButton.view.html.setAttribute('disabled', '');
+      }
     }
   }
 
@@ -343,11 +334,31 @@ class RegistrationForm extends LoginInfo {
       if (this.defaultAddressStatus) {
         this.defaultAddressStatus = false;
         this.separateAddressField.html.remove();
+        this.removeSecAddresses();
+        this.countryLabel.html.textContent = 'Address';
+      } else if (!this.defaultAddressStatus && this.differentAddressStatus) {
+        this.defaultAddressStatus = true;
+        this.regInputs.html.append(this.separateAddressField.html);
+        this.separateAddressField.html.append(this.separateAddressInput.view.html, this.separateAddressLabel.html);
+        this.composeViewAddresses();
+        this.countryLabel.html.textContent = 'Shipping Address';
       } else {
         this.defaultAddressStatus = true;
         this.regInputs.html.append(this.separateAddressField.html);
         this.separateAddressField.html.append(this.separateAddressInput.view.html, this.separateAddressLabel.html);
       }
+    });
+    this.separateAddressInput.view.html.addEventListener('input', () => {
+      if (this.differentAddressStatus) {
+        this.differentAddressStatus = false;
+        this.removeSecAddresses();
+        this.countryLabel.html.textContent = 'Address';
+      } else {
+        this.differentAddressStatus = true;
+        this.composeViewAddresses();
+        this.countryLabel.html.textContent = 'Shipping Address';
+      }
+      this.checkStatuses();
     });
   }
 
