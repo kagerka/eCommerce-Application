@@ -27,7 +27,7 @@ class SecondAddress extends LoginInfo {
 
   private secPostInputContainer: BaseComponent;
 
-  private secPostInput: Input;
+  public secPostInput: Input;
 
   private secPostError: BaseComponent;
 
@@ -35,7 +35,7 @@ class SecondAddress extends LoginInfo {
 
   private secCityInputContainer: BaseComponent;
 
-  private secCityInput: Input;
+  public secCityInput: Input;
 
   private secCityError: BaseComponent;
 
@@ -43,7 +43,7 @@ class SecondAddress extends LoginInfo {
 
   private secStreetInputContainer: BaseComponent;
 
-  private secStreetInput: Input;
+  public secStreetInput: Input;
 
   private secStreetError: BaseComponent;
 

@@ -4,7 +4,7 @@ export interface IRegForm {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
-  addresses: [{ country: string; city: string; streetName: string; postalCode: string }];
+  addresses: { country: string; city: string; streetName: string; postalCode: string }[];
   defaultShippingAddress?: number;
   defaultBillingAddress?: number;
 }
@@ -38,7 +38,7 @@ export interface IUser {
   salutation: string;
   dateOfBirth: string;
   password: string;
-  addresses: [{ country: string; city: string; streetName: string; postalCode: string }];
+  addresses: { country: string; city: string; streetName: string; postalCode: string }[];
   billingAddresses: number[];
   shippingAddresses: number[];
   defaultShippingAddress?: number;

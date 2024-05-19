@@ -398,7 +398,6 @@ class RegistrationForm extends SecondAddress {
       this.postInputStatus = false;
       this.cityInputStatus = false;
       this.streetInputStatus = false;
-      this.checkStatuses();
       this.emailInput.view.html.classList.remove('success');
       this.passwordInput.view.html.classList.remove('success');
       this.nameInput.view.html.classList.remove('success');
@@ -407,6 +406,23 @@ class RegistrationForm extends SecondAddress {
       this.postInput.view.html.classList.remove('success');
       this.cityInput.view.html.classList.remove('success');
       this.streetInput.view.html.classList.remove('success');
+    }
+    this.clearSecAddresFields();
+  }
+
+  private clearSecAddresFields(): void {
+    if (
+      this.secPostInput.view.html instanceof HTMLInputElement &&
+      this.secCityInput.view.html instanceof HTMLInputElement &&
+      this.secStreetInput.view.html instanceof HTMLInputElement
+    ) {
+      this.secPostInputStatus = false;
+      this.secCityInputStatus = false;
+      this.secStreetInputStatus = false;
+      this.checkStatuses();
+      this.secPostInput.view.html.classList.remove('success');
+      this.secCityInput.view.html.classList.remove('success');
+      this.secStreetInput.view.html.classList.remove('success');
     }
   }
 
@@ -441,35 +457,74 @@ class RegistrationForm extends SecondAddress {
     );
   }
 
+  private validateSecAddressInputs(): boolean {
+    return this.secCityInputStatus === true && this.secPostInputStatus === true && this.secStreetInputStatus === true;
+  }
+
+  private createOneAddressForm(): void {
+    const { emailInput, passwordInput, nameInput, surnameInput, dateInput, cityInput, streetInput, postInput } = this;
+    if (this.validateFormInputs() && !this.validateSecAddressInputs()) {
+      const customer: IRegForm = {
+        email: (emailInput.view.html as HTMLInputElement).value,
+        password: (passwordInput.view.html as HTMLInputElement).value,
+        firstName: (nameInput.view.html as HTMLInputElement).value,
+        lastName: (surnameInput.view.html as HTMLInputElement).value,
+        dateOfBirth: (dateInput.view.html as HTMLInputElement).value,
+        addresses: [
+          {
+            city: (cityInput.view.html as HTMLInputElement).value,
+            streetName: (streetInput.view.html as HTMLInputElement).value,
+            postalCode: (postInput.view.html as HTMLInputElement).value,
+            country: RegistrationForm.getSelectedValue() || '',
+          },
+        ],
+      };
+      if (this.defaultAddressStatus) {
+        customer.defaultShippingAddress = 0;
+        customer.defaultBillingAddress = 0;
+      }
+      this.signupCustomer(customer);
+    }
+  }
+
+  private createTwoAddressesForm(): void {
+    const { emailInput, passwordInput, nameInput, surnameInput, dateInput, cityInput, streetInput, postInput } = this;
+    if (this.validateFormInputs() && this.validateSecAddressInputs()) {
+      const customer: IRegForm = {
+        email: (emailInput.view.html as HTMLInputElement).value,
+        password: (passwordInput.view.html as HTMLInputElement).value,
+        firstName: (nameInput.view.html as HTMLInputElement).value,
+        lastName: (surnameInput.view.html as HTMLInputElement).value,
+        dateOfBirth: (dateInput.view.html as HTMLInputElement).value,
+        addresses: [
+          {
+            city: (cityInput.view.html as HTMLInputElement).value,
+            streetName: (streetInput.view.html as HTMLInputElement).value,
+            postalCode: (postInput.view.html as HTMLInputElement).value,
+            country: RegistrationForm.getSelectedValue() || '',
+          },
+          {
+            city: (this.secCityInput.view.html as HTMLInputElement).value,
+            streetName: (this.secStreetInput.view.html as HTMLInputElement).value,
+            postalCode: (this.secPostInput.view.html as HTMLInputElement).value,
+            country: RegistrationForm.getSelectedValue() || '',
+          },
+        ],
+      };
+      if (this.differentAddressStatus) {
+        customer.defaultShippingAddress = 0;
+        customer.defaultBillingAddress = 1;
+      }
+      this.signupCustomer(customer);
+    }
+  }
+
   private submitRegForm(): void {
     const form = this.regFormContainer.html;
     form.addEventListener('submit', (event: Event) => {
       event.preventDefault();
-
-      const { emailInput, passwordInput, nameInput, surnameInput, dateInput, cityInput, streetInput, postInput } = this;
-
-      if (this.validateFormInputs()) {
-        const customer: IRegForm = {
-          email: (emailInput.view.html as HTMLInputElement).value,
-          password: (passwordInput.view.html as HTMLInputElement).value,
-          firstName: (nameInput.view.html as HTMLInputElement).value,
-          lastName: (surnameInput.view.html as HTMLInputElement).value,
-          dateOfBirth: (dateInput.view.html as HTMLInputElement).value,
-          addresses: [
-            {
-              city: (cityInput.view.html as HTMLInputElement).value,
-              streetName: (streetInput.view.html as HTMLInputElement).value,
-              postalCode: (postInput.view.html as HTMLInputElement).value,
-              country: RegistrationForm.getSelectedValue() || '',
-            },
-          ],
-        };
-        if (this.defaultAddressStatus) {
-          customer.defaultShippingAddress = 0;
-          customer.defaultBillingAddress = 0;
-        }
-        this.signupCustomer(customer);
-      }
+      this.createOneAddressForm();
+      this.createTwoAddressesForm();
       this.checkStatuses();
     });
   }
