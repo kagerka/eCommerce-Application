@@ -268,7 +268,7 @@ class LoginInfo {
       const rules = LoginInfo.createTooltipItemElement(NAME_RULES);
       this.tooltipMessage.html.append(rules.html);
       const { value } = this.nameInput.view.html;
-      const regExp = /^(?=.*[A-Za-z])[A-Za-z]{1,}$/;
+      const regExp = /^(?=.*[A-Za-z ])[A-Za-z ]{1,}$/;
       const isValidateRegExp = validateRegExp(value, regExp);
       const isValidateLeadingTrailingSpace = validateLeadingTrailingSpace(value);
 
@@ -304,7 +304,7 @@ class LoginInfo {
       const rules = LoginInfo.createTooltipItemElement(SURNAME_RULES);
       this.tooltipMessage.html.append(rules.html);
       const { value } = this.surnameInput.view.html;
-      const regExp = /^(?=.*[A-Za-z])[A-Za-z]{1,}$/;
+      const regExp = /^(?=.*[A-Za-z ])[A-Za-z ]{1,}$/;
       const isValidateRegExp = validateRegExp(value, regExp);
       const isValidateLeadingTrailingSpace = validateLeadingTrailingSpace(value);
 

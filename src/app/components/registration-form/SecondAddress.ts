@@ -145,7 +145,7 @@ class SecondAddress extends LoginInfo {
       const rules = LoginInfo.createTooltipItemElement(CITY_RULES);
       this.tooltipMessage.html.append(rules.html);
       const { value } = this.secCityInput.view.html;
-      const regExp = /^(?=.*[A-Za-z])[A-Za-z]{1,}$/;
+      const regExp = /^[A-Za-z ]+$/;
       const isValidateRegExp = validateRegExp(value, regExp);
       const isValidateLeadingTrailingSpace = validateLeadingTrailingSpace(value);
 
