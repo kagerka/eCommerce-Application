@@ -16,7 +16,7 @@ import {
   STREET_ERROR,
   STREET_RULES,
 } from '../../utils/validation/inputErrorTexts';
-import IRegForm from '../../interfaces/RegistrationForm.interface';
+import { IRegForm } from '../../interfaces/RegistrationForm.interface';
 import currentClient from '../../api/data/currentClient';
 import ECommerceApi from '../../api/ECommerceApi';
 
@@ -25,6 +25,8 @@ const SAME_EMAIL_ERROR =
 
 class RegistrationForm extends LoginInfo {
   private streetInputStatus: boolean;
+
+  private defaultAddressStatus: boolean;
 
   private cityInputStatus: boolean;
 
@@ -74,8 +76,15 @@ class RegistrationForm extends LoginInfo {
 
   private countryLabel: BaseComponent;
 
+  private defaultAddressField: BaseComponent;
+
+  private defaultAddressInput: Input;
+
+  private defaultAddressLabel: BaseComponent;
+
   constructor() {
     super();
+    this.defaultAddressStatus = false;
     this.streetInputStatus = false;
     this.cityInputStatus = false;
     this.postInputStatus = false;
@@ -101,6 +110,12 @@ class RegistrationForm extends LoginInfo {
     this.countryField = RegistrationForm.createFieldElement('reg-field-country');
     this.countryLabel = RegistrationForm.createLabelElement('address', 'Address');
     this.countryInputContainer = RegistrationForm.createSelectElement();
+    this.defaultAddressField = RegistrationForm.createFieldElement('reg-field-default');
+    this.defaultAddressInput = RegistrationForm.createInputElement('checkbox', 'checkbox-default', '');
+    this.defaultAddressLabel = RegistrationForm.createLabelElement(
+      'default',
+      'Use the same address as a billing and a shipping',
+    );
 
     this.composeViewNew();
     this.handleRestInputs();
@@ -117,8 +132,9 @@ class RegistrationForm extends LoginInfo {
     this.streetInputContainer.html.append(this.streetInput.view.html, this.streetError.html);
     this.streetField.html.append(this.streetInputContainer.html);
     this.countryField.html.append(this.countryLabel.html, this.countryInputContainer.html);
-    this.regInputs.html.append(this.dateField.html, this.countryField.html);
-    this.regInputs.html.append(this.postField.html, this.cityField.html, this.streetField.html);
+    this.regInputs.html.append(this.dateField.html, this.countryField.html, this.postField.html);
+    this.regInputs.html.append(this.cityField.html, this.streetField.html, this.defaultAddressField.html);
+    this.defaultAddressField.html.append(this.defaultAddressInput.view.html, this.defaultAddressLabel.html);
   }
 
   private static createSelectElement(): BaseComponent {
@@ -181,7 +197,7 @@ class RegistrationForm extends LoginInfo {
       const rules = LoginInfo.createTooltipItemElement(CITY_RULES);
       this.tooltipMessage.html.append(rules.html);
       const { value } = this.cityInput.view.html;
-      const regExp = /^(?=.*[A-Za-z])[A-Za-z]{1,}$/;
+      const regExp = /^[A-Za-z ]+$/;
       const isValidateRegExp = validateRegExp(value, regExp);
       const isValidateLeadingTrailingSpace = validateLeadingTrailingSpace(value);
 
@@ -313,12 +329,23 @@ class RegistrationForm extends LoginInfo {
     });
   }
 
+  private handleDefaultAddressInput(): void {
+    this.defaultAddressInput.view.html.addEventListener('input', () => {
+      if (this.defaultAddressStatus) {
+        this.defaultAddressStatus = false;
+      } else {
+        this.defaultAddressStatus = true;
+      }
+    });
+  }
+
   private handleRestInputs(): void {
     this.handleCityInput();
     this.handleStreetInput();
     this.handlePostInput();
     this.handleDateInput();
     this.handleCountryInput();
+    this.handleDefaultAddressInput();
   }
 
   private clearFields(): void {
@@ -373,6 +400,24 @@ class RegistrationForm extends LoginInfo {
     }, time);
   }
 
+  private validateFormInputs(): boolean {
+    return (
+      this.emailInput.view.html instanceof HTMLInputElement &&
+      this.passwordInput.view.html instanceof HTMLInputElement &&
+      this.nameInput.view.html instanceof HTMLInputElement &&
+      this.surnameInput.view.html instanceof HTMLInputElement &&
+      this.dateInput.view.html instanceof HTMLInputElement &&
+      this.emailInputStatus === true &&
+      this.passwordInputStatus === true &&
+      this.nameInputStatus === true &&
+      this.surnameInputStatus === true &&
+      this.dateInputStatus === true &&
+      this.cityInputStatus === true &&
+      this.postInputStatus === true &&
+      this.streetInputStatus === true
+    );
+  }
+
   private submitRegForm(): void {
     const form = this.regFormContainer.html;
     form.addEventListener('submit', (event: Event) => {
@@ -380,27 +425,13 @@ class RegistrationForm extends LoginInfo {
 
       const { emailInput, passwordInput, nameInput, surnameInput, dateInput, cityInput, streetInput, postInput } = this;
 
-      if (
-        emailInput.view.html instanceof HTMLInputElement &&
-        passwordInput.view.html instanceof HTMLInputElement &&
-        nameInput.view.html instanceof HTMLInputElement &&
-        surnameInput.view.html instanceof HTMLInputElement &&
-        dateInput.view.html instanceof HTMLInputElement &&
-        this.emailInputStatus === true &&
-        this.passwordInputStatus === true &&
-        this.nameInputStatus === true &&
-        this.surnameInputStatus === true &&
-        this.dateInputStatus === true &&
-        this.cityInputStatus === true &&
-        this.postInputStatus === true &&
-        this.streetInputStatus === true
-      ) {
+      if (this.validateFormInputs()) {
         const customer: IRegForm = {
-          email: emailInput.view.html.value,
-          password: passwordInput.view.html.value,
-          firstName: nameInput.view.html.value,
-          lastName: surnameInput.view.html.value,
-          dateOfBirth: dateInput.view.html.value,
+          email: (emailInput.view.html as HTMLInputElement).value,
+          password: (passwordInput.view.html as HTMLInputElement).value,
+          firstName: (nameInput.view.html as HTMLInputElement).value,
+          lastName: (surnameInput.view.html as HTMLInputElement).value,
+          dateOfBirth: (dateInput.view.html as HTMLInputElement).value,
           addresses: [
             {
               city: (cityInput.view.html as HTMLInputElement).value,
@@ -410,6 +441,10 @@ class RegistrationForm extends LoginInfo {
             },
           ],
         };
+        if (this.defaultAddressStatus) {
+          customer.defaultShippingAddress = 0;
+          customer.defaultBillingAddress = 0;
+        }
         this.signupCustomer(customer);
       }
       this.checkStatuses();
@@ -434,6 +469,7 @@ class RegistrationForm extends LoginInfo {
         .then(() => {
           this.clearFields();
           localStorage.setItem('tokenPassword', res.access_token);
+          localStorage.setItem('isAuth', JSON.stringify(true));
           RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
           ECommerceApi.authCustomer(currentClient, customer, res.access_token).then(() => {
             window.history.pushState({}, '', '/');
@@ -443,6 +479,8 @@ class RegistrationForm extends LoginInfo {
         .catch((error) => {
           if (error.message === 'There is already an existing customer with the provided email.') {
             this.displayErrorEnter(SAME_EMAIL_ERROR);
+          } else if (error.message === 'Failed to fetch' || error.message === 'Not found') {
+            this.displayErrorEnter('Something went wrong during the registration process. Please try again later!');
           } else {
             this.displayErrorEnter(error.message);
           }
