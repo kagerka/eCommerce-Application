@@ -1,36 +1,26 @@
 @import './../../../styles/colors.scss';
-
-.main-page {
-  width: 100%;
-  max-width: 1440px;
-  height: 100vh;
-  padding: 0 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 100vh;
-}
+@import './../../../styles/variables';
 
 .main-content {
+  min-height: calc(100vh - $headerHeight - $footerHeight - 2 * $pageGap);
   display: flex;
-
   flex-grow: 1;
 }
 
 @media screen and (max-width: 1000px) {
-  .main-page {
+  .main-content {
     padding: 0 60px;
   }
 }
 
 @media screen and (max-width: 600px) {
-  .main-page {
+  .main-content {
     padding: 0 40px;
   }
 }
 
 @media screen and (max-width: 500px) {
-  .main-page {
+  .main-content {
     padding: 0 20px;
   }
 }

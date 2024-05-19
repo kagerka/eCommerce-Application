@@ -1,17 +1,8 @@
 @import './../../../styles/colors.scss';
-
-.about-page {
-  width: 100%;
-  max-width: 1440px;
-  height: 100vh;
-  padding: 0 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 100vh;
-}
+@import './../../../styles/variables';
 
 .about-content {
+  min-height: calc(100vh - $headerHeight - $footerHeight - 2 * $pageGap);
   display: flex;
   flex-direction: column;
   gap: 20px;

@@ -395,6 +395,7 @@ class LoginForm {
               ECommerceApi.authCustomer(currentClient, customer, res.access_token).then(() => {
                 window.history.pushState({}, '', '/');
                 this.loginButton.view.html.setAttribute('login-success', 'true');
+                localStorage.setItem('isAuth', JSON.stringify(true));
               });
             })
             .catch(() => {
