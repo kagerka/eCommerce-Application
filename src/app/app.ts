@@ -48,6 +48,7 @@ class App {
     this.composeView();
     this.observerLogin();
     this.observerReg();
+    this.observerLogout();
     this.setLoginBtnHref();
     this.setLogoutBtnHref();
   }
@@ -64,6 +65,7 @@ class App {
             this.pageContent.html.innerHTML = '';
             this.pageContent.html.append(this.mainPage.view.html);
             this.checkLoginAndRegBtns();
+            this.setLoginBtnHref();
             this.header.loginBtn.html.setAttribute('href', '/');
           }
           this.loginPage.loginBtn.view.html.removeAttribute('login-success');
@@ -81,6 +83,7 @@ class App {
             this.pageContent.html.innerHTML = '';
             this.pageContent.html.append(this.mainPage.view.html);
             this.checkLoginAndRegBtns();
+            this.setLoginBtnHref();
           }
           this.regPage.regBtn.view.html.removeAttribute('login-success');
         }
@@ -89,12 +92,33 @@ class App {
     observer.observe(this.regPage.regBtn.view.html, { attributes: true });
   }
 
+  private observerLogout(): void {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes') {
+          if (this.header.logoutBtn.html.getAttribute('logout-success') === 'true') {
+            this.pageContent.html.innerHTML = '';
+            this.pageContent.html.append(this.mainPage.view.html);
+            this.mainPage.loginBtn.html.setAttribute('href', '/');
+            this.mainPage.regBtn.html.setAttribute('href', '/');
+            this.checkLoginAndRegBtns();
+            this.setLoginBtnHref();
+          }
+          this.header.logoutBtn.html.removeAttribute('logout-success');
+          this.setLoginBtnHref();
+        }
+      });
+    });
+    observer.observe(this.header.logoutBtn.html, { attributes: true });
+  }
+
   private createRouter(): void {
     this.router
       .on('/about', () => {
         this.pageContent.html.innerHTML = '';
         this.pageContent.html.append(this.aboutPage.view.html);
         this.checkLoginAndRegBtns();
+        this.setLoginBtnHref();
       })
       .on('/login', () => {
         this.onLogin();
@@ -103,21 +127,22 @@ class App {
         this.pageContent.html.innerHTML = '';
         this.pageContent.html.append(this.mainPage.view.html);
         this.checkLoginAndRegBtns();
+        this.setLoginBtnHref();
       })
       .on('/registration', () => {
-        this.pageContent.html.innerHTML = '';
-        this.pageContent.html.append(this.regPage.view.html);
-        this.checkLoginAndRegBtns();
+        this.onReg();
       })
       .on('/', () => {
         this.pageContent.html.innerHTML = '';
         this.pageContent.html.append(this.mainPage.view.html);
         this.checkLoginAndRegBtns();
+        this.setLoginBtnHref();
       })
       .notFound(() => {
         this.pageContent.html.innerHTML = '';
         this.pageContent.html.append(this.notFound.view.html);
         this.checkLoginAndRegBtns();
+        this.setLoginBtnHref();
       })
       .resolve();
   }
@@ -127,28 +152,53 @@ class App {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
       window.location.assign(
-        `${window.location.protocol}//${window.location.hostname}`, // :5173
+        `${window.location.protocol}//${window.location.hostname}`,
+        // for correct operation locally you need to add a port number
+        // For example: ${window.location.protocol}//${window.location.hostname}:5173
       );
       this.checkLoginAndRegBtns();
+      this.setLoginBtnHref();
     } else {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.loginPage.view.html);
       this.checkLoginAndRegBtns();
+      this.setLoginBtnHref();
+    }
+  }
+
+  private onReg(): void {
+    if (localStorage.getItem('isAuth')) {
+      this.pageContent.html.innerHTML = '';
+      this.pageContent.html.append(this.mainPage.view.html);
+      window.location.assign(
+        `${window.location.protocol}//${window.location.hostname}`,
+        // for correct operation locally you need to add a port number
+        // For example: ${window.location.protocol}//${window.location.hostname}:5173
+      );
+      this.checkLoginAndRegBtns();
+      this.setLoginBtnHref();
+    } else {
+      this.pageContent.html.innerHTML = '';
+      this.pageContent.html.append(this.regPage.view.html);
+      this.checkLoginAndRegBtns();
+      this.setLoginBtnHref();
     }
   }
 
   private setLoginBtnHref(): void {
     if (localStorage.getItem('isAuth')) {
       this.header.loginBtn.html.setAttribute('href', '/');
+      this.mainPage.regBtn.html.setAttribute('href', '/');
+      this.mainPage.loginBtn.html.setAttribute('href', '/');
     } else {
       this.header.loginBtn.html.setAttribute('href', '/login');
+      this.mainPage.regBtn.html.setAttribute('href', '/registration');
+      this.mainPage.loginBtn.html.setAttribute('href', '/login');
     }
   }
 
   private setLogoutBtnHref(): void {
-    if (!localStorage.getItem('isAuth')) {
-      this.header.logoutBtn.html.setAttribute('href', '/');
-    }
+    this.header.logoutBtn.html.setAttribute('href', '/');
   }
 
   private checkLoginAndRegBtns(): void {
@@ -157,7 +207,7 @@ class App {
       this.header.regBtn.html.classList.add('hide');
       this.header.logoutBtn.html.classList.remove('hide');
     }
-    if (localStorage.getItem('tokenAnonimus')) {
+    if (localStorage.getItem('tokenAnonymous')) {
       this.header.loginBtn.html.classList.remove('hide');
       this.header.regBtn.html.classList.remove('hide');
       this.header.logoutBtn.html.classList.add('hide');
@@ -166,9 +216,9 @@ class App {
 
   run(): void {
     App.container.append(this.content.html);
-    if (!localStorage.getItem('tokenAnonimus') && !localStorage.getItem('tokenPassword')) {
+    if (!localStorage.getItem('tokenAnonymous') && !localStorage.getItem('tokenPassword')) {
       ECommerceApi.getAccessToken(currentClient).then((res) => {
-        localStorage.setItem('tokenAnonimus', res.access_token);
+        localStorage.setItem('tokenAnonymous', res.access_token);
       });
     }
 

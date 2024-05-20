@@ -398,8 +398,8 @@ class LoginForm {
         if (!localStorage.getItem('tokenPassword')) {
           ECommerceApi.getTokenPassword(currentClient, customer)
             .then((res) => {
-              if (localStorage.getItem('tokenAnonimus')) {
-                localStorage.removeItem('tokenAnonimus');
+              if (localStorage.getItem('tokenAnonymous')) {
+                localStorage.removeItem('tokenAnonymous');
               }
               this.clearFields();
               localStorage.setItem('tokenPassword', res.access_token);
