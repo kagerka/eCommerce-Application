@@ -91,6 +91,7 @@
 }
 
 .login-button,
+.logout-button,
 .registration-button {
   width: 120px;
   border-radius: 5px;
@@ -112,6 +113,7 @@
 }
 
 .login-button.hide,
+.logout-button.hide,
 .registration-button.hide {
   display: none;
 }
@@ -158,6 +160,7 @@
   }
 
   .login-button,
+  .logout-button,
   .registration-button {
     height: 45px;
     padding: 5px 20px;

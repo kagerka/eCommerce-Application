@@ -1,5 +1,4 @@
 import BaseComponent from '../../components/BaseComponent';
-import Banner from '../../components/banner/Banner';
 import './About.scss';
 
 const ABOUT_TEXT1 =
@@ -16,25 +15,16 @@ class About {
 
   private aboutText2: BaseComponent;
 
-  private banner: Banner;
-
   constructor() {
     this.aboutContent = About.createAboutContentElement();
     this.aboutHeading = About.createAboutHeadingElement();
     this.aboutText1 = About.createAboutText1Element();
     this.aboutText2 = About.createAboutText2Element();
-    this.banner = new Banner();
-
     this.composeView();
   }
 
   private composeView(): void {
-    this.aboutContent.html.append(
-      this.banner.view.html,
-      this.aboutHeading.html,
-      this.aboutText1.html,
-      this.aboutText2.html,
-    );
+    this.aboutContent.html.append(this.aboutHeading.html, this.aboutText1.html, this.aboutText2.html);
   }
 
   private static createAboutContentElement(): BaseComponent {
