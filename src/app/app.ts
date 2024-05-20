@@ -105,9 +105,7 @@ class App {
         this.checkLoginAndRegBtns();
       })
       .on('/registration', () => {
-        this.pageContent.html.innerHTML = '';
-        this.pageContent.html.append(this.regPage.view.html);
-        this.checkLoginAndRegBtns();
+        this.onReg();
       })
       .on('/', () => {
         this.pageContent.html.innerHTML = '';
@@ -127,12 +125,31 @@ class App {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
       window.location.assign(
-        `${window.location.protocol}//${window.location.hostname}`, // :5173
+        `${window.location.protocol}//${window.location.hostname}`,
+        // for correct operation locally you need to add a port number
+        // For example: ${window.location.protocol}//${window.location.hostname}:5173
       );
       this.checkLoginAndRegBtns();
     } else {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.loginPage.view.html);
+      this.checkLoginAndRegBtns();
+    }
+  }
+
+  private onReg(): void {
+    if (localStorage.getItem('isAuth')) {
+      this.pageContent.html.innerHTML = '';
+      this.pageContent.html.append(this.mainPage.view.html);
+      window.location.assign(
+        `${window.location.protocol}//${window.location.hostname}`,
+        // for correct operation locally you need to add a port number
+        // For example: ${window.location.protocol}//${window.location.hostname}:5173
+      );
+      this.checkLoginAndRegBtns();
+    } else {
+      this.pageContent.html.innerHTML = '';
+      this.pageContent.html.append(this.regPage.view.html);
       this.checkLoginAndRegBtns();
     }
   }
