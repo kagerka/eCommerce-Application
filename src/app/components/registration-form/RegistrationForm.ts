@@ -1,11 +1,6 @@
-import './RegistrationForm.scss';
-import '../login-form/LoginForm.scss';
-import BaseComponent from '../BaseComponent';
-import Input from '../input/Input';
-import validateRegExp from '../../utils/validation/validateRegExp';
-import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
-import validateDateOfBirth from '../../utils/validation/validateBirthDate';
-import LoginInfo from './LoginInfo';
+import ECommerceApi from '../../api/ECommerceApi';
+import currentClient from '../../api/data/currentClient';
+import { IRegForm } from '../../interfaces/RegistrationForm.interface';
 import {
   AGE_ERROR,
   CITY_ERROR,
@@ -16,9 +11,14 @@ import {
   STREET_ERROR,
   STREET_RULES,
 } from '../../utils/validation/inputErrorTexts';
-import { IRegForm } from '../../interfaces/RegistrationForm.interface';
-import currentClient from '../../api/data/currentClient';
-import ECommerceApi from '../../api/ECommerceApi';
+import validateDateOfBirth from '../../utils/validation/validateBirthDate';
+import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
+import validateRegExp from '../../utils/validation/validateRegExp';
+import BaseComponent from '../BaseComponent';
+import Input from '../input/Input';
+import '../login-form/LoginForm.scss';
+import LoginInfo from './LoginInfo';
+import './RegistrationForm.scss';
 import SecondAddress from './SecondAddress';
 
 const SAME_EMAIL_ERROR =
@@ -535,8 +535,8 @@ class RegistrationForm extends SecondAddress {
   }
 
   private signupCustomer(customer: IRegForm): void {
-    if (localStorage.getItem('tokenAnonimus') || localStorage.getItem('tokenPassword')) {
-      localStorage.removeItem('tokenAnonimus');
+    if (localStorage.getItem('tokenAnonymous') || localStorage.getItem('tokenPassword')) {
+      localStorage.removeItem('tokenAnonymous');
       localStorage.removeItem('tokenPassword');
     }
 

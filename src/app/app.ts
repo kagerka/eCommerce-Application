@@ -140,8 +140,12 @@ class App {
   private setLoginBtnHref(): void {
     if (localStorage.getItem('isAuth')) {
       this.header.loginBtn.html.setAttribute('href', '/');
+      this.mainPage.regBtn.html.setAttribute('href', '/');
+      this.mainPage.loginBtn.html.setAttribute('href', '/');
     } else {
       this.header.loginBtn.html.setAttribute('href', '/login');
+      this.mainPage.regBtn.html.setAttribute('href', '/registration');
+      this.mainPage.loginBtn.html.setAttribute('href', '/login');
     }
   }
 
@@ -157,7 +161,7 @@ class App {
       this.header.regBtn.html.classList.add('hide');
       this.header.logoutBtn.html.classList.remove('hide');
     }
-    if (localStorage.getItem('tokenAnonimus')) {
+    if (localStorage.getItem('tokenAnonymous')) {
       this.header.loginBtn.html.classList.remove('hide');
       this.header.regBtn.html.classList.remove('hide');
       this.header.logoutBtn.html.classList.add('hide');
@@ -166,9 +170,9 @@ class App {
 
   run(): void {
     App.container.append(this.content.html);
-    if (!localStorage.getItem('tokenAnonimus') && !localStorage.getItem('tokenPassword')) {
+    if (!localStorage.getItem('tokenAnonymous') && !localStorage.getItem('tokenPassword')) {
       ECommerceApi.getAccessToken(currentClient).then((res) => {
-        localStorage.setItem('tokenAnonimus', res.access_token);
+        localStorage.setItem('tokenAnonymous', res.access_token);
       });
     }
 

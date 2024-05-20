@@ -207,7 +207,7 @@ class Header {
       event.preventDefault();
       if (localStorage.getItem('tokenPassword')) {
         ECommerceApi.getAccessToken(currentClient).then((res) => {
-          localStorage.setItem('tokenAnonimus', res.access_token);
+          localStorage.setItem('tokenAnonymous', res.access_token);
           localStorage.removeItem('tokenPassword');
           localStorage.removeItem('isAuth');
           this.loginButton.html.classList.remove('hide');
