@@ -167,9 +167,7 @@ class App {
   }
 
   private setLogoutBtnHref(): void {
-    if (!localStorage.getItem('isAuth')) {
-      this.header.logoutBtn.html.setAttribute('href', '/');
-    }
+    this.header.logoutBtn.html.setAttribute('href', '/');
   }
 
   private checkLoginAndRegBtns(): void {
