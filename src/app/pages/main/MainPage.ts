@@ -77,6 +77,18 @@ class MainPage {
   get view(): BaseComponent {
     return this.main;
   }
+
+  get loginBtn(): BaseComponent {
+    return this.loginLink;
+  }
+
+  get regBtn(): BaseComponent {
+    return this.registrationLink;
+  }
+
+  get aboutBtn(): BaseComponent {
+    return this.aboutLink;
+  }
 }
 
 export default MainPage;
