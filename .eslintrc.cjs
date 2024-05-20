@@ -15,6 +15,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   rules: {
     'linebreak-style': 0,
+    'operator-linebreak': 0,
     'no-param-reassign': [
       'error',
       {
@@ -24,16 +25,20 @@ module.exports = {
     'no-magic-numbers': ['error', { ignoreArrayIndexes: true }],
     '@typescript-eslint/explicit-function-return-type': 'error',
     'max-lines-per-function': ['error', { max: 40, skipBlankLines: true }],
+    'max-len': ['error', { code: 120, ignoreStrings: true, ignoreRegExpLiterals: true }],
+    'import/no-extraneous-dependencies': 0,
+    'object-curly-newline': ['error', { multiline: true }],
   },
   overrides: [
     {
       files: ['*.ts', '*.tsx'],
       parserOptions: {
-        project: 'tsconfig.json',
+        project: ['tsconfig.json'],
       },
     },
   ],
   plugins: ['@typescript-eslint'],
   root: true,
   noInlineConfig: true,
+  ignorePatterns: ['vite.config.ts', 'vitest.config.ts'],
 };
