@@ -114,7 +114,7 @@ class Profile {
 
   private createAddressesElement(): BaseComponent {
     const addresses = new BaseComponent({ tag: 'div', class: ['addresses'] });
-    const title = new BaseComponent({ tag: 'div', class: ['addresses-title'], text: 'Adresses' });
+    const title = new BaseComponent({ tag: 'div', class: ['addresses-title'], text: 'Addresses' });
     addresses.html.append(title.html, this.profileAddressesContainer.html);
     return addresses;
   }
@@ -128,7 +128,7 @@ class Profile {
   }
 
   private static createShippingAddressesTitleElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['shipping-addresses'], text: 'shipping addresses' });
+    return new BaseComponent({ tag: 'div', class: ['shipping-addresses'], text: 'shipping address' });
   }
 
   private static createShippingAddressesElement(): BaseComponent {
@@ -140,7 +140,7 @@ class Profile {
   }
 
   private static createBillingAddressesTitleElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['billing-addresses-title'], text: 'billing addresses' });
+    return new BaseComponent({ tag: 'div', class: ['billing-addresses-title'], text: 'billing address' });
   }
 
   private static createBillingAddressesElement(): BaseComponent {
