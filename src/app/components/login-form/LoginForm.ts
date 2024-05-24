@@ -403,10 +403,11 @@ class LoginForm {
               }
               this.clearFields();
               localStorage.setItem('tokenPassword', res.access_token);
-              ECommerceApi.authCustomer(currentClient, customer, res.access_token).then(() => {
+              ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
                 window.history.pushState({}, '', '/');
                 this.loginButton.view.html.setAttribute('login-success', 'true');
                 localStorage.setItem('isAuth', JSON.stringify(true));
+                localStorage.setItem('customer', JSON.stringify(data.customer));
               });
             })
             .catch(() => {

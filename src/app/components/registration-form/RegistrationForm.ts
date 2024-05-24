@@ -547,7 +547,8 @@ class RegistrationForm extends SecondAddress {
           localStorage.setItem('tokenPassword', res.access_token);
           localStorage.setItem('isAuth', JSON.stringify(true));
           RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
-          ECommerceApi.authCustomer(currentClient, customer, res.access_token).then(() => {
+          ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
+            localStorage.setItem('customer', JSON.stringify(data.customer));
             window.history.pushState({}, '', '/');
             this.regButton.view.html.setAttribute('login-success', 'true');
           });

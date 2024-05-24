@@ -91,6 +91,7 @@
   gap: 20px;
 }
 
+.profile-button,
 .login-button,
 .logout-button,
 .registration-button {
@@ -113,6 +114,7 @@
   }
 }
 
+.profile-button.hide,
 .login-button.hide,
 .logout-button.hide,
 .registration-button.hide {
@@ -160,6 +162,7 @@
     gap: 10px;
   }
 
+  .profile-button,
   .login-button,
   .logout-button,
   .registration-button {

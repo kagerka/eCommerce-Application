@@ -10,6 +10,7 @@ import Login from './pages/login/Login';
 import MainPage from './pages/main/MainPage';
 import NotFound from './pages/notFound/NotFound';
 import Registration from './pages/registation/Registration';
+import Profile from './pages/profile/Profile';
 
 class App {
   private static container: HTMLElement = document.body;
@@ -32,6 +33,8 @@ class App {
 
   private notFound: NotFound;
 
+  private profilePage: Profile;
+
   private router: Navigo;
 
   constructor() {
@@ -44,6 +47,7 @@ class App {
     this.aboutPage = new About();
     this.notFound = new NotFound();
     this.regPage = new Registration();
+    this.profilePage = new Profile();
     this.router = new Navigo('/');
     this.composeView();
     this.observerLogin();
@@ -64,7 +68,7 @@ class App {
           if (this.loginPage.loginBtn.view.html.getAttribute('login-success') === 'true') {
             this.pageContent.html.innerHTML = '';
             this.pageContent.html.append(this.mainPage.view.html);
-            this.checkLoginAndRegBtns();
+            this.checkBtns();
             this.setLoginBtnHref();
             this.header.loginBtn.html.setAttribute('href', '/');
           }
@@ -82,7 +86,7 @@ class App {
           if (this.regPage.regBtn.view.html.getAttribute('login-success') === 'true') {
             this.pageContent.html.innerHTML = '';
             this.pageContent.html.append(this.mainPage.view.html);
-            this.checkLoginAndRegBtns();
+            this.checkBtns();
             this.setLoginBtnHref();
           }
           this.regPage.regBtn.view.html.removeAttribute('login-success');
@@ -101,7 +105,7 @@ class App {
             this.pageContent.html.append(this.mainPage.view.html);
             this.mainPage.loginBtn.html.setAttribute('href', '/');
             this.mainPage.regBtn.html.setAttribute('href', '/');
-            this.checkLoginAndRegBtns();
+            this.checkBtns();
             this.setLoginBtnHref();
           }
           this.header.logoutBtn.html.removeAttribute('logout-success');
@@ -117,7 +121,7 @@ class App {
       .on('/about', () => {
         this.pageContent.html.innerHTML = '';
         this.pageContent.html.append(this.aboutPage.view.html);
-        this.checkLoginAndRegBtns();
+        this.checkBtns();
         this.setLoginBtnHref();
       })
       .on('/login', () => {
@@ -126,7 +130,7 @@ class App {
       .on('/logout', () => {
         this.pageContent.html.innerHTML = '';
         this.pageContent.html.append(this.mainPage.view.html);
-        this.checkLoginAndRegBtns();
+        this.checkBtns();
         this.setLoginBtnHref();
       })
       .on('/registration', () => {
@@ -135,13 +139,16 @@ class App {
       .on('/', () => {
         this.pageContent.html.innerHTML = '';
         this.pageContent.html.append(this.mainPage.view.html);
-        this.checkLoginAndRegBtns();
+        this.checkBtns();
         this.setLoginBtnHref();
+      })
+      .on('/profile', () => {
+        this.onProfile();
       })
       .notFound(() => {
         this.pageContent.html.innerHTML = '';
         this.pageContent.html.append(this.notFound.view.html);
-        this.checkLoginAndRegBtns();
+        this.checkBtns();
         this.setLoginBtnHref();
       })
       .resolve();
@@ -156,12 +163,12 @@ class App {
         // for correct operation locally you need to add a port number
         // For example: ${window.location.protocol}//${window.location.hostname}:5173
       );
-      this.checkLoginAndRegBtns();
+      this.checkBtns();
       this.setLoginBtnHref();
     } else {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.loginPage.view.html);
-      this.checkLoginAndRegBtns();
+      this.checkBtns();
       this.setLoginBtnHref();
     }
   }
@@ -175,12 +182,37 @@ class App {
         // for correct operation locally you need to add a port number
         // For example: ${window.location.protocol}//${window.location.hostname}:5173
       );
-      this.checkLoginAndRegBtns();
+      this.checkBtns();
       this.setLoginBtnHref();
     } else {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.regPage.view.html);
-      this.checkLoginAndRegBtns();
+      this.checkBtns();
+      this.setLoginBtnHref();
+    }
+  }
+
+  private onProfile(): void {
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(this.profilePage.view.html);
+    if (localStorage.getItem('customer') !== null) {
+      const customerJSON = localStorage.getItem('customer');
+      if (customerJSON !== null) {
+        const customer = JSON.parse(customerJSON);
+        this.profilePage.firstName.html.textContent = customer.firstName;
+        this.profilePage.lastName.html.textContent = customer.lastName;
+        this.profilePage.dateOfBirth.html.textContent = customer.dateOfBirth;
+        this.profilePage.displayAddress();
+        this.checkBtns();
+        this.setLoginBtnHref();
+      }
+    } else {
+      window.location.assign(
+        `${window.location.protocol}//${window.location.hostname}`,
+        // for correct operation locally you need to add a port number
+        // For example: ${window.location.protocol}//${window.location.hostname}:5173
+      );
+      this.checkBtns();
       this.setLoginBtnHref();
     }
   }
@@ -201,16 +233,18 @@ class App {
     this.header.logoutBtn.html.setAttribute('href', '/');
   }
 
-  private checkLoginAndRegBtns(): void {
+  private checkBtns(): void {
     if (localStorage.getItem('isAuth') === 'true') {
       this.header.loginBtn.html.classList.add('hide');
       this.header.regBtn.html.classList.add('hide');
       this.header.logoutBtn.html.classList.remove('hide');
+      this.header.profileBtn.html.classList.remove('hide');
     }
     if (localStorage.getItem('tokenAnonymous')) {
       this.header.loginBtn.html.classList.remove('hide');
       this.header.regBtn.html.classList.remove('hide');
       this.header.logoutBtn.html.classList.add('hide');
+      this.header.profileBtn.html.classList.add('hide');
     }
   }
 

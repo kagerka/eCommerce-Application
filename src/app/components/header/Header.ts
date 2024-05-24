@@ -32,6 +32,8 @@ class Header {
 
   private headerButtonsContainer: BaseComponent;
 
+  private profileButton: BaseComponent;
+
   private loginButton: BaseComponent;
 
   private logoutButton: BaseComponent;
@@ -55,10 +57,12 @@ class Header {
     this.aboutNavListLink = Header.createAboutNavListLinkElement();
 
     this.headerButtonsContainer = Header.createHeaderButtonsContainerElement();
+    this.profileButton = Header.createProfileButtonElement();
     this.loginButton = Header.createLoginButtonElement();
     this.logoutButton = Header.createLogoutButtonElement();
     this.regButton = Header.createRegistrationButtonElement();
     this.composeView();
+    this.submitProfileButton();
     this.submitLogoutButton();
   }
 
@@ -76,7 +80,12 @@ class Header {
     this.navList.html.append(this.homeNavListItem.html, this.aboutNavListItem.html);
     this.homeNavListItem.html.append(this.homeNavListLink.html);
     this.aboutNavListItem.html.append(this.aboutNavListLink.html);
-    this.headerButtonsContainer.html.append(this.loginButton.html, this.logoutButton.html, this.regButton.html);
+    this.headerButtonsContainer.html.append(
+      this.profileButton.html,
+      this.loginButton.html,
+      this.logoutButton.html,
+      this.regButton.html,
+    );
   }
 
   private static createHeaderContainerElement(): BaseComponent {
@@ -166,6 +175,18 @@ class Header {
     return new BaseComponent({ tag: 'div', class: ['buttons-container'] });
   }
 
+  private static createProfileButtonElement(): BaseComponent {
+    return new BaseComponent({
+      tag: 'a',
+      class: ['profile-button'],
+      attribute: [
+        ['href', '/profile'],
+        ['data-navigo', ''],
+      ],
+      text: 'Profile',
+    });
+  }
+
   private static createLoginButtonElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
@@ -210,13 +231,25 @@ class Header {
           localStorage.setItem('tokenAnonymous', res.access_token);
           localStorage.removeItem('tokenPassword');
           localStorage.removeItem('isAuth');
+          localStorage.removeItem('customer');
           this.loginButton.html.classList.remove('hide');
           this.loginButton.html.setAttribute('href', '/login');
           this.logoutButton.html.classList.add('hide');
+          this.profileButton.html.classList.add('hide');
           this.regButton.html.classList.remove('hide');
         });
       }
     });
+  }
+
+  private submitProfileButton(): void {
+    this.profileButton.html.addEventListener('click', (event: Event) => {
+      event.preventDefault();
+    });
+  }
+
+  get profileBtn(): BaseComponent {
+    return this.profileButton;
   }
 
   get loginBtn(): BaseComponent {
