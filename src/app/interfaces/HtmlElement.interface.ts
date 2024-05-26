@@ -6,4 +6,6 @@ export interface IHtmlElement {
   class?: string[];
   attribute?: AttributeType[];
   text?: string;
+  src?: string;
+  alt?: string;
 }

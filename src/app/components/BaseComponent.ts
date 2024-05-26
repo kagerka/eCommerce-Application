@@ -1,7 +1,7 @@
 import { IHtmlElement } from '../interfaces/HtmlElement.interface';
 
 type FormElementsType = HTMLFormElement | HTMLInputElement;
-type TagType = HTMLDivElement | HTMLButtonElement | FormElementsType | HTMLElement;
+type TagType = HTMLDivElement | HTMLImageElement | HTMLButtonElement | FormElementsType | HTMLElement;
 
 class BaseComponent {
   protected options: IHtmlElement;
@@ -14,6 +14,8 @@ class BaseComponent {
     this.addClass();
     this.addAttribute();
     this.addText();
+    this.addLink();
+    this.addAltName();
   }
 
   protected addClass(): void {
@@ -35,6 +37,18 @@ class BaseComponent {
   protected addText(): void {
     if (this.options.text) {
       this.element.textContent = this.options.text;
+    }
+  }
+
+  protected addLink(): void {
+    if ('src' in this.element) {
+      this.element.src = this.options.src;
+    }
+  }
+
+  protected addAltName(): void {
+    if ('alt' in this.element) {
+      this.element.alt = this.options.alt;
     }
   }
 
