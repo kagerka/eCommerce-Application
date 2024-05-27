@@ -10,6 +10,7 @@
   width: 20%;
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .products-container {
@@ -28,6 +29,7 @@
   text-align: center;
   gap: 2rem;
   padding: 0;
+  margin: 0;
 }
 
 .product-card {
@@ -106,6 +108,8 @@
 .categories-container {
   display: flex;
   flex-direction: column;
+  border-bottom: 0.2rem solid hwb(0 92% 7%);
+  border-right: 0.2rem solid hwb(0 92% 7%);
 }
 
 .categories-title {
@@ -123,6 +127,7 @@
   margin: 0px;
   cursor: pointer;
   transition-duration: 0.3s;
+  list-style-type: none;
 }
 
 .category-name:hover {
@@ -210,6 +215,12 @@
 
 .max {
   left: 95%;
+}
+
+.brand-conteiner {
+  order: 1;
+  margin: 0;
+  padding: 0;
 }
 
 .reset-button {

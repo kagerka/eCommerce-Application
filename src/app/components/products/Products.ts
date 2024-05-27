@@ -41,8 +41,10 @@ class Products {
     Products.categoriesContainer = Products.createCategoriesContainer();
     Products.productsList = Products.createProductsList();
     const filter = Products.createPriceDefining();
+    const brandsList = Products.displayBrands();
 
     this.priceContainer.append(filter.html);
+    this.brandsContainer.append(brandsList.html);
 
     this.composeView();
   }
@@ -51,8 +53,8 @@ class Products {
     this.catalogContainer.html.append(this.filterContainer.html, this.productsContainer.html);
     this.filterContainer.html.append(
       Products.categoriesContainer.html,
-      this.priceContainer.html,
       this.brandsContainer.html,
+      this.priceContainer.html,
       this.resetButton.html,
     );
     Products.categoriesContainer.html.append(this.categoriesTitle.html);
@@ -166,7 +168,6 @@ class Products {
     const pathPart = product[cardNumber]?.masterData?.current;
     const variant = Products.addPrice() ? pathPart?.masterVariant?.prices[1] : pathPart?.masterVariant?.prices[0];
 
-    console.log(pathPart.masterVariant?.attributes[0]);
     const productPrice = variant?.value.centAmount;
     const productDiscount = variant?.discounted?.value.centAmount;
     const currencySymbol = Products.addPrice() ? 'RUB' : '$';
@@ -201,6 +202,25 @@ class Products {
     }
 
     return productCard;
+  }
+
+  private static displayBrands(): BaseComponent {
+    const productsJSON = localStorage.getItem('products');
+    const product = JSON.parse(productsJSON!);
+    const brandsList = [];
+    for (let i = 0; i < product.length - iteratorStep; i += iteratorStep) {
+      const brandName = product[i]?.masterData?.current?.masterVariant?.attributes[0]?.value;
+      if (brandName) {
+        brandsList.push(brandName);
+      }
+    }
+    const uniqueBrandsList = [...new Set(brandsList)];
+    const brandConteiner = new BaseComponent({ tag: 'ul', class: ['brand-conteiner'] });
+    for (let i = 0; i <= uniqueBrandsList.length - iteratorStep; i += iteratorStep) {
+      const brand = new BaseComponent({ tag: 'li', class: ['category-name'], text: uniqueBrandsList[i] });
+      brandConteiner.html.append(brand.html);
+    }
+    return brandConteiner;
   }
 
   private static createCategory(categoryNumber: number): BaseComponent {
