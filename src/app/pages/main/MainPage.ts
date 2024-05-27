@@ -1,11 +1,19 @@
+import ECommerceApi from '../../api/ECommerceApi';
+import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Banner from '../../components/banner/Banner';
+import Products from '../../components/products/Products';
+
+import { IQueryProducts } from '../../interfaces/Product.interface';
+
 import './MainPage.scss';
 
 class MainPage {
   private main: BaseComponent;
 
   private banner: Banner;
+
+  private products: Products;
 
   private linkContainer: BaseComponent;
 
@@ -18,15 +26,17 @@ class MainPage {
   constructor() {
     this.main = MainPage.createMainContentElement();
     this.banner = new Banner();
+    this.products = new Products();
     this.linkContainer = MainPage.createLinksContainerElement();
     this.aboutLink = MainPage.createLinkToAboutPageElement();
     this.loginLink = MainPage.createLinkToLoginPageElement();
     this.registrationLink = MainPage.createLinkToRegistrationPageElement();
     this.composeView();
+    MainPage.displayProducts();
   }
 
   private composeView(): void {
-    this.main.html.append(this.banner.view.html, this.linkContainer.html);
+    this.main.html.append(this.banner.view.html, this.products.view.html, this.linkContainer.html);
     this.linkContainer.html.append(this.aboutLink.html, this.loginLink.html, this.registrationLink.html);
   }
 
@@ -72,6 +82,31 @@ class MainPage {
       ],
       text: 'Registration',
     });
+  }
+
+  private static displayProducts(): void {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const products: IQueryProducts = {
+      limit: 10,
+      offset: 0,
+      count: 0,
+      total: 0,
+      results: [],
+    };
+    if (token) {
+      ECommerceApi.getProducts(currentClient, token)
+        .then((res) => {
+          products.results = res.results;
+          products.count = res.count;
+          products.total = res.total;
+          localStorage.setItem('products', JSON.stringify(products.results));
+        })
+        .catch((error) => {
+          throw new Error(`Error displayProducts: , ${error}`);
+        });
+    }
   }
 
   get view(): BaseComponent {
