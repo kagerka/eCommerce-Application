@@ -26,6 +26,10 @@ class BaseComponent {
     }
   }
 
+  addId(): void {
+    this.element.id = this.options.id!;
+  }
+
   protected addAttribute(): void {
     if (this.options.attribute) {
       this.options.attribute.forEach(([name, value]) => {
@@ -54,6 +58,10 @@ class BaseComponent {
 
   public append(child: TagType): void {
     this.element.appendChild(child);
+  }
+
+  addStyleAttribute(style: string): void {
+    this.element.setAttribute('style', style);
   }
 
   public get html(): TagType {

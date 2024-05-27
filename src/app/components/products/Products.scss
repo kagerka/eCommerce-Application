@@ -3,11 +3,13 @@
 .catalog-container {
   display: flex;
   justify-content: space-between;
-  padding: 0px 20px;
+  padding: 0 0 0 20px;
 }
 
 .filter-container {
-  width: 25%;
+  width: 20%;
+  display: flex;
+  flex-direction: column;
 }
 
 .products-container {
@@ -110,22 +112,254 @@
   color: $green;
   order: 0;
   font-size: 1.6rem;
+  margin: 15px 0;
 }
 
 .category-name {
   order: 1;
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 600;
+  padding: 10px 5px;
+  margin: 0px;
+  cursor: pointer;
+  transition-duration: 0.3s;
+}
+
+.category-name:hover {
+  color: $green;
+  outline: 0.15rem solid hwb(0 92% 7%);
+  background-color: hwb(0 92% 7%);
+  border-radius: 5px;
+}
+
+.filter {
+  order: 1;
+  margin-top: 5px;
+  padding: 0 3px;
+}
+
+.filter-range-wrapper {
+  padding: 15px 0px;
+  border-radius: 3px;
+}
+
+.filter-range {
+  position: relative;
+}
+
+.filter-range-scale {
+  cursor: pointer;
+  height: 5px;
+  background-color: hwb(0 92% 7%);
+}
+
+.filter-range-bar {
+  cursor: pointer;
+  height: 5px;
+  width: 100%;
+  background-color: $green;
+}
+
+.filter-range-handle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  box-sizing: content-box;
+  padding: 0;
+  border: 5px solid $green;
+  border-radius: 50%;
+  background-color: $green;
+  cursor: pointer;
+}
+
+.filter-interval {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-left: 5px;
+}
+
+.filter-interval label {
+  width: 100%;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.filter-interval input {
+  width: 100%;
+  height: 1.8rem;
+  outline: 0.15rem solid hwb(0 92% 7%);
+  border-radius: 8px;
+  margin: 8px;
+  border: none;
+  color: inherit;
+  text-align: center;
+}
+
+.filter-label {
+  display: flex;
+  align-items: center;
+}
+
+.min {
+  left: 0;
+}
+
+.max {
+  left: 95%;
+}
+
+.reset-button {
+  width: 120px;
+  border-radius: 5px;
+  background-color: #46a358;
+  padding: 8px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: #ffffff;
+  text-align: center;
+  transition: 0.5s all;
+  outline: none;
+  border: none;
+  margin-top: 15px;
+  align-self: center;
+  cursor: pointer;
+  transition-duration: 0.5s;
+
+  &:hover {
+    background-color: $darkGreen;
+  }
 }
 
 @media screen and (max-width: 1270px) {
   .products-list {
-    grid-template-columns: repeat(2, auto);
+    grid-template-columns: repeat(2, 45%);
+    gap: 1.5rem;
   }
 }
 
-@media screen and (max-width: 935px) {
+@media screen and (max-width: 1040px) {
   .products-list {
-    grid-template-columns: repeat(1, auto);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .product-card {
+    width: 80%;
+  }
+
+  .img-container {
+    margin: 0 1rem;
+  }
+
+  .products-container {
+    width: 70%;
+  }
+
+  .filter-container {
+    width: 30%;
+  }
+}
+
+@media screen and (max-width: 710px) {
+  .categories-title {
+    font-size: 1.3rem;
+  }
+
+  .category-name {
+    font-size: 1.05rem;
+  }
+
+  .filter-interval label {
+    font-size: 0.6rem;
+  }
+
+  .filter-interval input {
+    height: 1.35rem;
+  }
+
+  .product-title {
+    font-size: 0.9rem;
+  }
+
+  .product-description {
+    font-size: 0.7rem;
+  }
+}
+
+@media screen and (max-width: 550px) {
+  .categories-title {
+    font-size: 1.1rem;
+  }
+
+  .category-name {
+    font-size: 0.85rem;
+  }
+
+  .filter-interval label {
+    font-size: 0.4rem;
+  }
+
+  .filter-interval input {
+    height: 1.15rem;
+  }
+
+  .reset-button {
+    width: 90px;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    padding: 5px 20px;
+  }
+
+  .product-title {
+    font-size: 0.8rem;
+  }
+
+  .product-description {
+    font-size: 0.6rem;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .categories-title {
+    font-size: 0.9rem;
+  }
+
+  .category-name {
+    font-size: 0.65rem;
+  }
+
+  .filter-interval label {
+    font-size: 0.4rem;
+  }
+
+  .filter-interval input {
+    height: 1.15rem;
+    margin-right: 0;
+  }
+
+  .reset-button {
+    width: 60px;
+    font-size: 0.7rem;
+    padding: 5px 10px;
+  }
+
+  .filter-range-handle {
+    border: 3px solid #46a358;
+  }
+
+  .filter-range-scale,
+  .filter-range-bar {
+    height: 4px;
+  }
+
+  .filter-interval input {
+    height: 0.95rem;
   }
 }

@@ -1,4 +1,5 @@
 import BaseComponent from '../BaseComponent';
+import Input from '../input/Input';
 import './Products.scss';
 
 const iteratorStep = 1;
@@ -17,9 +18,15 @@ class Products {
 
   private priceTitle: BaseComponent;
 
+  private brandsContainer: BaseComponent;
+
+  private brandTitle: BaseComponent;
+
   private productsContainer: BaseComponent;
 
   static productsList: BaseComponent;
+
+  private resetButton: BaseComponent;
 
   constructor() {
     this.catalogContainer = Products.createCatalogContainerElement();
@@ -27,17 +34,29 @@ class Products {
     this.categoriesTitle = Products.createCategoriesTitle();
     this.priceContainer = Products.createPriceContainer();
     this.priceTitle = Products.createPriceTitle();
+    this.brandsContainer = Products.createBrandsContainer();
+    this.brandTitle = Products.createBrandsTitle();
+    this.resetButton = Products.createResetButton();
     this.productsContainer = Products.createProductsContainerElement();
     Products.categoriesContainer = Products.createCategoriesContainer();
     Products.productsList = Products.createProductsList();
+    const filter = Products.createPriceDefining();
+
+    this.priceContainer.append(filter.html);
 
     this.composeView();
   }
 
   private composeView(): void {
     this.catalogContainer.html.append(this.filterContainer.html, this.productsContainer.html);
-    this.filterContainer.html.append(Products.categoriesContainer.html, this.priceContainer.html);
+    this.filterContainer.html.append(
+      Products.categoriesContainer.html,
+      this.priceContainer.html,
+      this.brandsContainer.html,
+      this.resetButton.html,
+    );
     Products.categoriesContainer.html.append(this.categoriesTitle.html);
+    this.brandsContainer.html.append(this.brandTitle.html);
     this.priceContainer.html.append(this.priceTitle.html);
     this.productsContainer.html.append(Products.productsList.html);
   }
@@ -49,7 +68,7 @@ class Products {
       const customer = JSON.parse(productsJSON!);
 
       for (let i = 0; i < customer.length - iteratorStep; i += iteratorStep) {
-        productCards.push(Products.createProductCard(i + iteratorStep));
+        productCards.push(Products.createProductCard(i));
       }
     }
     return productCards;
@@ -60,10 +79,9 @@ class Products {
     if (localStorage.getItem('categories') !== null) {
       const categoriesJSON = localStorage.getItem('categories');
       const categories = JSON.parse(categoriesJSON!).results;
-      console.log(categories);
 
       for (let i = 0; i < categories.length - iteratorStep; i += iteratorStep) {
-        categoryCards.push(Products.createCategory(i + iteratorStep));
+        categoryCards.push(Products.createCategory(i));
       }
     }
     return categoryCards;
@@ -101,6 +119,43 @@ class Products {
     return new BaseComponent({ tag: 'ul', class: ['products-list'] });
   }
 
+  private static createResetButton(): BaseComponent {
+    return new BaseComponent({ tag: 'button', class: ['reset-button'], text: 'Reset' });
+  }
+
+  private static createBrandsContainer(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['categories-container'] });
+  }
+
+  private static createBrandsTitle(): BaseComponent {
+    return new BaseComponent({ tag: 'h1', class: ['categories-title'], text: 'Brands' });
+  }
+
+  private static createPriceDefining(): BaseComponent {
+    const filter = new BaseComponent({ tag: 'div', class: ['filter'] });
+    const filterWrapper = new BaseComponent({ tag: 'div', class: ['filter-range-wrapper'] });
+    const filterRange = new BaseComponent({ tag: 'div', class: ['filter-range'] });
+    const filterScale = new BaseComponent({ tag: 'div', class: ['filter-range-scale'] });
+    const filterBar = new BaseComponent({ tag: 'div', class: ['filter-range-bar'] });
+    const filterMin = new BaseComponent({ tag: 'button', class: ['filter-range-handle', 'min'] });
+    const filterMax = new BaseComponent({ tag: 'button', class: ['filter-range-handle', 'max'], style: 'left: 70%' });
+    const filterInterval = new BaseComponent({ tag: 'div', class: ['filter-interval'] });
+    const labelFrom = new BaseComponent({ tag: 'label', text: 'From:', class: ['filter-label'] });
+    const inputFrom = new Input({ type: 'text', name: 'min-interval', value: '0' });
+    const labelTo = new BaseComponent({ tag: 'label', text: 'To:', class: ['filter-label'] });
+    const inputTo = new Input({ type: 'text', name: 'min-interval', value: '15000' });
+
+    filter.html.append(filterWrapper.html, filterInterval.html);
+    filterInterval.html.append(labelFrom.html, labelTo.html);
+    filterWrapper.html.append(filterRange.html);
+    filterRange.html.append(filterScale.html, filterMin.html, filterMax.html);
+    filterScale.html.append(filterBar.html);
+    labelFrom.html.append(inputFrom.view.html);
+    labelTo.html.append(inputTo.view.html);
+
+    return filter;
+  }
+
   private static createProductCard(cardNumber: number): BaseComponent {
     const productsJSON = localStorage.getItem('products');
     if (!productsJSON) {
@@ -111,6 +166,7 @@ class Products {
     const pathPart = product[cardNumber]?.masterData?.current;
     const variant = Products.addPrice() ? pathPart?.masterVariant?.prices[1] : pathPart?.masterVariant?.prices[0];
 
+    console.log(pathPart.masterVariant?.attributes[0]);
     const productPrice = variant?.value.centAmount;
     const productDiscount = variant?.discounted?.value.centAmount;
     const currencySymbol = Products.addPrice() ? 'RUB' : '$';
@@ -150,12 +206,19 @@ class Products {
   private static createCategory(categoryNumber: number): BaseComponent {
     const categoriesJSON = localStorage.getItem('categories');
     const category = JSON.parse(categoriesJSON!);
-    if (!category.results[categoryNumber - iteratorStep].parent) {
-      const categoryName = category.results[categoryNumber - iteratorStep].name.en;
-      const categoryNameEl = new BaseComponent({ tag: 'div', class: ['category-name'], text: categoryName });
-      console.log(category.results[categoryNumber - iteratorStep].name.en);
+    const pathPart = category.results[categoryNumber];
+
+    if (!pathPart.parent) {
+      const categoryName = pathPart.name.en;
+      const categoryNameEl = new BaseComponent({
+        tag: 'ul',
+        class: ['category-name', pathPart.id],
+        id: pathPart.id,
+        text: categoryName,
+      });
       return categoryNameEl;
     }
+
     return new BaseComponent({ tag: 'div' });
   }
 
