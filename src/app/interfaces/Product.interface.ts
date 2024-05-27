@@ -120,3 +120,22 @@ export interface IQueryProducts {
   total: number;
   results: IProducts[];
 }
+
+export interface ICategories {
+  id: string;
+  version: number;
+  name: {
+    en: string;
+  };
+  slug: {
+    en: string;
+  };
+  parent: {
+    typeId: string;
+    id: string;
+  };
+  ancestors: [];
+  orderHint: string;
+  createdAt: string;
+  lastModifiedAt: string;
+}

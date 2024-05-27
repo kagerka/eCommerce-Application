@@ -3,7 +3,7 @@ import IAccessToken from '../interfaces/AccessToken.interface';
 import ICustomerData from '../interfaces/CustomerData.interface';
 import ICustomerProfile from '../interfaces/CustomerProfile.interface';
 import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface';
-import { IQueryProducts } from '../interfaces/Product.interface';
+import { ICategories, IQueryProducts } from '../interfaces/Product.interface';
 
 import ITokenPassword from '../interfaces/TokenPassword.interface';
 
@@ -127,8 +127,8 @@ class ECommerceApi {
     }
   }
 
-  static async getDiscount(clientDetails: IAPIClientDetails, token: string): Promise<IQueryProducts> {
-    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/product-discounts`, {
+  static async getCategories(clientDetails: IAPIClientDetails, token: string): Promise<ICategories> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/categories`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

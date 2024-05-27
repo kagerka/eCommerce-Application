@@ -8,6 +8,14 @@ import { IQueryProducts } from '../../interfaces/Product.interface';
 
 import './MainPage.scss';
 
+const products: IQueryProducts = {
+  limit: 10,
+  offset: 0,
+  count: 0,
+  total: 0,
+  results: [],
+};
+
 class MainPage {
   private main: BaseComponent;
 
@@ -87,13 +95,6 @@ class MainPage {
     const token = localStorage.getItem('tokenPassword')
       ? localStorage.getItem('tokenPassword')
       : localStorage.getItem('tokenAnonymous');
-    const products: IQueryProducts = {
-      limit: 10,
-      offset: 0,
-      count: 0,
-      total: 0,
-      results: [],
-    };
     if (token) {
       try {
         const res = await ECommerceApi.getProducts(currentClient, token);
@@ -106,6 +107,23 @@ class MainPage {
         });
       } catch (error) {
         throw new Error(`Error displayProducts: ${error}`);
+      }
+    }
+  }
+
+  static async displayCategories(): Promise<void> {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    if (token) {
+      try {
+        const res = await ECommerceApi.getCategories(currentClient, token);
+        localStorage.setItem('categories', JSON.stringify(res));
+        await Products.createCategoriesFromLocalStorage().forEach((productCard) => {
+          Products.categoriesContainer.html.append(productCard.html);
+        });
+      } catch (error) {
+        throw new Error(`Error displayCategories: ${error}`);
       }
     }
   }

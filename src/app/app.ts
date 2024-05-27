@@ -254,9 +254,11 @@ class App {
       ECommerceApi.getAccessToken(currentClient).then((res) => {
         localStorage.setItem('tokenAnonymous', res.access_token);
         MainPage.displayProducts();
+        MainPage.displayCategories();
       });
     }
-
+    MainPage.displayProducts();
+    MainPage.displayCategories();
     this.createRouter();
   }
 }
