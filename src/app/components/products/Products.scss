@@ -20,7 +20,7 @@
   display: grid;
   align-items: stretch;
   justify-content: center;
-  grid-template-columns: repeat(3, auto);
+  grid-template-columns: repeat(3, 33%);
   height: max-content;
   text-align: center;
   gap: 2rem;
@@ -29,12 +29,20 @@
 
 .product-card {
   list-style-type: none;
-  max-width: 100%;
+  width: 100%;
   font-size: 0.85rem;
   outline: 0.2rem solid hwb(0 92% 7%);
-  border-radius: 5%;
+  border-radius: 15px;
   cursor: pointer;
   padding: 4%;
+  transition-duration: 0.9s;
+}
+
+.product-card:hover,
+.product-card:active,
+.product-card:focus {
+  outline-color: $green;
+  scale: 1.05;
 }
 
 .img-container {
@@ -43,7 +51,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: 5%;
+  border-radius: 15px;
 }
 
 .product-img {
