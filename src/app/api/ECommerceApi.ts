@@ -1,9 +1,11 @@
 import IAPIClientDetails from '../interfaces/APIClientDetails.interface';
 import IAccessToken from '../interfaces/AccessToken.interface';
-import ICustomerProfile from '../interfaces/CustomerProfile.interface';
-import ITokenPassword from '../interfaces/TokenPassword.interface';
 import ICustomerData from '../interfaces/CustomerData.interface';
+import ICustomerProfile from '../interfaces/CustomerProfile.interface';
 import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface';
+import { IQueryProducts } from '../interfaces/Product.interface';
+
+import ITokenPassword from '../interfaces/TokenPassword.interface';
 
 class ECommerceApi {
   static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
@@ -95,6 +97,22 @@ class ECommerceApi {
 
   static async getCustomer(clientDetails: IAPIClientDetails, token: string): Promise<ICustomerProfile> {
     const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getProducts(clientDetails: IAPIClientDetails, token: string): Promise<IQueryProducts> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/products`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
