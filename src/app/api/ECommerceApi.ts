@@ -126,6 +126,22 @@ class ECommerceApi {
       return json;
     }
   }
+
+  static async getDiscount(clientDetails: IAPIClientDetails, token: string): Promise<IQueryProducts> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/product-discounts`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
 }
 
 export default ECommerceApi;

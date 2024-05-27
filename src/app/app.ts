@@ -253,6 +253,7 @@ class App {
     if (!localStorage.getItem('tokenAnonymous') && !localStorage.getItem('tokenPassword')) {
       ECommerceApi.getAccessToken(currentClient).then((res) => {
         localStorage.setItem('tokenAnonymous', res.access_token);
+        MainPage.displayProducts();
       });
     }
 

@@ -32,7 +32,6 @@ class MainPage {
     this.loginLink = MainPage.createLinkToLoginPageElement();
     this.registrationLink = MainPage.createLinkToRegistrationPageElement();
     this.composeView();
-    MainPage.displayProducts();
   }
 
   private composeView(): void {
@@ -84,8 +83,10 @@ class MainPage {
     });
   }
 
-  private static displayProducts(): void {
-    const token = localStorage.getItem('tokenPassword') ? localStorage.getItem('tokenPassword') : localStorage.getItem('tokenAnonymous');
+  static async displayProducts(): Promise<void> {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
     const products: IQueryProducts = {
       limit: 10,
       offset: 0,
@@ -94,14 +95,18 @@ class MainPage {
       results: [],
     };
     if (token) {
-      ECommerceApi.getProducts(currentClient, token).then((res) => {
+      try {
+        const res = await ECommerceApi.getProducts(currentClient, token);
         products.results = res.results;
         products.count = res.count;
         products.total = res.total;
         localStorage.setItem('products', JSON.stringify(products.results));
-      }).catch((error) => {
-        throw new Error(`Error displayProducts: , ${error}`);
-      });
+        await Products.createProductCardsFromLocalStorage().forEach((productCard) => {
+          Products.productsList.html.append(productCard.html);
+        });
+      } catch (error) {
+        throw new Error(`Error displayProducts: ${error}`);
+      }
     }
   }
 
