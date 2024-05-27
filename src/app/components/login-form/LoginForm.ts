@@ -18,7 +18,6 @@ import {
   RULE_SEPARATOR,
   RULE_SPACE,
 } from '../../utils/validation/inputErrorTexts';
-import MainPage from '../../pages/main/MainPage';
 
 class LoginForm {
   private passwordInputStatus: boolean;
@@ -405,7 +404,6 @@ class LoginForm {
               this.clearFields();
               localStorage.setItem('tokenPassword', res.access_token);
               ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
-                MainPage.displayProducts();
                 window.history.pushState({}, '', '/');
                 this.loginButton.view.html.setAttribute('login-success', 'true');
                 localStorage.setItem('isAuth', JSON.stringify(true));
