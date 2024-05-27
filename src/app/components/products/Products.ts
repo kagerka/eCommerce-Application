@@ -11,13 +11,27 @@ class Products {
 
   private productsContainer: BaseComponent;
 
-  private productsList: BaseComponent;
+  static productsList: BaseComponent;
 
   constructor() {
     this.catalogContainer = Products.createCatalogContainerElement();
     this.filterContainer = Products.createFilterContainerElement();
     this.productsContainer = Products.createProductsContainerElement();
-    this.productsList = Products.createProductsList();
+    Products.productsList = Products.createProductsList();
+
+    Products.createProductCardsFromLocalStorage().forEach((productCard) => {
+      Products.productsList.html.append(productCard.html);
+    });
+
+    this.composeView();
+  }
+
+  private composeView(): void {
+    this.catalogContainer.html.append(this.filterContainer.html, this.productsContainer.html);
+    this.productsContainer.html.append(Products.productsList.html);
+  }
+
+  static createProductCardsFromLocalStorage(): BaseComponent[] {
     const productCards: BaseComponent[] = [];
     if (localStorage.getItem('products') !== null) {
       const productsJSON = localStorage.getItem('products');
@@ -27,17 +41,7 @@ class Products {
         productCards.push(Products.createProductCard(i + iteratorStep));
       }
     }
-
-    productCards.forEach((productCard) => {
-      this.productsList.html.append(productCard.html);
-    });
-
-    this.composeView();
-  }
-
-  private composeView(): void {
-    this.catalogContainer.html.append(this.filterContainer.html, this.productsContainer.html);
-    this.productsContainer.html.append(this.productsList.html);
+    return productCards;
   }
 
   private static createCatalogContainerElement(): BaseComponent {
@@ -64,11 +68,11 @@ class Products {
 
     const product = JSON.parse(productsJSON);
     const pathPart = product[cardNumber]?.masterData?.current;
-    const variant = this.addPrice() ? pathPart?.masterVariant?.prices[1] : pathPart?.masterVariant?.prices[0];
+    const variant = Products.addPrice() ? pathPart?.masterVariant?.prices[1] : pathPart?.masterVariant?.prices[0];
 
     const productPrice = variant?.value.centAmount;
     const productDiscount = variant?.discounted?.value.centAmount;
-    const currencySymbol = this.addPrice() ? 'RUB' : '$';
+    const currencySymbol = Products.addPrice() ? 'RUB' : '$';
     const hundredthsRound = 2;
 
     const formattedPrice = (productPrice / cents).toFixed(hundredthsRound);
