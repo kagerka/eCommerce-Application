@@ -83,7 +83,10 @@ class Products {
       const categories = JSON.parse(categoriesJSON!).results;
 
       for (let i = 0; i < categories.length - iteratorStep; i += iteratorStep) {
-        categoryCards.push(Products.createCategory(i));
+        const categoryComponent = Products.createCategory(i);
+        if (categoryComponent !== null) {
+          categoryCards.push(categoryComponent);
+        }
       }
     }
     return categoryCards;
@@ -217,13 +220,13 @@ class Products {
     const uniqueBrandsList = [...new Set(brandsList)];
     const brandConteiner = new BaseComponent({ tag: 'ul', class: ['brand-conteiner'] });
     for (let i = 0; i <= uniqueBrandsList.length - iteratorStep; i += iteratorStep) {
-      const brand = new BaseComponent({ tag: 'li', class: ['category-name'], text: uniqueBrandsList[i] });
+      const brand = new BaseComponent({ tag: 'li', class: ['category'], text: uniqueBrandsList[i] });
       brandConteiner.html.append(brand.html);
     }
     return brandConteiner;
   }
 
-  private static createCategory(categoryNumber: number): BaseComponent {
+  private static createCategory(categoryNumber: number): BaseComponent | null {
     const categoriesJSON = localStorage.getItem('categories');
     const category = JSON.parse(categoriesJSON!);
     const pathPart = category.results[categoryNumber];
@@ -232,14 +235,21 @@ class Products {
       const categoryName = pathPart.name.en;
       const categoryNameEl = new BaseComponent({
         tag: 'ul',
-        class: ['category-name', pathPart.id],
-        id: pathPart.id,
+        class: ['category', pathPart.id],
         text: categoryName,
       });
       return categoryNameEl;
     }
-
-    return new BaseComponent({ tag: 'div' });
+    if (pathPart.parent) {
+      const categoryName = pathPart.name.en;
+      const categoryNameEl = new BaseComponent({
+        tag: 'li',
+        class: ['subcategory', pathPart.parent.id],
+        text: categoryName,
+      });
+      return categoryNameEl;
+    }
+    return null;
   }
 
   private static addPrice(): boolean {
