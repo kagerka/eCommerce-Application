@@ -38,8 +38,6 @@ class App {
 
   private router: Navigo;
 
-  // private product: Product;
-
   constructor() {
     this.content = new BaseComponent({ tag: 'div', class: ['app'] });
     this.header = new Header();
