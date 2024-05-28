@@ -1,9 +1,13 @@
 import BaseComponent from '../BaseComponent';
-import Input from '../input/Input';
 import './Products.scss';
 
 const iteratorStep = 1;
 const cents = 100;
+const minValue = 0;
+const toHundredths = 2;
+const maxValue = 1000;
+let isDraggingMin = false;
+let isDraggingMax = false;
 
 class Products {
   private catalogContainer: BaseComponent;
@@ -47,6 +51,7 @@ class Products {
     this.brandsContainer.append(brandsList.html);
 
     this.composeView();
+    this.resetProducts();
   }
 
   private composeView(): void {
@@ -61,6 +66,12 @@ class Products {
     this.brandsContainer.html.append(this.brandTitle.html);
     this.priceContainer.html.append(this.priceTitle.html);
     this.productsContainer.html.append(Products.productsList.html);
+  }
+
+  private resetProducts(): void {
+    this.resetButton.html.addEventListener('click', () => {
+      this.catalogContainer.html.innerHTML = '';
+    });
   }
 
   static createProductCardsFromLocalStorage(): BaseComponent[] {
@@ -145,20 +156,123 @@ class Products {
     const filterMin = new BaseComponent({ tag: 'button', class: ['filter-range-handle', 'min'] });
     const filterMax = new BaseComponent({ tag: 'button', class: ['filter-range-handle', 'max'], style: 'left: 70%' });
     const filterInterval = new BaseComponent({ tag: 'div', class: ['filter-interval'] });
-    const labelFrom = new BaseComponent({ tag: 'label', text: 'From:', class: ['filter-label'] });
-    const inputFrom = new Input({ type: 'text', name: 'min-interval', value: '0' });
-    const labelTo = new BaseComponent({ tag: 'label', text: 'To:', class: ['filter-label'] });
-    const inputTo = new Input({ type: 'text', name: 'min-interval', value: '15000' });
+    const priceConteiner = new BaseComponent({ tag: 'div', class: ['prices-conteiner'] });
+    const minPrice = new BaseComponent({ tag: 'div', text: `${minValue}$`, class: ['min-price'] });
+    const maxPrice = new BaseComponent({ tag: 'div', text: `${maxValue}$`, class: ['max-price'] });
 
     filter.html.append(filterWrapper.html, filterInterval.html);
-    filterInterval.html.append(labelFrom.html, labelTo.html);
+    filterInterval.html.append(priceConteiner.html);
     filterWrapper.html.append(filterRange.html);
     filterRange.html.append(filterScale.html, filterMin.html, filterMax.html);
     filterScale.html.append(filterBar.html);
-    labelFrom.html.append(inputFrom.view.html);
-    labelTo.html.append(inputTo.view.html);
+    priceConteiner.html.append(minPrice.html, maxPrice.html);
+
+    filterMin.html.style.left = '0%';
+    filterMax.html.style.left = '95%';
+
+    this.handleSliderMovement(filterMin, filterMax, filterBar, filterScale, minPrice, maxPrice);
+    this.handleTouchMovement(filterMin, filterMax, filterBar, filterScale, minPrice, maxPrice);
 
     return filter;
+  }
+
+  private static handleSliderMovement(
+    filterMin: BaseComponent,
+    filterMax: BaseComponent,
+    filterBar: BaseComponent,
+    filterScale: BaseComponent,
+    minPrice: BaseComponent,
+    maxPrice: BaseComponent,
+  ): void {
+    filterMin.html.addEventListener('mousedown', () => {
+      isDraggingMin = true;
+    });
+
+    filterMax.html.addEventListener('mousedown', () => {
+      isDraggingMax = true;
+    });
+
+    document.addEventListener('mousemove', (event) => {
+      const newPosition = Products.calculateNewPosition(event.clientX, filterScale.html);
+      if (newPosition > minValue && newPosition < cents) {
+        if (isDraggingMin && newPosition < parseFloat(filterMax.html.style.left)) {
+          filterMin.html.style.left = `${newPosition}%`;
+          filterBar.html.style.marginLeft = `${newPosition}%`;
+          const updatedMinValue = this.calculateValueFromPosition(newPosition);
+          const clampedMinValue = Math.max(minValue, Math.min(updatedMinValue, maxValue));
+          minPrice.html.textContent = `${clampedMinValue.toFixed(toHundredths)}$`;
+        }
+
+        if (isDraggingMax && newPosition > parseFloat(filterMin.html.style.left)) {
+          filterMax.html.style.left = `${newPosition}%`;
+          filterBar.html.style.marginRight = `${cents - newPosition}%`;
+          const updatedMaxValue = this.calculateValueFromPosition(newPosition);
+          const clampedMaxValue = Math.max(minValue, Math.min(updatedMaxValue, maxValue));
+          maxPrice.html.textContent = `${clampedMaxValue.toFixed(toHundredths)}$`;
+        }
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDraggingMin = false;
+      isDraggingMax = false;
+    });
+  }
+
+  private static handleTouchMovement(
+    filterMin: BaseComponent,
+    filterMax: BaseComponent,
+    filterBar: BaseComponent,
+    filterScale: BaseComponent,
+    minPrice: BaseComponent,
+    maxPrice: BaseComponent,
+  ): void {
+    filterMin.html.addEventListener('touchstart', () => {
+      isDraggingMin = true;
+    });
+
+    filterMax.html.addEventListener('touchstart', () => {
+      isDraggingMax = true;
+    });
+
+    document.addEventListener('touchmove', (event) => {
+      const touch = event.touches[0];
+      const newPosition = Products.calculateNewPosition(touch.clientX, filterScale.html);
+      if (newPosition > minValue && newPosition < cents) {
+        if (isDraggingMin && newPosition < parseFloat(filterMax.html.style.left)) {
+          filterMin.html.style.left = `${newPosition}%`;
+          filterBar.html.style.marginLeft = `${newPosition}%`;
+          const updatedMinValue = this.calculateValueFromPosition(newPosition);
+          const clampedMinValue = Math.max(minValue, Math.min(updatedMinValue, maxValue));
+          minPrice.html.textContent = `${clampedMinValue.toFixed(toHundredths)}$`;
+        }
+
+        if (isDraggingMax && newPosition > parseFloat(filterMin.html.style.left)) {
+          filterMax.html.style.left = `${newPosition}%`;
+          filterBar.html.style.marginRight = `${cents - newPosition}%`;
+          const updatedMaxValue = this.calculateValueFromPosition(newPosition);
+          const clampedMaxValue = Math.max(minValue, Math.min(updatedMaxValue, maxValue));
+          maxPrice.html.textContent = `${clampedMaxValue.toFixed(toHundredths)}$`;
+        }
+      }
+    });
+
+    document.addEventListener('touchend', () => {
+      isDraggingMin = false;
+      isDraggingMax = false;
+    });
+  }
+
+  private static calculateNewPosition(clientX: number, filterBar: HTMLElement): number {
+    const rect = filterBar.getBoundingClientRect();
+    const offsetX = clientX - rect.left;
+    const barWidth = rect.width;
+    return (offsetX / barWidth) * cents;
+  }
+
+  private static calculateValueFromPosition(position: number): number {
+    const range = maxValue - minValue;
+    return minValue + (position / cents) * range;
   }
 
   private static createProductCard(cardNumber: number): BaseComponent {
@@ -220,7 +334,10 @@ class Products {
     const uniqueBrandsList = [...new Set(brandsList)];
     const brandConteiner = new BaseComponent({ tag: 'ul', class: ['brand-conteiner'] });
     for (let i = 0; i <= uniqueBrandsList.length - iteratorStep; i += iteratorStep) {
-      const brand = new BaseComponent({ tag: 'li', class: ['category'], text: uniqueBrandsList[i] });
+      const brand = new BaseComponent({ tag: 'li', class: ['subcategory'], text: uniqueBrandsList[i] });
+      brand.html.addEventListener('click', () => {
+        brand.html.classList.toggle('active');
+      });
       brandConteiner.html.append(brand.html);
     }
     return brandConteiner;

@@ -138,9 +138,11 @@
 }
 
 .category:hover,
-.subcategory:hover {
+.subcategory:hover,
+.category.active,
+.subcategory.active {
   color: $green;
-  outline: 0.15rem solid hwb(0 92% 7%);
+  outline: 0.1rem solid hwb(0 92% 7%);
   border-radius: 5px;
 }
 
@@ -168,7 +170,6 @@
 .filter-range-bar {
   cursor: pointer;
   height: 5px;
-  width: 100%;
   background-color: $green;
 }
 
@@ -216,14 +217,6 @@
   align-items: center;
 }
 
-.min {
-  left: 0;
-}
-
-.max {
-  left: 95%;
-}
-
 .brand-conteiner {
   order: 1;
   margin: 0;
@@ -252,6 +245,14 @@
   &:hover {
     background-color: $darkGreen;
   }
+}
+
+.prices-conteiner {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 500;
+  margin-bottom: 15px;
 }
 
 @media screen and (max-width: 1270px) {
@@ -291,15 +292,27 @@
   .product-discount {
     font-size: 1.1rem;
   }
+
+  .subcategory {
+    font-size: 0.75rem;
+  }
 }
 
 @media screen and (max-width: 710px) {
+  .filter-container {
+    width: 35%;
+  }
+
   .categories-title {
     font-size: 1.3rem;
   }
 
-  .category-name {
+  .category {
     font-size: 1.05rem;
+  }
+
+  .subcategory {
+    font-size: 0.65rem;
   }
 
   .filter-interval label {
@@ -337,11 +350,15 @@
 }
 
 @media screen and (max-width: 550px) {
+  .filter-container {
+    width: 40%;
+  }
+
   .categories-title {
     font-size: 1.1rem;
   }
 
-  .category-name {
+  .category {
     font-size: 0.85rem;
   }
 
@@ -374,11 +391,20 @@
 }
 
 @media screen and (max-width: 420px) {
-  .categories-title {
-    font-size: 0.9rem;
+  .filter-container {
+    width: 43%;
   }
 
-  .category-name {
+  .subcategory {
+    font-size: 0.6rem;
+    padding-left: 8px;
+  }
+
+  .categories-title {
+    font-size: 0.8rem;
+  }
+
+  .category {
     font-size: 0.65rem;
   }
 

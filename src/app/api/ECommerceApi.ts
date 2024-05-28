@@ -123,6 +123,7 @@ class ECommerceApi {
       throw new Error(`HTTP error! status: ${response.status}`);
     } else {
       const json = await response.json();
+      console.log(json);
       return json;
     }
   }
@@ -139,6 +140,23 @@ class ECommerceApi {
       throw new Error(`HTTP error! status: ${response.status}`);
     } else {
       const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getSelectedProducts(clientDetails: IAPIClientDetails, token: string): Promise<ICategories> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/product-selections`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      console.log(json);
       return json;
     }
   }

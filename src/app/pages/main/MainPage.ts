@@ -9,7 +9,7 @@ import { IQueryProducts } from '../../interfaces/Product.interface';
 import './MainPage.scss';
 
 const products: IQueryProducts = {
-  limit: 10,
+  limit: 0,
   offset: 0,
   count: 0,
   total: 0,
@@ -121,6 +121,11 @@ class MainPage {
         localStorage.setItem('categories', JSON.stringify(res));
         await Products.createCategoriesFromLocalStorage().forEach((productCard) => {
           Products.categoriesContainer.html.append(productCard.html);
+          productCard.html.addEventListener('click', () => {
+            console.log(productCard.html.textContent);
+            ECommerceApi.getSelectedProducts(currentClient, token);
+            productCard.html.classList.toggle('active');
+          });
         });
       } catch (error) {
         throw new Error(`Error displayCategories: ${error}`);
