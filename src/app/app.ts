@@ -9,8 +9,9 @@ import About from './pages/about/About';
 import Login from './pages/login/Login';
 import MainPage from './pages/main/MainPage';
 import NotFound from './pages/notFound/NotFound';
-import Registration from './pages/registation/Registration';
+import Product from './pages/product/Product';
 import Profile from './pages/profile/Profile';
+import Registration from './pages/registation/Registration';
 
 class App {
   private static container: HTMLElement = document.body;
@@ -36,6 +37,8 @@ class App {
   private profilePage: Profile;
 
   private router: Navigo;
+
+  // private product: Product;
 
   constructor() {
     this.content = new BaseComponent({ tag: 'div', class: ['app'] });
@@ -103,8 +106,6 @@ class App {
           if (this.header.logoutBtn.html.getAttribute('logout-success') === 'true') {
             this.pageContent.html.innerHTML = '';
             this.pageContent.html.append(this.mainPage.view.html);
-            this.mainPage.loginBtn.html.setAttribute('href', '/');
-            this.mainPage.regBtn.html.setAttribute('href', '/');
             this.checkBtns();
             this.setLoginBtnHref();
           }
@@ -145,6 +146,9 @@ class App {
       .on('/profile', () => {
         this.onProfile();
       })
+      .on('/catalog\\/(.*)/', () => {
+        this.onProduct();
+      })
       .notFound(() => {
         this.pageContent.html.innerHTML = '';
         this.pageContent.html.append(this.notFound.view.html);
@@ -152,6 +156,16 @@ class App {
         this.setLoginBtnHref();
       })
       .resolve();
+  }
+
+  private onProduct(): void {
+    const productJSON = localStorage.getItem('currentProduct');
+    const product = JSON.parse(productJSON || '');
+    const name = product.name.en;
+    const description = product.description.en;
+    const productPage = new Product(name, description);
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(productPage.view.html);
   }
 
   private onLogin(): void {
@@ -220,12 +234,8 @@ class App {
   private setLoginBtnHref(): void {
     if (localStorage.getItem('isAuth')) {
       this.header.loginBtn.html.setAttribute('href', '/');
-      this.mainPage.regBtn.html.setAttribute('href', '/');
-      this.mainPage.loginBtn.html.setAttribute('href', '/');
     } else {
       this.header.loginBtn.html.setAttribute('href', '/login');
-      this.mainPage.regBtn.html.setAttribute('href', '/registration');
-      this.mainPage.loginBtn.html.setAttribute('href', '/login');
     }
   }
 

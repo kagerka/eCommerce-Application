@@ -1,3 +1,4 @@
+import { IProducts } from '../../interfaces/Product.interface';
 import BaseComponent from '../BaseComponent';
 import './Products.scss';
 
@@ -18,11 +19,9 @@ class Products {
     this.filterContainer = Products.createFilterContainerElement();
     this.productsContainer = Products.createProductsContainerElement();
     Products.productsList = Products.createProductsList();
-
     Products.createProductCardsFromLocalStorage().forEach((productCard) => {
       Products.productsList.html.append(productCard.html);
     });
-
     this.composeView();
   }
 
@@ -60,6 +59,57 @@ class Products {
     return new BaseComponent({ tag: 'ul', class: ['products-list'] });
   }
 
+  private static createProductListener(link: string, currentProduct: IProducts): BaseComponent {
+    const productLink = new BaseComponent({
+      tag: 'a',
+      class: ['product-card-link'],
+      attribute: [
+        ['href', `/catalog/${link}`],
+        ['data-navigo', ''],
+      ],
+    });
+
+    productLink.html.addEventListener('click', () => {
+      localStorage.setItem('currentProduct', JSON.stringify(currentProduct));
+    });
+
+    return productLink;
+  }
+
+  private static renderProductElements(
+    link: string,
+    productImage: string,
+    productTitle: string,
+    formattedPrice: string,
+    currencySymbol: string,
+    productDescription: string,
+    productCard: BaseComponent,
+    productDiscount: number,
+    formattedDiscount: string,
+    currentProduct: IProducts,
+  ): void {
+    const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });
+    const infoContainer = new BaseComponent({ tag: 'div', class: ['info-container'] });
+    const img = new BaseComponent({ tag: 'img', class: ['product-img'], src: productImage });
+    const title = new BaseComponent({ tag: 'h3', class: ['product-title'], text: productTitle });
+    const priceContainer = new BaseComponent({ tag: 'div', class: ['price-container'] });
+    const priceText = `${formattedPrice} ${currencySymbol}`;
+    const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: priceText });
+    const description = new BaseComponent({ tag: 'p', class: ['product-description'], text: productDescription });
+    const productLink = this.createProductListener(link, currentProduct);
+    productCard.html.append(productLink.html);
+    productLink.html.append(imgContainer.html, infoContainer.html);
+    imgContainer.html.append(img.html);
+    infoContainer.html.append(title.html, priceContainer.html, description.html);
+    priceContainer.html.append(price.html);
+    if (productDiscount) {
+      const discountText = `${formattedDiscount} ${currencySymbol}`;
+      const discount = new BaseComponent({ tag: 'h4', class: ['product-discount'], text: discountText });
+      priceContainer.html.append(discount.html);
+      price.html.classList.add('crossed');
+    }
+  }
+
   private static createProductCard(cardNumber: number): BaseComponent {
     const productsJSON = localStorage.getItem('products');
     if (!productsJSON) {
@@ -81,27 +131,22 @@ class Products {
     const productTitle = pathPart?.name.en;
     const productDescription = pathPart?.description.en;
     const productImage = pathPart?.masterVariant.images[0].url;
+    const link = pathPart?.slug.en;
 
     const productCard = new BaseComponent({ tag: 'li', class: ['product-card'] });
-    const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });
-    const infoContainer = new BaseComponent({ tag: 'div', class: ['info-container'] });
-    const img = new BaseComponent({ tag: 'img', class: ['product-img'], src: productImage });
-    const title = new BaseComponent({ tag: 'h3', class: ['product-title'], text: productTitle });
-    const priceContainer = new BaseComponent({ tag: 'div', class: ['price-container'] });
-    const priceText = `${formattedPrice} ${currencySymbol}`;
-    const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: priceText });
-    const description = new BaseComponent({ tag: 'p', class: ['product-description'], text: productDescription });
 
-    productCard.html.append(imgContainer.html, infoContainer.html);
-    imgContainer.html.append(img.html);
-    infoContainer.html.append(title.html, priceContainer.html, description.html);
-    priceContainer.html.append(price.html);
-    if (productDiscount) {
-      const discountText = `${formattedDiscount} ${currencySymbol}`;
-      const discount = new BaseComponent({ tag: 'h4', class: ['product-discount'], text: discountText });
-      priceContainer.html.append(discount.html);
-      price.html.classList.add('crossed');
-    }
+    this.renderProductElements(
+      link,
+      productImage,
+      productTitle,
+      formattedPrice,
+      currencySymbol,
+      productDescription,
+      productCard,
+      productDiscount,
+      formattedDiscount,
+      pathPart,
+    );
 
     return productCard;
   }

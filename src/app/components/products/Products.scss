@@ -34,7 +34,7 @@
   outline: 0.2rem solid hwb(0 92% 7%);
   border-radius: 15px;
   cursor: pointer;
-  padding: 4%;
+
   transition-duration: 0.9s;
 }
 
@@ -43,6 +43,14 @@
 .product-card:focus {
   outline-color: $green;
   scale: 1.05;
+}
+
+.product-card-link {
+  display: block;
+  text-decoration: none;
+  width: 100%;
+  height: 100%;
+  padding: 4% 4%;
 }
 
 .img-container {
