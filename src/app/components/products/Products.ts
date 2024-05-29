@@ -151,7 +151,7 @@ class Products {
     return productCard;
   }
 
-  private static addPrice(): boolean {
+  public static addPrice(): boolean {
     let country;
     if (localStorage.getItem('customer') !== null) {
       const customerJSON = localStorage.getItem('customer');

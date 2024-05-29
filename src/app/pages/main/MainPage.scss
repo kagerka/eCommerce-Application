@@ -2,8 +2,7 @@
 @import './../../../styles/variables';
 
 .main-content {
-  min-height: calc(100vh - $headerHeight - $footerHeight - 2 * $pageGap);
-  display: flex;
+  min-height: calc(100vh - $headerHeight - $footerHeight - 20px - 2 * $pageGap);
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -28,22 +27,4 @@
   width: fit-content;
   min-width: 110px;
   text-align: center;
-}
-
-@media screen and (max-width: 1000px) {
-  .main-content {
-    padding: 0 60px;
-  }
-}
-
-@media screen and (max-width: 600px) {
-  .main-content {
-    padding: 0 40px;
-  }
-}
-
-@media screen and (max-width: 500px) {
-  .main-content {
-    padding: 0 20px;
-  }
 }

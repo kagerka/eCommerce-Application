@@ -12,6 +12,11 @@ import NotFound from './pages/notFound/NotFound';
 import Product from './pages/product/Product';
 import Profile from './pages/profile/Profile';
 import Registration from './pages/registation/Registration';
+import getBedrooms from './utils/productAttributes/getBedrooms';
+import getBrand from './utils/productAttributes/getBrand';
+import getPersons from './utils/productAttributes/getPersons';
+import getPrices from './utils/productAttributes/getPrices';
+import getSizes from './utils/productAttributes/getSizes';
 
 class App {
   private static container: HTMLElement = document.body;
@@ -161,20 +166,42 @@ class App {
     const product = JSON.parse(productJSON || '');
     const name = product.name.en;
     const description = product.description.en;
-    const productPage = new Product(name, description);
+    const { images } = product.masterVariant;
+    const { attributes } = product.masterVariant;
+    const { variants } = product;
+
+    const brand = getBrand(attributes);
+    const sizes = getSizes(variants, attributes);
+    const prices = getPrices(product);
+    const bedrooms = getBedrooms(variants, attributes);
+    const persons = getPersons(variants, attributes);
+
+    const productPage = new Product(
+      name,
+      description,
+      images,
+      prices.formattedPrice,
+      prices.formattedDiscount,
+      prices.currencySymbol,
+      prices.productDiscount,
+      brand,
+      sizes,
+      bedrooms,
+      persons,
+    );
     this.pageContent.html.innerHTML = '';
     this.pageContent.html.append(productPage.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
   }
 
   private onLogin(): void {
     if (localStorage.getItem('isAuth')) {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
-      window.location.assign(
-        `${window.location.protocol}//${window.location.hostname}`,
-        // for correct operation locally you need to add a port number
-        // For example: ${window.location.protocol}//${window.location.hostname}:5173
-      );
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      // for correct operation locally you need to add a port number
+      // For example: ${window.location.protocol}//${window.location.hostname}:5173
       this.checkBtns();
       this.setLoginBtnHref();
     } else {
@@ -189,11 +216,10 @@ class App {
     if (localStorage.getItem('isAuth')) {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
-      window.location.assign(
-        `${window.location.protocol}//${window.location.hostname}`,
-        // for correct operation locally you need to add a port number
-        // For example: ${window.location.protocol}//${window.location.hostname}:5173
-      );
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      // for correct operation locally you need to add a port number
+      // For example: ${window.location.protocol}//${window.location.hostname}:5173
+
       this.checkBtns();
       this.setLoginBtnHref();
     } else {
@@ -219,11 +245,10 @@ class App {
         this.setLoginBtnHref();
       }
     } else {
-      window.location.assign(
-        `${window.location.protocol}//${window.location.hostname}`,
-        // for correct operation locally you need to add a port number
-        // For example: ${window.location.protocol}//${window.location.hostname}:5173
-      );
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      // for correct operation locally you need to add a port number
+      // For example: ${window.location.protocol}//${window.location.hostname}:5173
+
       this.checkBtns();
       this.setLoginBtnHref();
     }
