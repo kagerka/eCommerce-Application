@@ -1,35 +1,217 @@
 import BaseComponent from '../../components/BaseComponent';
+import { IProductImages } from '../../interfaces/Product.interface';
 import './Product.scss';
 
 class Product {
   private productPageContent: BaseComponent;
 
+  private productImagesContent: BaseComponent;
+
+  private productImagesPreviewContent: BaseComponent;
+
+  private productImagesSelectedContent: BaseComponent;
+
+  private productInfoContent: BaseComponent;
+
   private productName: BaseComponent;
+
+  private productPrice: BaseComponent;
 
   private productDescription: BaseComponent;
 
-  constructor(name: string, description: string) {
-    this.productPageContent = Product.createProductPageContentElement();
-    this.productName = Product.createProductNameContainerElement(name);
-    this.productDescription = Product.createProductDescriptionContainerElement(description);
+  private productBrand: BaseComponent;
 
+  private productSizes: BaseComponent;
+
+  private productBedrooms: BaseComponent;
+
+  private productPersons: BaseComponent;
+
+  constructor(
+    name: string,
+    description: string,
+    images: IProductImages[],
+    formattedPrice: string,
+    formattedDiscount: string,
+    currencySymbol: string,
+    productDiscount: number,
+    brand: string,
+    sizes: string[],
+    bedrooms: string[],
+    persons: string[],
+  ) {
+    this.productPageContent = Product.createProductPageContentElement();
+    this.productImagesContent = Product.createProductImagesContentElement();
+    this.productImagesPreviewContent = Product.createProductImagesPreviewContentElement();
+    this.productImagesSelectedContent = Product.createProductImagesSelectedContentElement();
+    this.productInfoContent = Product.createProductInfoContentElement();
+    this.productName = Product.createProductNameContainerElement(name);
+    this.productPrice = Product.createProductPriceContainerElement(
+      formattedPrice,
+      formattedDiscount,
+      currencySymbol,
+      productDiscount,
+    );
+    this.productDescription = Product.createProductDescriptionContainerElement(description);
+    this.productBrand = Product.createProductBrandContainerElement(brand);
+    this.productSizes = Product.createProductSizeContainerElement(sizes);
+    this.productBedrooms = Product.createProductBedroomsContainerElement(bedrooms);
+    this.productPersons = Product.createProductPersonsContainerElement(persons);
+    this.addImages(images);
     this.composeView();
   }
 
   private composeView(): void {
-    this.productPageContent.html.append(this.productName.html, this.productDescription.html);
+    this.productPageContent.html.append(this.productImagesContent.html, this.productInfoContent.html);
+    this.productImagesContent.html.append(
+      this.productImagesPreviewContent.html,
+      this.productImagesSelectedContent.html,
+    );
+    this.productInfoContent.html.append(
+      this.productName.html,
+      this.productPrice.html,
+      this.productDescription.html,
+      this.productBrand.html,
+      this.productSizes.html,
+      this.productBedrooms.html,
+      this.productPersons.html,
+    );
   }
 
   private static createProductPageContentElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['product-content'] });
+    return new BaseComponent({ tag: 'div', class: ['product-page-content'] });
+  }
+
+  private static createProductImagesContentElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['product-page-images-content'] });
+  }
+
+  private static createProductImagesPreviewContentElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['product-page-images-preview-content'] });
+  }
+
+  private static createProductImagesSelectedContentElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['product-page-images-selected-content'] });
+  }
+
+  private addImages(images: IProductImages[]): void {
+    images.forEach((image, i) => {
+      const ZERO = 0;
+      const img = new BaseComponent({ tag: 'img', class: ['product-page-image'], src: image.url });
+      const imgContainer = new BaseComponent({ tag: 'div', class: ['product-page-image-container'] });
+      if (i === ZERO) {
+        imgContainer.html.classList.add('selected-image');
+        this.productImagesSelectedContent.html.append(imgContainer.html);
+        imgContainer.html.append(img.html);
+      } else {
+        this.productImagesPreviewContent.html.append(imgContainer.html);
+        imgContainer.html.append(img.html);
+      }
+    });
+  }
+
+  private static createProductInfoContentElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['product-page-info-content'] });
   }
 
   private static createProductNameContainerElement(name: string): BaseComponent {
-    return new BaseComponent({ tag: 'h1', class: ['product-name'], text: name });
+    return new BaseComponent({ tag: 'h2', class: ['product-page-name'], text: name });
+  }
+
+  private static createProductPriceContainerElement(
+    formattedPrice: string,
+    formattedDiscount: string,
+    currencySymbol: string,
+    productDiscount: number,
+  ): BaseComponent {
+    const priceContainer = new BaseComponent({ tag: 'div', class: ['product-page-price-container'] });
+    const priceText = `${formattedPrice} ${currencySymbol}`;
+    const price = new BaseComponent({ tag: 'h4', class: ['product-page-price'], text: priceText });
+    priceContainer.html.append(price.html);
+    if (productDiscount) {
+      const discountText = `${formattedDiscount} ${currencySymbol}`;
+      const discount = new BaseComponent({ tag: 'h4', class: ['product-page-discount'], text: discountText });
+      priceContainer.html.append(discount.html);
+      price.html.classList.add('crossed');
+    }
+    return priceContainer;
   }
 
   private static createProductDescriptionContainerElement(description: string): BaseComponent {
-    return new BaseComponent({ tag: 'p', class: ['product-description'], text: description });
+    const descriptionContainer = new BaseComponent({ tag: 'div', class: ['product-page-description-container'] });
+    const descriptionHeading = new BaseComponent({
+      tag: 'p',
+      class: ['product-page-description-heading'],
+      text: 'Description:',
+    });
+    const descriptionText = new BaseComponent({ tag: 'p', class: ['product-page-description'], text: description });
+    descriptionContainer.html.append(descriptionHeading.html, descriptionText.html);
+    return descriptionContainer;
+  }
+
+  private static createProductBrandContainerElement(brand: string): BaseComponent {
+    const brandContainer = new BaseComponent({ tag: 'div', class: ['product-page-brand-container'] });
+    const brandHeading = new BaseComponent({ tag: 'p', class: ['product-page-brand-heading'], text: 'Brand:' });
+    const brandText = new BaseComponent({ tag: 'p', class: ['product-page-brand'], text: brand });
+    brandContainer.html.append(brandHeading.html, brandText.html);
+    return brandContainer;
+  }
+
+  private static createProductSizeContainerElement(sizes: string[]): BaseComponent {
+    const sizeContainer = new BaseComponent({ tag: 'div', class: ['product-page-size-container'] });
+    const sizeHeading = new BaseComponent({ tag: 'p', class: ['product-page-size-heading'], text: 'Size:' });
+    const productSizes = new BaseComponent({ tag: 'div', class: ['product-page-sizes'] });
+
+    if (sizes.length) {
+      sizes.forEach((item: string) => {
+        const sizeItem = new BaseComponent({ tag: 'div', class: ['product-page-size'], text: item });
+        productSizes.html.append(sizeItem.html);
+      });
+      sizeContainer.html.append(sizeHeading.html, productSizes.html);
+    } else {
+      sizeContainer.html.classList.add('hidden');
+    }
+    return sizeContainer;
+  }
+
+  private static createProductBedroomsContainerElement(bedrooms: string[]): BaseComponent {
+    const bedroomsContainer = new BaseComponent({ tag: 'div', class: ['product-page-bedrooms-container'] });
+    const bedroomsHeading = new BaseComponent({
+      tag: 'p',
+      class: ['product-page-bedrooms-heading'],
+      text: 'Bedrooms:',
+    });
+    const productBedrooms = new BaseComponent({ tag: 'div', class: ['product-page-bedrooms'] });
+
+    if (bedrooms.join('').length) {
+      bedrooms.forEach((item: string) => {
+        const sizeItem = new BaseComponent({ tag: 'div', class: ['product-page-bedrooms'], text: item });
+        productBedrooms.html.append(sizeItem.html);
+      });
+      bedroomsContainer.html.append(bedroomsHeading.html, productBedrooms.html);
+    } else {
+      bedroomsContainer.html.classList.add('hidden');
+    }
+
+    return bedroomsContainer;
+  }
+
+  private static createProductPersonsContainerElement(persons: string[]): BaseComponent {
+    const personsContainer = new BaseComponent({ tag: 'div', class: ['product-page-persons-container'] });
+    const personsHeading = new BaseComponent({ tag: 'p', class: ['product-page-persons-heading'], text: 'Persons:' });
+    const productPersons = new BaseComponent({ tag: 'div', class: ['product-page-persons'] });
+
+    if (persons.join('').length) {
+      persons.forEach((item: string) => {
+        const personsItem = new BaseComponent({ tag: 'div', class: ['product-page-persons'], text: item });
+        productPersons.html.append(personsItem.html);
+      });
+      personsContainer.html.append(personsHeading.html, productPersons.html);
+    } else {
+      personsContainer.html.classList.add('hidden');
+    }
+
+    return personsContainer;
   }
 
   get view(): BaseComponent {

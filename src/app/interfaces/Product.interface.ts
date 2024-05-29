@@ -1,58 +1,7 @@
 export interface IProducts {
   id: string;
   masterData: {
-    current: {
-      categories: [
-        {
-          id: string;
-          typeId: string;
-        },
-      ];
-      description: {
-        en: string;
-      };
-      masterVariant: {
-        attributes: [];
-        id: number;
-        images: [
-          {
-            dimensions: {
-              h: number;
-              w: number;
-            };
-            url: string;
-          },
-        ];
-        price: [
-          {
-            value: {
-              type: string;
-              fractionDigits: number;
-              centAmount: number;
-              currencyCode: string;
-            };
-            discounted: {
-              value: {
-                type: string;
-                fractionDigits: number;
-                centAmount: number;
-                currencyCode: string;
-              };
-            };
-            id: string;
-          },
-        ];
-        sku: string;
-      };
-      name: {
-        en: string;
-      };
-      slug: {
-        en: string;
-      };
-      variants: [];
-      searchKeywords: object;
-    };
+    current: ICurrentProduct;
     hasStagedChanges: boolean;
     published: boolean;
     staged: {
@@ -66,17 +15,9 @@ export interface IProducts {
         en: string;
       };
       masterVariant: {
-        attributes: [];
+        attributes: IProductAttributes[];
         id: number;
-        images: [
-          {
-            dimensions: {
-              h: number;
-              w: number;
-            };
-            url: string;
-          },
-        ];
+        images: IProductImages[];
         prices: [
           {
             value: {
@@ -96,7 +37,7 @@ export interface IProducts {
       slug: {
         en: string;
       };
-      variants: [];
+      variants: IProductVariants[];
       searchKeywords: object;
     };
   };
@@ -119,4 +60,91 @@ export interface IQueryProducts {
   count: number;
   total: number;
   results: IProducts[];
+}
+
+export interface ICurrentProduct {
+  name: {
+    en: string;
+  };
+  description: {
+    en: string;
+  };
+  categories: [
+    {
+      id: string;
+      typeId: string;
+    },
+  ];
+  slug: {
+    en: string;
+  };
+  masterVariant: IMasterVariant;
+  variants: IProductVariants[];
+  searchKeywords: object;
+}
+
+export interface IMasterVariant {
+  id: number;
+  sku: string;
+  prices: [
+    {
+      id: string;
+      value: {
+        type: string;
+        fractionDigits: number;
+        centAmount: number;
+        currencyCode: string;
+      };
+      discounted: {
+        value: {
+          type: string;
+          fractionDigits: number;
+          centAmount: number;
+          currencyCode: string;
+        };
+      };
+    },
+    {
+      id: string;
+      value: {
+        type: string;
+        fractionDigits: number;
+        centAmount: number;
+        currencyCode: string;
+      };
+      discounted: {
+        value: {
+          type: string;
+          fractionDigits: number;
+          centAmount: number;
+          currencyCode: string;
+        };
+      };
+    },
+  ];
+  images: IProductImages[];
+  attributes: IProductAttributes[];
+}
+
+export interface IProductImages {
+  dimensions: {
+    h: number;
+    w: number;
+  };
+  url: string;
+}
+
+export interface IProductAttributes {
+  name: string;
+  value: string;
+}
+
+export interface IProductVariants {
+  assets: [];
+  attributes: IProductAttributes[];
+  id: number;
+  images: [];
+  key: string;
+  prices: [];
+  sku: string;
 }

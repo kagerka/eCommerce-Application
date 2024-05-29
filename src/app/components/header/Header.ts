@@ -178,7 +178,7 @@ class Header {
   private static createProfileButtonElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
-      class: ['profile-button'],
+      class: ['profile-button', 'hide'],
       attribute: [
         ['href', '/profile'],
         ['data-navigo', ''],

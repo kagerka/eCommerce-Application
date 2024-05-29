@@ -20,7 +20,7 @@
   display: grid;
   align-items: stretch;
   justify-content: center;
-  grid-template-columns: repeat(3, 33%);
+  grid-template-columns: repeat(3, 1fr);
   height: max-content;
   text-align: center;
   gap: 2rem;
@@ -51,6 +51,11 @@
   width: 100%;
   height: 100%;
   padding: 4% 4%;
+  color: $gray;
+
+  &:visited {
+    color: $gray;
+  }
 }
 
 .img-container {
