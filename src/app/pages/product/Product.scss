@@ -17,15 +17,24 @@
   width: 50%;
   flex-basis: 50%;
   gap: 16px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
 }
 
 .product-page-images-preview-content {
   display: flex;
   flex-direction: row;
-  width: 564px;
   gap: 16px;
   height: 100px;
   overflow: hidden;
+  position: relative;
+
+  & > * {
+    cursor: pointer;
+  }
 }
 
 .product-page-images-selected-content {
@@ -45,6 +54,7 @@
   height: 100px;
 
   &.selected-image {
+    cursor: pointer;
     height: 564px;
     width: 564px;
   }
@@ -143,9 +153,118 @@
 .hidden {
   display: none;
 }
+
+.modal-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: $mediumDarkGray;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &.hidden {
+    display: none;
+  }
+}
+
+.modal-window {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70%;
+  max-width: 70%;
+  max-height: 84%;
+  overflow: hidden;
+}
+
+.modal-image {
+  width: 100%;
+  height: auto;
+}
+
+.modal-close-icon {
+  cursor: pointer;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  fill: $green;
+
+  & .background {
+    fill-opacity: 0.5;
+    transition: all 0.5s;
+  }
+
+  &:hover .background {
+    fill-opacity: 0.9;
+  }
+}
+.product-page-images-preview-container {
+  position: relative;
+  overflow: hidden;
+  max-width: 564px;
+}
+
+.left-arrow-icon {
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 4px;
+  z-index: 1;
+
+  & svg {
+    fill: $white;
+    fill-opacity: 0.6;
+    stroke: $green;
+    stroke-width: 2;
+    transition: all 0.5s;
+  }
+
+  &:hover svg {
+    fill-opacity: 0.9;
+  }
+}
+
+.right-arrow-icon {
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-right: 4px;
+  z-index: 1;
+
+  & svg {
+    fill: $white;
+    fill-opacity: 0.6;
+    stroke: $green;
+    stroke-width: 2;
+    transition: all 0.5s;
+  }
+
+  &:hover svg {
+    fill-opacity: 0.9;
+  }
+}
+
 @media screen and (max-width: 1440px) {
   .product-page-images-preview-content {
-    display: none;
+    max-width: none;
   }
 
   .product-page-images-selected-content {
@@ -175,8 +294,17 @@
     gap: 16px;
   }
 
+  .product-page-images-preview-content {
+    display: none;
+  }
+
   .product-page-info-content {
     flex-basis: 100%;
     width: 100%;
+  }
+
+  .modal-window {
+    width: 80%;
+    max-width: 80%;
   }
 }
