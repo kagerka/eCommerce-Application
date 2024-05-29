@@ -97,6 +97,7 @@ export interface IProducts {
         en: string;
       };
       variants: [];
+      attributes: [];
       searchKeywords: object;
     };
   };
@@ -122,6 +123,7 @@ export interface IQueryProducts {
 }
 
 export interface ICategories {
+  results(results: string): string;
   id: string;
   version: number;
   name: {

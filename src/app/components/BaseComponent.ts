@@ -12,6 +12,7 @@ class BaseComponent {
     this.options = options;
     this.element = document.createElement(this.options.tag);
     this.addClass();
+    this.addId();
     this.addAttribute();
     this.addText();
     this.addLink();
@@ -26,7 +27,7 @@ class BaseComponent {
     }
   }
 
-  addId(): void {
+  protected addId(): void {
     this.element.id = this.options.id!;
   }
 

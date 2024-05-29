@@ -9,7 +9,7 @@ import { IQueryProducts } from '../../interfaces/Product.interface';
 import './MainPage.scss';
 
 const products: IQueryProducts = {
-  limit: 0,
+  limit: 70,
   offset: 0,
   count: 0,
   total: 0,
@@ -97,12 +97,10 @@ class MainPage {
       : localStorage.getItem('tokenAnonymous');
     if (token) {
       try {
-        const res = await ECommerceApi.getProducts(currentClient, token);
+        const res = await ECommerceApi.getProducts(currentClient, token, products.limit);
         products.results = res.results;
-        products.count = res.count;
-        products.total = res.total;
         localStorage.setItem('products', JSON.stringify(products.results));
-        await Products.createProductCardsFromLocalStorage().forEach((productCard) => {
+        await Products.createProductCardsFromLocalStorage(true).forEach((productCard) => {
           Products.productsList.html.append(productCard.html);
         });
       } catch (error) {
@@ -112,19 +110,23 @@ class MainPage {
   }
 
   static async displayCategories(): Promise<void> {
-    const token = localStorage.getItem('tokenPassword')
-      ? localStorage.getItem('tokenPassword')
-      : localStorage.getItem('tokenAnonymous');
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
     if (token) {
       try {
         const res = await ECommerceApi.getCategories(currentClient, token);
         localStorage.setItem('categories', JSON.stringify(res));
-        await Products.createCategoriesFromLocalStorage().forEach((productCard) => {
-          Products.categoriesContainer.html.append(productCard.html);
-          productCard.html.addEventListener('click', () => {
-            console.log(productCard.html.textContent);
-            ECommerceApi.getSelectedProducts(currentClient, token);
-            productCard.html.classList.toggle('active');
+
+        Products.createCategoriesFromLocalStorage().forEach((category) => {
+          Products.categoriesContainer.html.append(category.html);
+          category.html.addEventListener('click', async () => {
+            if (!category.html.classList.contains('category')) {
+              const resp = await ECommerceApi.getSelectedProducts(currentClient, token, category.html.id);
+              localStorage.setItem('products', JSON.stringify(resp.results));
+              Products.productsList.html.innerHTML = '';
+              Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+                Products.productsList.html.append(productCard.html);
+              });
+            }
           });
         });
       } catch (error) {

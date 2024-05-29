@@ -1,3 +1,5 @@
+import ECommerceApi from '../../api/ECommerceApi';
+import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../BaseComponent';
 import './Products.scss';
 
@@ -22,10 +24,6 @@ class Products {
 
   private priceTitle: BaseComponent;
 
-  private brandsContainer: BaseComponent;
-
-  private brandTitle: BaseComponent;
-
   private productsContainer: BaseComponent;
 
   static productsList: BaseComponent;
@@ -38,17 +36,13 @@ class Products {
     this.categoriesTitle = Products.createCategoriesTitle();
     this.priceContainer = Products.createPriceContainer();
     this.priceTitle = Products.createPriceTitle();
-    this.brandsContainer = Products.createBrandsContainer();
-    this.brandTitle = Products.createBrandsTitle();
     this.resetButton = Products.createResetButton();
     this.productsContainer = Products.createProductsContainerElement();
     Products.categoriesContainer = Products.createCategoriesContainer();
     Products.productsList = Products.createProductsList();
     const filter = Products.createPriceDefining();
-    const brandsList = Products.displayBrands();
 
     this.priceContainer.append(filter.html);
-    this.brandsContainer.append(brandsList.html);
 
     this.composeView();
     this.resetProducts();
@@ -58,12 +52,12 @@ class Products {
     this.catalogContainer.html.append(this.filterContainer.html, this.productsContainer.html);
     this.filterContainer.html.append(
       Products.categoriesContainer.html,
-      this.brandsContainer.html,
+
       this.priceContainer.html,
       this.resetButton.html,
     );
     Products.categoriesContainer.html.append(this.categoriesTitle.html);
-    this.brandsContainer.html.append(this.brandTitle.html);
+
     this.priceContainer.html.append(this.priceTitle.html);
     this.productsContainer.html.append(Products.productsList.html);
   }
@@ -74,14 +68,14 @@ class Products {
     });
   }
 
-  static createProductCardsFromLocalStorage(): BaseComponent[] {
+  static createProductCardsFromLocalStorage(fullData: boolean): BaseComponent[] {
     const productCards: BaseComponent[] = [];
     if (localStorage.getItem('products') !== null) {
       const productsJSON = localStorage.getItem('products');
-      const customer = JSON.parse(productsJSON!);
+      const products = JSON.parse(productsJSON!);
 
-      for (let i = 0; i < customer.length - iteratorStep; i += iteratorStep) {
-        productCards.push(Products.createProductCard(i));
+      for (let i = 0; i < products.length - iteratorStep; i += iteratorStep) {
+        productCards.push(Products.createProductCard(i, fullData));
       }
     }
     return productCards;
@@ -137,14 +131,6 @@ class Products {
 
   private static createResetButton(): BaseComponent {
     return new BaseComponent({ tag: 'button', class: ['reset-button'], text: 'Reset' });
-  }
-
-  private static createBrandsContainer(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['categories-container'] });
-  }
-
-  private static createBrandsTitle(): BaseComponent {
-    return new BaseComponent({ tag: 'h1', class: ['categories-title'], text: 'Brands' });
   }
 
   private static createPriceDefining(): BaseComponent {
@@ -213,9 +199,25 @@ class Products {
       }
     });
 
-    document.addEventListener('mouseup', () => {
+    filterMin.html.parentElement!.addEventListener('mouseup', () => {
       isDraggingMin = false;
       isDraggingMax = false;
+      this.getMinMax(minPrice, maxPrice);
+    });
+  }
+
+  private static async getMinMax(minPrice: BaseComponent, maxPrice: BaseComponent): Promise<void> {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+
+    const max = parseFloat(maxPrice.html.textContent as string) * cents;
+    const min = parseFloat(minPrice.html.textContent as string) * cents;
+    const resp = await ECommerceApi.getPriceRange(currentClient, token!, min, max);
+    localStorage.setItem('products', JSON.stringify(resp.results));
+    Products.productsList.html.innerHTML = '';
+    Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+      Products.productsList.html.append(productCard.html);
     });
   }
 
@@ -257,9 +259,10 @@ class Products {
       }
     });
 
-    document.addEventListener('touchend', () => {
+    filterMin.html.parentElement!.addEventListener('touchend', () => {
       isDraggingMin = false;
       isDraggingMax = false;
+      this.getMinMax(minPrice, maxPrice);
     });
   }
 
@@ -275,15 +278,16 @@ class Products {
     return minValue + (position / cents) * range;
   }
 
-  private static createProductCard(cardNumber: number): BaseComponent {
+  private static createProductCard(cardNumber: number, fullData: boolean): BaseComponent {
     const productsJSON = localStorage.getItem('products');
-    if (!productsJSON) {
-      return new BaseComponent({ tag: 'div' });
+
+    let path = JSON.parse(productsJSON!)[cardNumber]?.masterData?.current;
+
+    if (!fullData) {
+      path = JSON.parse(productsJSON!)[cardNumber];
     }
 
-    const product = JSON.parse(productsJSON);
-    const pathPart = product[cardNumber]?.masterData?.current;
-    const variant = Products.addPrice() ? pathPart?.masterVariant?.prices[1] : pathPart?.masterVariant?.prices[0];
+    const variant = Products.addPrice() ? path?.masterVariant?.prices[1] : path?.masterVariant?.prices[0];
 
     const productPrice = variant?.value.centAmount;
     const productDiscount = variant?.discounted?.value.centAmount;
@@ -293,9 +297,9 @@ class Products {
     const formattedPrice = (productPrice / cents).toFixed(hundredthsRound);
     const formattedDiscount = (productDiscount / cents).toFixed(hundredthsRound);
 
-    const productTitle = pathPart?.name.en;
-    const productDescription = pathPart?.description.en;
-    const productImage = pathPart?.masterVariant.images[0].url;
+    const productTitle = path?.name.en;
+    const productDescription = path?.description.en;
+    const productImage = path?.masterVariant.images[0].url;
 
     const productCard = new BaseComponent({ tag: 'li', class: ['product-card'] });
     const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });
@@ -321,52 +325,72 @@ class Products {
     return productCard;
   }
 
-  private static displayBrands(): BaseComponent {
-    const productsJSON = localStorage.getItem('products');
-    const product = JSON.parse(productsJSON!);
-    const brandsList = [];
-    for (let i = 0; i < product.length - iteratorStep; i += iteratorStep) {
-      const brandName = product[i]?.masterData?.current?.masterVariant?.attributes[0]?.value;
-      if (brandName) {
-        brandsList.push(brandName);
-      }
-    }
-    const uniqueBrandsList = [...new Set(brandsList)];
-    const brandConteiner = new BaseComponent({ tag: 'ul', class: ['brand-conteiner'] });
-    for (let i = 0; i <= uniqueBrandsList.length - iteratorStep; i += iteratorStep) {
-      const brand = new BaseComponent({ tag: 'li', class: ['subcategory'], text: uniqueBrandsList[i] });
-      brand.html.addEventListener('click', () => {
-        brand.html.classList.toggle('active');
-      });
-      brandConteiner.html.append(brand.html);
-    }
-    return brandConteiner;
+  private static createCategoryElement(
+    pathPart: { name: { en: string }; parent: { id: string }; id: string },
+    isTopLevel: boolean,
+  ): BaseComponent {
+    const categoryName = pathPart.name.en;
+    const tag = isTopLevel ? 'ul' : 'li';
+    const classList = isTopLevel ? ['category'] : ['subcategory', pathPart.parent.id];
+    const categoryNameEl = new BaseComponent({
+      tag,
+      class: classList,
+      id: pathPart.id,
+      text: categoryName,
+    });
+    return categoryNameEl;
   }
 
   private static createCategory(categoryNumber: number): BaseComponent | null {
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    if (!token) return null;
+
     const categoriesJSON = localStorage.getItem('categories');
     const category = JSON.parse(categoriesJSON!);
     const pathPart = category.results[categoryNumber];
 
-    if (!pathPart.parent) {
-      const categoryName = pathPart.name.en;
-      const categoryNameEl = new BaseComponent({
-        tag: 'ul',
-        class: ['category', pathPart.id],
-        text: categoryName,
-      });
-      return categoryNameEl;
+    const isParent = !pathPart.parent;
+    const categoryNameEl = this.createCategoryElement(pathPart, isParent);
+    this.handleCategoryClick(categoryNameEl, pathPart, token);
+
+    categoryNameEl.html.addEventListener('click', () => {
+      categoryNameEl.html.classList.add('active');
+      this.removeActiveClassFromElements(isParent ? 'category' : 'subcategory', categoryNameEl.html);
+      this.removeActiveClassFromElements(isParent ? 'subcategory' : 'category', categoryNameEl.html);
+    });
+
+    return categoryNameEl;
+  }
+
+  private static removeActiveClassFromElements(className: string, excludeElement: HTMLElement): void {
+    const elements = document.getElementsByClassName(className);
+    for (let i = 0; i < elements.length; i += iteratorStep) {
+      if (elements[i] !== excludeElement) {
+        elements[i].classList.remove('active');
+      }
     }
-    if (pathPart.parent) {
-      const categoryName = pathPart.name.en;
-      const categoryNameEl = new BaseComponent({
-        tag: 'li',
-        class: ['subcategory', pathPart.parent.id],
-        text: categoryName,
-      });
-      return categoryNameEl;
-    }
-    return null;
+  }
+
+  private static handleCategoryClick(
+    categoryNameEl: BaseComponent,
+    pathPart: { name: { en: string }; parent: { id: string }; id: string },
+    token: string,
+  ): void {
+    categoryNameEl.html.addEventListener('click', async () => {
+      categoryNameEl.html.classList.add('active');
+      const els = document.getElementsByClassName('subcategory');
+      Products.productsList.html.innerHTML = '';
+      for (let i = 0; i < els.length; i += iteratorStep) {
+        if (els[i].className === `subcategory ${pathPart.id}`) {
+          ECommerceApi.getSelectedProducts(currentClient, token, els[i].id).then((resp) => {
+            localStorage.setItem('products', JSON.stringify(resp.results));
+            Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+              Products.productsList.html.append(productCard.html);
+            });
+          });
+        }
+      }
+    });
   }
 
   private static addPrice(): boolean {
