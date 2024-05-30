@@ -120,11 +120,13 @@ class Product {
     const imageTag = image.html.childNodes[0] as HTMLImageElement;
     const imageSrc = imageTag.src;
     const modalWindow = new BaseComponent({ tag: 'div', class: ['modal-window'] });
+    const modalImgAndIconContainer = new BaseComponent({ tag: 'div', class: ['modal-img-icon-container'] });
     const modalImage = new BaseComponent({ tag: 'img', class: ['modal-image'], src: imageSrc });
     const modalCloseIcon = new BaseComponent({ tag: 'div', class: ['modal-close-icon'] });
     modalCloseIcon.html.innerHTML = closeButton;
     this.modalContainer.html.append(modalWindow.html);
-    modalWindow.html.append(modalImage.html, modalCloseIcon.html);
+    modalWindow.html.append(modalImgAndIconContainer.html);
+    modalImgAndIconContainer.html.append(modalImage.html, modalCloseIcon.html);
     this.closeModal(modalCloseIcon);
     return this.modalContainer;
   }
