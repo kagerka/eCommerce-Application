@@ -176,15 +176,19 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 70%;
-  max-width: 70%;
-  max-height: 84%;
-  overflow: hidden;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.modal-img-icon-container {
+  max-width: 90vw;
+  max-height: 90vh;
 }
 
 .modal-image {
-  width: 100%;
-  height: auto;
+  max-height: 90vh;
+  max-width: 90vw;
+  object-fit: cover;
 }
 
 .modal-close-icon {
@@ -305,7 +309,7 @@
   }
 
   .modal-window {
-    width: 80%;
-    max-width: 80%;
+    width: 90vw;
+    max-width: 90vw;
   }
 }
