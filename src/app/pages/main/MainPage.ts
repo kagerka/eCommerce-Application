@@ -8,6 +8,14 @@ import { IQueryProducts } from '../../interfaces/Product.interface';
 
 import './MainPage.scss';
 
+const products: IQueryProducts = {
+  limit: 70,
+  offset: 0,
+  count: 0,
+  total: 0,
+  results: [],
+};
+
 class MainPage {
   private main: BaseComponent;
 
@@ -34,25 +42,42 @@ class MainPage {
     const token = localStorage.getItem('tokenPassword')
       ? localStorage.getItem('tokenPassword')
       : localStorage.getItem('tokenAnonymous');
-    const products: IQueryProducts = {
-      limit: 10,
-      offset: 0,
-      count: 0,
-      total: 0,
-      results: [],
-    };
     if (token) {
       try {
-        const res = await ECommerceApi.getProducts(currentClient, token);
+        const res = await ECommerceApi.getProducts(currentClient, token, products.limit);
         products.results = res.results;
-        products.count = res.count;
-        products.total = res.total;
         localStorage.setItem('products', JSON.stringify(products.results));
-        await Products.createProductCardsFromLocalStorage().forEach((productCard) => {
+        await Products.createProductCardsFromLocalStorage(true).forEach((productCard) => {
           Products.productsList.html.append(productCard.html);
         });
       } catch (error) {
         throw new Error(`Error displayProducts: ${error}`);
+      }
+    }
+  }
+
+  static async displayCategories(): Promise<void> {
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    if (token) {
+      try {
+        const res = await ECommerceApi.getCategories(currentClient, token);
+        localStorage.setItem('categories', JSON.stringify(res));
+        Products.createCategoriesFromLocalStorage().forEach((category) => {
+          Products.categoriesContainer.html.append(category.html);
+          category.html.addEventListener('click', async () => {
+            if (!category.html.classList.contains('category')) {
+              const resp = await ECommerceApi.getSelectedProducts(currentClient, token, category.html.id);
+              localStorage.setItem('products', JSON.stringify(resp.results));
+              Products.productsList.html.innerHTML = '';
+              Products.resetPriceRange();
+              Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+                Products.productsList.html.append(productCard.html);
+              });
+            }
+          });
+        });
+      } catch (error) {
+        throw new Error(`Error displayCategories: ${error}`);
       }
     }
   }

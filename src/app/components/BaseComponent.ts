@@ -12,6 +12,7 @@ class BaseComponent {
     this.options = options;
     this.element = document.createElement(this.options.tag);
     this.addClass();
+    this.addId();
     this.addAttribute();
     this.addText();
     this.addLink();
@@ -24,6 +25,10 @@ class BaseComponent {
         this.element.classList.add(i);
       });
     }
+  }
+
+  protected addId(): void {
+    this.element.id = this.options.id!;
   }
 
   protected addAttribute(): void {
@@ -54,6 +59,10 @@ class BaseComponent {
 
   public append(child: TagType): void {
     this.element.appendChild(child);
+  }
+
+  addStyleAttribute(style: string): void {
+    this.element.setAttribute('style', style);
   }
 
   public get html(): TagType {

@@ -3,9 +3,11 @@ type ValueAttributeType = string;
 type AttributeType = [NameAttributeType, ValueAttributeType];
 export interface IHtmlElement {
   tag: string;
-  class?: string[];
-  attribute?: AttributeType[];
-  text?: string;
   src?: string;
   alt?: string;
+  id?: string;
+  class?: string[];
+  style?: string;
+  attribute?: AttributeType[];
+  text?: string;
 }

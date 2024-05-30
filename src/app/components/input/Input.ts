@@ -37,6 +37,14 @@ class Input {
     this.input.html.setAttribute('placeholder', text);
   }
 
+  addNameAttribute(name: string): void {
+    this.input.html.setAttribute('name', name);
+  }
+
+  addValueAttribute(value: string): void {
+    this.input.html.setAttribute('value', value);
+  }
+
   get view(): BaseComponent {
     return this.input;
   }

@@ -3,10 +3,14 @@
 .catalog-container {
   display: flex;
   justify-content: space-between;
+  padding: 0 0 0 20px;
 }
 
 .filter-container {
-  width: 25%;
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .products-container {
@@ -20,11 +24,12 @@
   display: grid;
   align-items: stretch;
   justify-content: center;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 33%);
   height: max-content;
   text-align: center;
   gap: 2rem;
   padding: 0;
+  margin: 0;
 }
 
 .product-card {
@@ -34,7 +39,7 @@
   outline: 0.2rem solid hwb(0 92% 7%);
   border-radius: 15px;
   cursor: pointer;
-
+  padding: 4%;
   transition-duration: 0.9s;
 }
 
@@ -43,19 +48,6 @@
 .product-card:focus {
   outline-color: $green;
   scale: 1.05;
-}
-
-.product-card-link {
-  display: block;
-  text-decoration: none;
-  width: 100%;
-  height: 100%;
-  padding: 4% 4%;
-  color: $gray;
-
-  &:visited {
-    color: $gray;
-  }
 }
 
 .img-container {
@@ -113,14 +105,325 @@
   margin-bottom: 0;
 }
 
-@media screen and (max-width: 1270px) {
-  .products-list {
-    grid-template-columns: repeat(2, auto);
+.categories-container {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 0.2rem solid hwb(0 92% 7%);
+  border-right: 0.2rem solid hwb(0 92% 7%);
+  padding-right: 5px;
+}
+
+.categories-title {
+  color: $green;
+  order: 0;
+  font-size: 1.6rem;
+  margin: 15px 0;
+}
+
+.category,
+.subcategory {
+  font-size: 1.35rem;
+  font-weight: 600;
+  padding: 10px 5px;
+  margin: 0px;
+  cursor: pointer;
+  transition-duration: 0.5s;
+  list-style-type: none;
+}
+
+.subcategory {
+  font-size: 0.95rem;
+  font-weight: 400;
+  padding: 10px 14px;
+}
+
+.category:hover,
+.subcategory:hover,
+.category.active,
+.subcategory.active {
+  color: $green;
+  outline: 0.1rem solid hwb(0 92% 7%);
+  border-radius: 5px;
+}
+
+.filter {
+  order: 1;
+  margin-top: 5px;
+  padding: 0 3px;
+}
+
+.filter-range-wrapper {
+  padding: 15px 0px;
+  border-radius: 3px;
+}
+
+.filter-range {
+  position: relative;
+}
+
+.filter-range-scale {
+  cursor: pointer;
+  height: 5px;
+  background-color: hwb(0 92% 7%);
+}
+
+.filter-range-bar {
+  cursor: pointer;
+  height: 5px;
+  background-color: $green;
+}
+
+.filter-range-handle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  box-sizing: content-box;
+  padding: 0;
+  border: 5px solid $green;
+  border-radius: 50%;
+  background-color: $green;
+  cursor: pointer;
+}
+
+.filter-interval {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-left: 5px;
+}
+
+.filter-interval label {
+  width: 100%;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.filter-interval input {
+  width: 100%;
+  height: 1.8rem;
+  outline: 0.15rem solid hwb(0 92% 7%);
+  border-radius: 8px;
+  margin: 8px;
+  border: none;
+  color: inherit;
+  text-align: center;
+}
+
+.filter-label {
+  display: flex;
+  align-items: center;
+}
+
+.brand-conteiner {
+  order: 1;
+  margin: 0;
+  padding: 0;
+}
+
+.reset-button {
+  width: 120px;
+  border-radius: 5px;
+  background-color: #46a358;
+  padding: 8px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: #ffffff;
+  text-align: center;
+  transition: 0.5s all;
+  outline: none;
+  border: none;
+  margin-top: 15px;
+  align-self: center;
+  cursor: pointer;
+  transition-duration: 0.5s;
+
+  &:hover {
+    background-color: $darkGreen;
   }
 }
 
-@media screen and (max-width: 935px) {
+.prices-conteiner {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+@media screen and (max-width: 1270px) {
   .products-list {
-    grid-template-columns: repeat(1, auto);
+    grid-template-columns: repeat(2, 45%);
+    gap: 1.5rem;
+  }
+}
+
+@media screen and (max-width: 1040px) {
+  .products-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .product-card {
+    width: 80%;
+  }
+
+  .img-container {
+    margin: 0 1rem;
+  }
+
+  .products-container {
+    width: 70%;
+  }
+
+  .filter-container {
+    width: 30%;
+  }
+
+  .product-price {
+    font-size: 0.9rem;
+  }
+
+  .product-discount {
+    font-size: 1.1rem;
+  }
+
+  .subcategory {
+    font-size: 0.75rem;
+  }
+}
+
+@media screen and (max-width: 710px) {
+  .filter-container {
+    width: 35%;
+  }
+
+  .categories-title {
+    font-size: 1.3rem;
+  }
+
+  .category {
+    font-size: 1.05rem;
+  }
+
+  .subcategory {
+    font-size: 0.65rem;
+  }
+
+  .filter-interval label {
+    font-size: 0.6rem;
+  }
+
+  .filter-interval input {
+    height: 1.35rem;
+  }
+
+  .product-title {
+    font-size: 0.9rem;
+  }
+
+  .product-description {
+    font-size: 0.7rem;
+  }
+
+  .filter-range-handle {
+    border: 3px solid #46a358;
+  }
+
+  .filter-range-scale,
+  .filter-range-bar {
+    height: 4px;
+  }
+
+  .product-price {
+    font-size: 0.7rem;
+  }
+
+  .product-discount {
+    font-size: 0.9rem;
+  }
+}
+
+@media screen and (max-width: 550px) {
+  .filter-container {
+    width: 40%;
+  }
+
+  .categories-title {
+    font-size: 1.1rem;
+  }
+
+  .category {
+    font-size: 0.85rem;
+  }
+
+  .filter-interval label {
+    font-size: 0.4rem;
+  }
+
+  .filter-interval input {
+    height: 1.15rem;
+  }
+
+  .reset-button {
+    width: 90px;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    padding: 5px 20px;
+  }
+
+  .product-title {
+    font-size: 0.8rem;
+  }
+
+  .product-description {
+    font-size: 0.6rem;
+  }
+
+  .price-container {
+    flex-direction: column;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .filter-container {
+    width: 43%;
+  }
+
+  .subcategory {
+    font-size: 0.6rem;
+    padding-left: 8px;
+  }
+
+  .categories-title {
+    font-size: 0.8rem;
+  }
+
+  .category {
+    font-size: 0.65rem;
+  }
+
+  .filter-interval label {
+    font-size: 0.4rem;
+  }
+
+  .filter-interval input {
+    height: 1.15rem;
+    margin-right: 0;
+  }
+
+  .reset-button {
+    width: 60px;
+    font-size: 0.7rem;
+    padding: 5px 10px;
+  }
+
+  .filter-interval input {
+    height: 0.95rem;
   }
 }
