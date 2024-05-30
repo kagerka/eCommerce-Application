@@ -62,6 +62,26 @@ export interface IQueryProducts {
   results: IProducts[];
 }
 
+export interface ICategories {
+  results(results: string): string;
+  id: string;
+  version: number;
+  name: {
+    en: string;
+  };
+  slug: {
+    en: string;
+  };
+  parent: {
+    typeId: string;
+    id: string;
+  };
+  ancestors: [];
+  orderHint: string;
+  createdAt: string;
+  lastModifiedAt: string;
+}
+
 export interface ICurrentProduct {
   name: {
     en: string;

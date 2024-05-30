@@ -1,6 +1,11 @@
 @import './../../../styles/colors.scss';
 @import './../../../styles/variables';
 
+a {
+  text-decoration: none;
+  color: black;
+}
+
 .main-content {
   min-height: calc(100vh - $headerHeight - $footerHeight - 2 * $pageGap);
   display: flex;
