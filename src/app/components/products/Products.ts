@@ -14,7 +14,7 @@ let isDraggingMin = false;
 let isDraggingMax = false;
 
 class Products {
-   private catalogContainer: BaseComponent;
+  private catalogContainer: BaseComponent;
 
   private filterContainer: BaseComponent;
 
@@ -32,7 +32,7 @@ class Products {
 
   private resetButton: BaseComponent;
 
- constructor() {
+  constructor() {
     this.catalogContainer = Products.createCatalogContainerElement();
     this.filterContainer = Products.createFilterContainerElement();
     this.categoriesTitle = Products.createCategoriesTitle();
@@ -126,7 +126,7 @@ class Products {
     return productCards;
   }
 
-static createCategoriesFromLocalStorage(): BaseComponent[] {
+  static createCategoriesFromLocalStorage(): BaseComponent[] {
     const categoryCards: BaseComponent[] = [];
     if (localStorage.getItem('categories') !== null) {
       const categoriesJSON = localStorage.getItem('categories');
@@ -141,8 +141,8 @@ static createCategoriesFromLocalStorage(): BaseComponent[] {
     }
     return categoryCards;
   }
-  
- private static createCatalogContainerElement(): BaseComponent {
+
+  private static createCatalogContainerElement(): BaseComponent {
     return new BaseComponent({ tag: 'div', class: ['catalog-container'] });
   }
 
@@ -177,7 +177,7 @@ static createCategoriesFromLocalStorage(): BaseComponent[] {
   private static createResetButton(): BaseComponent {
     return new BaseComponent({ tag: 'button', class: ['reset-button'], text: 'Reset' });
   }
-  
+
   private static createProductListener(link: string, currentProduct: IProducts): BaseComponent {
     const productLink = new BaseComponent({
       tag: 'a',
@@ -228,16 +228,17 @@ static createCategoriesFromLocalStorage(): BaseComponent[] {
       price.html.classList.add('crossed');
     }
   }
-  
-  private static createProductCard(cardNumber: number): BaseComponent {
+
+  private static createProductCard(cardNumber: number, fullData: boolean): BaseComponent {
     const productsJSON = localStorage.getItem('products');
-    if (!productsJSON) {
-      return new BaseComponent({ tag: 'div' });
+
+    let path = JSON.parse(productsJSON!)[cardNumber]?.masterData?.current;
+
+    if (!fullData) {
+      path = JSON.parse(productsJSON!)[cardNumber];
     }
 
-    const product = JSON.parse(productsJSON);
-    const pathPart = product[cardNumber]?.masterData?.current;
-    const variant = Products.addPrice() ? pathPart?.masterVariant?.prices[1] : pathPart?.masterVariant?.prices[0];
+    const variant = Products.addPrice() ? path?.masterVariant?.prices[1] : path?.masterVariant?.prices[0];
 
     const productPrice = variant?.value.centAmount;
     const productDiscount = variant?.discounted?.value.centAmount;
@@ -247,10 +248,10 @@ static createCategoriesFromLocalStorage(): BaseComponent[] {
     const formattedPrice = (productPrice / cents).toFixed(hundredthsRound);
     const formattedDiscount = (productDiscount / cents).toFixed(hundredthsRound);
 
-    const productTitle = pathPart?.name.en;
-    const productDescription = pathPart?.description.en;
-    const productImage = pathPart?.masterVariant.images[0].url;
-    const link = pathPart?.slug.en;
+    const productTitle = path?.name.en;
+    const productDescription = path?.description.en;
+    const productImage = path?.masterVariant.images[0].url;
+    const link = path?.slug.en;
 
     const productCard = new BaseComponent({ tag: 'li', class: ['product-card'] });
 
@@ -264,7 +265,7 @@ static createCategoriesFromLocalStorage(): BaseComponent[] {
       productCard,
       productDiscount,
       formattedDiscount,
-      pathPart,
+      path,
     );
 
     return productCard;
@@ -416,53 +417,6 @@ static createCategoriesFromLocalStorage(): BaseComponent[] {
     return minValue + (position / cents) * range;
   }
 
-  private static createProductCard(cardNumber: number, fullData: boolean): BaseComponent {
-    const productsJSON = localStorage.getItem('products');
-
-    let path = JSON.parse(productsJSON!)[cardNumber]?.masterData?.current;
-
-    if (!fullData) {
-      path = JSON.parse(productsJSON!)[cardNumber];
-    }
-
-    const variant = Products.addPrice() ? path?.masterVariant?.prices[1] : path?.masterVariant?.prices[0];
-
-    const productPrice = variant?.value.centAmount;
-    const productDiscount = variant?.discounted?.value.centAmount;
-    const currencySymbol = Products.addPrice() ? 'RUB' : '$';
-    const hundredthsRound = 2;
-
-    const formattedPrice = (productPrice / cents).toFixed(hundredthsRound);
-    const formattedDiscount = (productDiscount / cents).toFixed(hundredthsRound);
-
-    const productTitle = path?.name.en;
-    const productDescription = path?.description.en;
-    const productImage = path?.masterVariant.images[0].url;
-
-    const productCard = new BaseComponent({ tag: 'li', class: ['product-card'] });
-    const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });
-    const infoContainer = new BaseComponent({ tag: 'div', class: ['info-container'] });
-    const img = new BaseComponent({ tag: 'img', class: ['product-img'], src: productImage });
-    const title = new BaseComponent({ tag: 'h3', class: ['product-title'], text: productTitle });
-    const priceContainer = new BaseComponent({ tag: 'div', class: ['price-container'] });
-    const priceText = `${formattedPrice} ${currencySymbol}`;
-    const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: priceText });
-    const description = new BaseComponent({ tag: 'p', class: ['product-description'], text: productDescription });
-
-    productCard.html.append(imgContainer.html, infoContainer.html);
-    imgContainer.html.append(img.html);
-    infoContainer.html.append(title.html, priceContainer.html, description.html);
-    priceContainer.html.append(price.html);
-    if (productDiscount) {
-      const discountText = `${formattedDiscount} ${currencySymbol}`;
-      const discount = new BaseComponent({ tag: 'h4', class: ['product-discount'], text: discountText });
-      priceContainer.html.append(discount.html);
-      price.html.classList.add('crossed');
-    }
-
-    return productCard;
-  }
-  
   private static createCategoryElement(
     pathPart: { name: { en: string }; parent: { id: string }; id: string },
     isTopLevel: boolean,
@@ -479,27 +433,6 @@ static createCategoriesFromLocalStorage(): BaseComponent[] {
     return categoryNameEl;
   }
 
-  private static createCategory(categoryNumber: number): BaseComponent | null {
-    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
-    if (!token) return null;
-
-    const categoriesJSON = localStorage.getItem('categories');
-    const category = JSON.parse(categoriesJSON!);
-    const pathPart = category.results[categoryNumber];
-
-    const isParent = !pathPart.parent;
-    const categoryNameEl = this.createCategoryElement(pathPart, isParent);
-    this.handleCategoryClick(categoryNameEl, pathPart, token);
-
-    categoryNameEl.html.addEventListener('click', () => {
-      categoryNameEl.html.classList.add('active');
-      this.removeActiveClassFromElements(isParent ? 'category' : 'subcategory', categoryNameEl.html);
-      this.removeActiveClassFromElements(isParent ? 'subcategory' : 'category', categoryNameEl.html);
-    });
-
-    return categoryNameEl;
-  }
-
   private static removeActiveClassFromElements(className: string, excludeElement: HTMLElement): void {
     const elements = document.getElementsByClassName(className);
     for (let i = 0; i < elements.length; i += iteratorStep) {
@@ -546,20 +479,6 @@ static createCategoriesFromLocalStorage(): BaseComponent[] {
       country = false;
     }
     return country;
-  }private static createCategoryElement(
-    pathPart: { name: { en: string }; parent: { id: string }; id: string },
-    isTopLevel: boolean,
-  ): BaseComponent {
-    const categoryName = pathPart.name.en;
-    const tag = isTopLevel ? 'ul' : 'li';
-    const classList = isTopLevel ? ['category'] : ['subcategory', pathPart.parent.id];
-    const categoryNameEl = new BaseComponent({
-      tag,
-      class: classList,
-      id: pathPart.id,
-      text: categoryName,
-    });
-    return categoryNameEl;
   }
 
   private static createCategory(categoryNumber: number): BaseComponent | null {
@@ -581,54 +500,6 @@ static createCategoriesFromLocalStorage(): BaseComponent[] {
     });
 
     return categoryNameEl;
-  }
-
-  private static removeActiveClassFromElements(className: string, excludeElement: HTMLElement): void {
-    const elements = document.getElementsByClassName(className);
-    for (let i = 0; i < elements.length; i += iteratorStep) {
-      if (elements[i] !== excludeElement) {
-        elements[i].classList.remove('active');
-      }
-    }
-  }
-
-  private static handleCategoryClick(
-    categoryNameEl: BaseComponent,
-    pathPart: { name: { en: string }; parent: { id: string }; id: string },
-    token: string,
-  ): void {
-    categoryNameEl.html.addEventListener('click', async () => {
-      categoryNameEl.html.classList.add('active');
-      const els = document.getElementsByClassName('subcategory');
-      Products.productsList.html.innerHTML = '';
-      Products.resetPriceRange();
-      for (let i = 0; i < els.length; i += iteratorStep) {
-        if (els[i].className === `subcategory ${pathPart.id}`) {
-          ECommerceApi.getSelectedProducts(currentClient, token, els[i].id).then((resp) => {
-            localStorage.setItem('products', JSON.stringify(resp.results));
-            Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
-              Products.productsList.html.append(productCard.html);
-            });
-          });
-        }
-      }
-    });
-  }
-
-  private static addPrice(): boolean {
-    let country;
-    if (localStorage.getItem('customer') !== null) {
-      const customerJSON = localStorage.getItem('customer');
-      const customer = JSON.parse(customerJSON!);
-      if (customer.addresses[0].country === 'RU') {
-        country = true;
-      } else {
-        country = false;
-      }
-    } else {
-      country = false;
-    }
-    return country;
   }
 
   get view(): BaseComponent {
