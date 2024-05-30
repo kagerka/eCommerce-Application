@@ -115,7 +115,6 @@ class MainPage {
       try {
         const res = await ECommerceApi.getCategories(currentClient, token);
         localStorage.setItem('categories', JSON.stringify(res));
-
         Products.createCategoriesFromLocalStorage().forEach((category) => {
           Products.categoriesContainer.html.append(category.html);
           category.html.addEventListener('click', async () => {
@@ -123,6 +122,7 @@ class MainPage {
               const resp = await ECommerceApi.getSelectedProducts(currentClient, token, category.html.id);
               localStorage.setItem('products', JSON.stringify(resp.results));
               Products.productsList.html.innerHTML = '';
+              Products.resetPriceRange();
               Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
                 Products.productsList.html.append(productCard.html);
               });

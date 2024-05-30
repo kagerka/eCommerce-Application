@@ -63,9 +63,52 @@ class Products {
   }
 
   private resetProducts(): void {
-    this.resetButton.html.addEventListener('click', () => {
-      this.catalogContainer.html.innerHTML = '';
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    this.resetButton.html.addEventListener('click', async () => {
+      if (token) {
+        const subcategory = document.getElementsByClassName('subcategory');
+        Products.productsList.html.innerHTML = '';
+
+        for (let i = 0; i < subcategory.length; i += iteratorStep) {
+          ECommerceApi.getSelectedProducts(currentClient, token, subcategory[i].id).then((resp) => {
+            Products.resetCategoriesClass();
+            Products.resetPriceRange();
+
+            localStorage.setItem('products', JSON.stringify(resp.results));
+            Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+              Products.productsList.html.append(productCard.html);
+            });
+          });
+        }
+      }
     });
+  }
+
+  static resetPriceRange(): void {
+    const subcategory = document.getElementsByClassName('subcategory');
+    const filterMin = document.getElementsByClassName('min')[0] as HTMLElement;
+    const filterMax = document.getElementsByClassName('max')[0] as HTMLElement;
+    const minPrice = document.getElementsByClassName('min-price')[0];
+    const maxPrice = document.getElementsByClassName('max-price')[0];
+    const filterBar = document.getElementsByClassName('filter-range-bar')[0] as HTMLElement;
+
+    for (let i = 0; i < subcategory.length; i += iteratorStep) {
+      filterMin.style.left = '0%';
+      filterMax.style.left = '95%';
+      minPrice.textContent = `${minValue}$`;
+      maxPrice.textContent = `${maxValue}$`;
+      filterBar.style.marginLeft = '0';
+      filterBar.style.marginRight = '0';
+    }
+  }
+
+  static resetCategoriesClass(): void {
+    const subcategory = document.getElementsByClassName('subcategory');
+    const category = document.getElementsByClassName('category');
+    for (let i = 0; i < subcategory.length; i += iteratorStep) {
+      category[i]?.classList.remove('active');
+      subcategory[i].classList.remove('active');
+    }
   }
 
   static createProductCardsFromLocalStorage(fullData: boolean): BaseComponent[] {
@@ -219,6 +262,7 @@ class Products {
     Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
       Products.productsList.html.append(productCard.html);
     });
+    Products.resetCategoriesClass();
   }
 
   private static handleTouchMovement(
@@ -380,6 +424,7 @@ class Products {
       categoryNameEl.html.classList.add('active');
       const els = document.getElementsByClassName('subcategory');
       Products.productsList.html.innerHTML = '';
+      Products.resetPriceRange();
       for (let i = 0; i < els.length; i += iteratorStep) {
         if (els[i].className === `subcategory ${pathPart.id}`) {
           ECommerceApi.getSelectedProducts(currentClient, token, els[i].id).then((resp) => {

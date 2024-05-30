@@ -182,7 +182,6 @@ class ECommerceApi {
       throw new Error(`HTTP error! status: ${response.status}`);
     } else {
       const json = await response.json();
-      console.log(json);
       return json;
     }
   }
