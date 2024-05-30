@@ -14,7 +14,7 @@ let isDraggingMin = false;
 let isDraggingMax = false;
 
 class Products {
-  private catalogContainer: BaseComponent;
+   private catalogContainer: BaseComponent;
 
   private filterContainer: BaseComponent;
 
@@ -32,7 +32,7 @@ class Products {
 
   private resetButton: BaseComponent;
 
-  constructor() {
+ constructor() {
     this.catalogContainer = Products.createCatalogContainerElement();
     this.filterContainer = Products.createFilterContainerElement();
     this.categoriesTitle = Products.createCategoriesTitle();
@@ -126,7 +126,7 @@ class Products {
     return productCards;
   }
 
-  static createCategoriesFromLocalStorage(): BaseComponent[] {
+static createCategoriesFromLocalStorage(): BaseComponent[] {
     const categoryCards: BaseComponent[] = [];
     if (localStorage.getItem('categories') !== null) {
       const categoriesJSON = localStorage.getItem('categories');
@@ -141,8 +141,8 @@ class Products {
     }
     return categoryCards;
   }
-
-  private static createCatalogContainerElement(): BaseComponent {
+  
+ private static createCatalogContainerElement(): BaseComponent {
     return new BaseComponent({ tag: 'div', class: ['catalog-container'] });
   }
 
@@ -177,7 +177,7 @@ class Products {
   private static createResetButton(): BaseComponent {
     return new BaseComponent({ tag: 'button', class: ['reset-button'], text: 'Reset' });
   }
-
+  
   private static createProductListener(link: string, currentProduct: IProducts): BaseComponent {
     const productLink = new BaseComponent({
       tag: 'a',
@@ -228,7 +228,7 @@ class Products {
       price.html.classList.add('crossed');
     }
   }
-
+  
   private static createProductCard(cardNumber: number, fullData: boolean): BaseComponent {
     const productsJSON = localStorage.getItem('products');
 
@@ -416,7 +416,7 @@ class Products {
     const range = maxValue - minValue;
     return minValue + (position / cents) * range;
   }
-
+  
   private static createCategoryElement(
     pathPart: { name: { en: string }; parent: { id: string }; id: string },
     isTopLevel: boolean,
