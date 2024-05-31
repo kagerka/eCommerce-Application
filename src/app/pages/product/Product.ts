@@ -1,5 +1,12 @@
+import ECommerceApi from '../../api/ECommerceApi';
+import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import { IProductImages } from '../../interfaces/Product.interface';
+import getBedrooms from '../../utils/productAttributes/getBedrooms';
+import getBrand from '../../utils/productAttributes/getBrand';
+import getPersons from '../../utils/productAttributes/getPersons';
+import getPrices from '../../utils/productAttributes/getPrices';
+import getSizes from '../../utils/productAttributes/getSizes';
 import closeButton from '../../utils/svg/closeButton';
 import leftArrowBtn from '../../utils/svg/leftArrow';
 import rightArrowBtn from '../../utils/svg/rightArrow';
@@ -8,6 +15,20 @@ import './Product.scss';
 const gap = 16;
 const startPos = 0;
 const count = 1;
+
+type TProductDetails = {
+  name: string;
+  description: string;
+  images: IProductImages[];
+  formattedPrice: string;
+  formattedDiscount: string;
+  currencySymbol: string;
+  productDiscount: number;
+  brand: string;
+  sizes: string[];
+  bedrooms: string[];
+  persons: string[];
+};
 
 class Product {
   private productPageContent: BaseComponent;
@@ -364,6 +385,58 @@ class Product {
     }
 
     return personsContainer;
+  }
+
+  private static async fetchProductByID(): Promise<void> {
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    const id = localStorage.getItem('id')?.replace(/"/g, '');
+
+    if (token && id) {
+      try {
+        const res = await ECommerceApi.getProductByID(currentClient, token, id);
+        localStorage.setItem('productData', JSON.stringify(res));
+      } catch (error) {
+        throw new Error(`Error displayCategories: ${error}`);
+      }
+    }
+  }
+
+  static async getProductDetails(): Promise<TProductDetails> {
+    await Product.fetchProductByID();
+
+    const productJSON = localStorage.getItem('productData');
+    const product = JSON.parse(productJSON || '').masterData.current;
+
+    const name = product.name.en;
+    const description = product.description.en;
+    const { images } = product.masterVariant;
+    const { attributes } = product.masterVariant;
+    const { variants } = product;
+
+    const brand = getBrand(attributes);
+    const sizes = getSizes(variants, attributes);
+    const prices = getPrices(product);
+    const { formattedPrice } = prices;
+    const { formattedDiscount } = prices;
+    const { currencySymbol } = prices;
+    const { productDiscount } = prices;
+    const bedrooms = getBedrooms(variants, attributes);
+    const persons = getPersons(variants, attributes);
+
+    const productData = {
+      name,
+      description,
+      images,
+      formattedPrice,
+      formattedDiscount,
+      currencySymbol,
+      productDiscount,
+      brand,
+      sizes,
+      bedrooms,
+      persons,
+    };
+    return productData;
   }
 
   get view(): BaseComponent {

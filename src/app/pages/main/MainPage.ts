@@ -1,85 +1,63 @@
-import ECommerceApi from '../../api/ECommerceApi';
-import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Banner from '../../components/banner/Banner';
-import Products from '../../components/products/Products';
-
-import { IQueryProducts } from '../../interfaces/Product.interface';
-
 import './MainPage.scss';
-
-const products: IQueryProducts = {
-  limit: 70,
-  offset: 0,
-  count: 0,
-  total: 0,
-  results: [],
-};
+import image from './catalog-banner.jpg';
 
 class MainPage {
   private main: BaseComponent;
 
   private banner: Banner;
 
-  private products: Products;
+  private catalogBannerContainer: BaseComponent;
+
+  private catalogBanner: BaseComponent;
+
+  private catalogBannerText: BaseComponent;
+
+  private catalogBannerImage: BaseComponent;
 
   constructor() {
     this.main = MainPage.createMainContentElement();
     this.banner = new Banner();
-    this.products = new Products();
+    this.catalogBannerContainer = MainPage.createCatalogBannerContainerElement();
+    this.catalogBanner = MainPage.createCatalogBannerContentElement();
+    this.catalogBannerText = MainPage.createBannerTextContentElement();
+    this.catalogBannerImage = MainPage.createBannerImageContentElement();
+
     this.composeView();
   }
 
   private composeView(): void {
-    this.main.html.append(this.banner.view.html, this.products.view.html);
+    this.main.html.append(this.banner.view.html, this.catalogBannerContainer.html);
+    this.catalogBannerContainer.html.append(this.catalogBanner.html);
+    this.catalogBanner.html.append(this.catalogBannerText.html, this.catalogBannerImage.html);
   }
 
   private static createMainContentElement(): BaseComponent {
     return new BaseComponent({ tag: 'main', class: ['main-content'] });
   }
 
-  static async displayProducts(): Promise<void> {
-    const token = localStorage.getItem('tokenPassword')
-      ? localStorage.getItem('tokenPassword')
-      : localStorage.getItem('tokenAnonymous');
-    if (token) {
-      try {
-        const res = await ECommerceApi.getProducts(currentClient, token, products.limit);
-        products.results = res.results;
-        localStorage.setItem('products', JSON.stringify(products.results));
-        await Products.createProductCardsFromLocalStorage(true).forEach((productCard) => {
-          Products.productsList.html.append(productCard.html);
-        });
-      } catch (error) {
-        throw new Error(`Error displayProducts: ${error}`);
-      }
-    }
+  private static createCatalogBannerContainerElement(): BaseComponent {
+    return new BaseComponent({ tag: 'main', class: ['catalog-banner-container'] });
   }
 
-  static async displayCategories(): Promise<void> {
-    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
-    if (token) {
-      try {
-        const res = await ECommerceApi.getCategories(currentClient, token);
-        localStorage.setItem('categories', JSON.stringify(res));
-        Products.createCategoriesFromLocalStorage().forEach((category) => {
-          Products.categoriesContainer.html.append(category.html);
-          category.html.addEventListener('click', async () => {
-            if (!category.html.classList.contains('category')) {
-              const resp = await ECommerceApi.getSelectedProducts(currentClient, token, category.html.id);
-              localStorage.setItem('products', JSON.stringify(resp.results));
-              Products.productsList.html.innerHTML = '';
-              Products.resetPriceRange();
-              Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
-                Products.productsList.html.append(productCard.html);
-              });
-            }
-          });
-        });
-      } catch (error) {
-        throw new Error(`Error displayCategories: ${error}`);
-      }
-    }
+  private static createCatalogBannerContentElement(): BaseComponent {
+    return new BaseComponent({
+      tag: 'a',
+      class: ['catalog-banner-content'],
+      attribute: [
+        ['href', '/catalog'],
+        ['data-navigo', ''],
+      ],
+    });
+  }
+
+  private static createBannerTextContentElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['catalog-banner-text'], text: 'Visit our catalog' });
+  }
+
+  private static createBannerImageContentElement(): BaseComponent {
+    return new BaseComponent({ tag: 'img', class: ['catalog-banner-image'], src: image });
   }
 
   get view(): BaseComponent {
