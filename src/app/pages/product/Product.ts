@@ -5,6 +5,10 @@ import leftArrowBtn from '../../utils/svg/leftArrow';
 import rightArrowBtn from '../../utils/svg/rightArrow';
 import './Product.scss';
 
+const gap = 16;
+const startPos = 0;
+const count = 1;
+
 class Product {
   private productPageContent: BaseComponent;
 
@@ -66,7 +70,8 @@ class Product {
     this.productBedrooms = Product.createProductBedroomsContainerElement(bedrooms);
     this.productPersons = Product.createProductPersonsContainerElement(persons);
     this.modalContainer = Product.createModalContainerElement();
-    this.addImages(images);
+    this.addImages(images, this.productImagesPreviewContainer.html);
+
     this.composeView();
   }
 
@@ -81,6 +86,7 @@ class Product {
       this.productImagesSelectedContent.html,
     );
     this.productImagesPreviewContainer.html.append(this.productImagesPreviewContent.html);
+    this.productImagesPreviewContainer.html.append(this.productImagesPreviewContent.html);
     this.productInfoContent.html.append(
       this.productName.html,
       this.productPrice.html,
@@ -90,6 +96,15 @@ class Product {
       this.productBedrooms.html,
       this.productPersons.html,
     );
+  }
+
+  private static addResizeListener(): void {
+    window.addEventListener('resize', () => {
+      const modalWindow = document.getElementsByClassName('modal-img-content')[0] as HTMLElement;
+      if (modalWindow) {
+        modalWindow.style.marginLeft = '0';
+      }
+    });
   }
 
   private static createProductPageContentElement(): BaseComponent {
@@ -116,19 +131,64 @@ class Product {
     return new BaseComponent({ tag: 'div', class: ['modal-container', 'hidden'] });
   }
 
-  private createImageModalContentElement(image: BaseComponent): BaseComponent {
-    const imageTag = image.html.childNodes[0] as HTMLImageElement;
-    const imageSrc = imageTag.src;
+  private createImageModalContentElement(images: IProductImages[], imageEl: HTMLElement): BaseComponent {
     const modalWindow = new BaseComponent({ tag: 'div', class: ['modal-window'] });
-    const modalImgAndIconContainer = new BaseComponent({ tag: 'div', class: ['modal-img-icon-container'] });
-    const modalImage = new BaseComponent({ tag: 'img', class: ['modal-image'], src: imageSrc });
+    const modalImgContent = new BaseComponent({ tag: 'div', class: ['modal-img-content'] });
     const modalCloseIcon = new BaseComponent({ tag: 'div', class: ['modal-close-icon'] });
     modalCloseIcon.html.innerHTML = closeButton;
     this.modalContainer.html.append(modalWindow.html);
-    modalWindow.html.append(modalImgAndIconContainer.html);
-    modalImgAndIconContainer.html.append(modalImage.html, modalCloseIcon.html);
+    modalWindow.html.append(modalImgContent.html, modalCloseIcon.html);
     this.closeModal(modalCloseIcon);
+    const imageTag = imageEl.childNodes[0] as HTMLImageElement;
+    const imageSrc = imageTag.src;
+    images.forEach((image) => {
+      const modalImgAndIconContainer = new BaseComponent({ tag: 'div', class: ['modal-img-icon-container'] });
+      const modalImage = new BaseComponent({ tag: 'img', class: ['modal-image'], src: image.url });
+      modalImgContent.html.append(modalImgAndIconContainer.html);
+      modalImgAndIconContainer.html.append(modalImage.html);
+      if (imageSrc === image.url) {
+        modalImgAndIconContainer.html.id = 'selected-modal';
+      }
+    });
+    Product.addResizeListener();
     return this.modalContainer;
+  }
+
+  private static createModalSlider(containerEl: HTMLElement): void {
+    const leftArrow = new BaseComponent({ tag: 'div', class: ['left-arrow-modal'] });
+    const rightArrow = new BaseComponent({ tag: 'div', class: ['right-arrow-modal'] });
+    const modalWindow = document.getElementsByClassName('modal-img-content')[0] as HTMLElement;
+    const modal = document.getElementsByClassName('modal-window')[0] as HTMLElement;
+    leftArrow.html.innerHTML = leftArrowBtn;
+    rightArrow.html.innerHTML = rightArrowBtn;
+    containerEl.append(leftArrow.html, rightArrow.html);
+    let num = 1;
+    let position = 0;
+    const images = modalWindow.children;
+    const numImages = images.length;
+    rightArrow.html.addEventListener('click', () => {
+      const width = (modal as HTMLElement).offsetWidth + gap;
+      position -= width * count;
+      position = Math.max(position, -width * (numImages - count));
+      modalWindow.style.marginLeft = `${position}px`;
+      num += count;
+      if (numImages === num) {
+        num = count;
+        position = startPos;
+      }
+    });
+
+    leftArrow.html.addEventListener('click', () => {
+      const width = (modal as HTMLElement).offsetWidth + gap;
+      num -= count;
+      if (num <= count) {
+        num = numImages;
+        position = -width * (num - count);
+      } else {
+        position += width * count;
+      }
+      modalWindow.style.marginLeft = `${position}px`;
+    });
   }
 
   private closeModal(closeIcon: BaseComponent): void {
@@ -137,24 +197,26 @@ class Product {
     });
   }
 
-  private zoomImage(image: BaseComponent): void {
-    image.html.addEventListener('click', () => {
+  private zoomImage(images: IProductImages[], imageEl: HTMLElement): void {
+    imageEl.addEventListener('click', () => {
       this.modalContainer.html.innerHTML = '';
       this.modalContainer.html.classList.remove('hidden');
-      const modal = this.createImageModalContentElement(image);
+      const modal = this.createImageModalContentElement(images, imageEl);
       this.productPageContent.html.append(modal.html);
+      const modalWindow = document.getElementsByClassName('modal-window')[0] as HTMLElement;
+      Product.createModalSlider(modalWindow);
     });
   }
 
-  private createSliderIcons(): void {
+  private createSliderIcons(containerEl: HTMLElement): void {
     const leftArrow = new BaseComponent({ tag: 'div', class: ['left-arrow-icon'] });
     const rightArrow = new BaseComponent({ tag: 'div', class: ['right-arrow-icon'] });
     leftArrow.html.innerHTML = leftArrowBtn;
     rightArrow.html.innerHTML = rightArrowBtn;
-    this.productImagesPreviewContainer.html.append(leftArrow.html, rightArrow.html);
+    containerEl.append(leftArrow.html, rightArrow.html);
     let position = 0;
     const width = 100;
-    const count = 1;
+
     rightArrow.html.addEventListener('click', () => {
       const elements = this.productImagesPreviewContent.html.children;
       const arrayOfElements = [...elements];
@@ -171,7 +233,7 @@ class Product {
     });
   }
 
-  private addImages(images: IProductImages[]): void {
+  private addImages(images: IProductImages[], containerEl: HTMLElement): void {
     images.forEach((image, i) => {
       const ZERO = 0;
       const img = new BaseComponent({ tag: 'img', class: ['product-page-image'], src: image.url });
@@ -181,7 +243,7 @@ class Product {
         imgContainer.html.classList.add('selected-image');
         this.productImagesSelectedContent.html.append(imgContainer.html);
         imgContainer.html.append(img.html);
-        this.zoomImage(imgContainer);
+        this.zoomImage(images, imgContainer.html);
       } else {
         this.productImagesPreviewContent.html.append(imgContainer.html);
         imgContainer.html.append(img.html);
@@ -197,7 +259,7 @@ class Product {
       });
     });
 
-    this.createSliderIcons();
+    this.createSliderIcons(containerEl);
   }
 
   private static createProductInfoContentElement(): BaseComponent {
