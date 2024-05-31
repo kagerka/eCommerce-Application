@@ -69,6 +69,7 @@ class Product {
     this.addImages(images, this.productImagesPreviewContainer.html);
 
     this.composeView();
+    Product.addResizeListener();
   }
 
   private composeView(): void {
@@ -92,6 +93,13 @@ class Product {
       this.productBedrooms.html,
       this.productPersons.html,
     );
+  }
+
+  private static addResizeListener(): void {
+    window.addEventListener('resize', () => {
+      const modalWindow = document.getElementsByClassName('modal-img-content')[0] as HTMLElement;
+      modalWindow.style.marginLeft = '0';
+    });
   }
 
   private static createProductPageContentElement(): BaseComponent {
@@ -118,22 +126,96 @@ class Product {
     return new BaseComponent({ tag: 'div', class: ['modal-container', 'hidden'] });
   }
 
-  private createImageModalContentElement(image: BaseComponent): BaseComponent {
-    const imageTag = image.html.childNodes[0] as HTMLImageElement;
-    const imageSrc = imageTag.src;
+  private createImageModalContentElement(images: IProductImages[], imageEl: HTMLElement): BaseComponent {
     const modalWindow = new BaseComponent({ tag: 'div', class: ['modal-window'] });
     const modalImgContent = new BaseComponent({ tag: 'div', class: ['modal-img-content'] });
-    const modalImgAndIconContainer = new BaseComponent({ tag: 'div', class: ['modal-img-icon-container'] });
-    const modalImage = new BaseComponent({ tag: 'img', class: ['modal-image'], src: imageSrc });
     const modalCloseIcon = new BaseComponent({ tag: 'div', class: ['modal-close-icon'] });
     modalCloseIcon.html.innerHTML = closeButton;
     this.modalContainer.html.append(modalWindow.html);
-    modalWindow.html.append(modalImgContent.html);
-    modalImgContent.html.append(modalImgAndIconContainer.html);
-    modalImgAndIconContainer.html.append(modalImage.html, modalCloseIcon.html);
+    modalWindow.html.append(modalImgContent.html, modalCloseIcon.html);
     this.closeModal(modalCloseIcon);
-    this.createSliderIcons(modalWindow.html);
+    const imageTag = imageEl.childNodes[0] as HTMLImageElement;
+    const imageSrc = imageTag.src;
+    images.forEach((image) => {
+      const modalImgAndIconContainer = new BaseComponent({ tag: 'div', class: ['modal-img-icon-container'] });
+      const modalImage = new BaseComponent({ tag: 'img', class: ['modal-image'], src: image.url });
+      modalImgContent.html.append(modalImgAndIconContainer.html);
+      modalImgAndIconContainer.html.append(modalImage.html);
+      if (imageSrc === image.url) {
+        modalImgAndIconContainer.html.id = 'selected-modal';
+      }
+    });
     return this.modalContainer;
+  }
+
+  private addModalImages(images: IProductImages[], containerEl: HTMLElement): void {
+    images.forEach((image, i) => {
+      const ZERO = 0;
+      const img = new BaseComponent({ tag: 'img', class: ['modal-image'], src: image.url });
+      const imgContainer = new BaseComponent({ tag: 'div', class: ['modal-img-icon-container'] });
+      let currentImg: BaseComponent;
+      if (i === ZERO) {
+        imgContainer.html.classList.add('selected-image');
+        this.productImagesSelectedContent.html.append(imgContainer.html);
+        imgContainer.html.append(img.html);
+        this.zoomImage(images, imgContainer.html);
+      } else {
+        this.productImagesPreviewContent.html.append(imgContainer.html);
+        imgContainer.html.append(img.html);
+      }
+
+      imgContainer.html.addEventListener('click', () => {
+        const selectedImg = document.querySelector('.selected-image');
+        currentImg = img;
+        const currentImageSrc = currentImg.html.getAttribute('src');
+        const selectedImgTag = selectedImg?.children[0] as HTMLImageElement;
+        if (currentImageSrc) selectedImgTag?.setAttribute('src', currentImageSrc);
+        imgContainer.html.classList.remove('image-preview');
+      });
+    });
+    Product.createModalSlider(containerEl);
+  }
+
+  private static createModalSlider(containerEl: HTMLElement): void {
+    const leftArrow = new BaseComponent({ tag: 'div', class: ['left-arrow-modal'] });
+    const rightArrow = new BaseComponent({ tag: 'div', class: ['right-arrow-modal'] });
+    const modalWindow = document.getElementsByClassName('modal-img-content')[0] as HTMLElement;
+    const modal = document.getElementsByClassName('modal-window')[0] as HTMLElement;
+    leftArrow.html.innerHTML = leftArrowBtn;
+    rightArrow.html.innerHTML = rightArrowBtn;
+    containerEl.append(leftArrow.html, rightArrow.html);
+    let num = 1;
+    let position = 0;
+    const gap = 16;
+    const startPos = 0;
+    let width = (modal as HTMLElement).offsetWidth + gap;
+    const count = 1;
+    const images = modalWindow.children;
+    const numImages = images.length;
+
+    rightArrow.html.addEventListener('click', () => {
+      width = (modal as HTMLElement).offsetWidth + gap;
+      position -= width * count;
+      position = Math.max(position, -width * (numImages - count));
+      modalWindow.style.marginLeft = `${position}px`;
+      num += count;
+      if (numImages === num) {
+        num = count;
+        position = startPos;
+      }
+    });
+
+    leftArrow.html.addEventListener('click', () => {
+      width = (modal as HTMLElement).offsetWidth + gap;
+      num -= count;
+      if (num <= count) {
+        num = numImages;
+        position = -width * (num - count);
+      } else {
+        position += width * count;
+      }
+      modalWindow.style.marginLeft = `${position}px`;
+    });
   }
 
   private closeModal(closeIcon: BaseComponent): void {
@@ -142,12 +224,14 @@ class Product {
     });
   }
 
-  private zoomImage(image: BaseComponent): void {
-    image.html.addEventListener('click', () => {
+  private zoomImage(images: IProductImages[], imageEl: HTMLElement): void {
+    imageEl.addEventListener('click', () => {
       this.modalContainer.html.innerHTML = '';
       this.modalContainer.html.classList.remove('hidden');
-      const modal = this.createImageModalContentElement(image);
+      const modal = this.createImageModalContentElement(images, imageEl);
       this.productPageContent.html.append(modal.html);
+      const modalWindow = document.getElementsByClassName('modal-window')[0] as HTMLElement;
+      this.addModalImages(images, modalWindow);
     });
   }
 
@@ -186,7 +270,7 @@ class Product {
         imgContainer.html.classList.add('selected-image');
         this.productImagesSelectedContent.html.append(imgContainer.html);
         imgContainer.html.append(img.html);
-        this.zoomImage(imgContainer);
+        this.zoomImage(images, imgContainer.html);
       } else {
         this.productImagesPreviewContent.html.append(imgContainer.html);
         imgContainer.html.append(img.html);

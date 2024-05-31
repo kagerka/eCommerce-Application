@@ -476,15 +476,6 @@ class Products {
     return categoryNameEl;
   }
 
-  private static removeActiveClassFromElements(className: string, excludeElement: HTMLElement): void {
-    const elements = document.getElementsByClassName(className);
-    for (let i = 0; i < elements.length; i += iteratorStep) {
-      if (elements[i] !== excludeElement) {
-        elements[i].classList.remove('active');
-      }
-    }
-  }
-
   private static handleCategoryClick(
     categoryNameEl: BaseComponent,
     pathPart: { name: { en: string }; parent: { id: string }; id: string },
@@ -540,9 +531,8 @@ class Products {
     this.handleCategoryClick(categoryNameEl, pathPart, token);
 
     categoryNameEl.html.addEventListener('click', () => {
+      this.resetCategoriesClass();
       categoryNameEl.html.classList.add('active');
-      this.removeActiveClassFromElements(isParent ? 'category' : 'subcategory', categoryNameEl.html);
-      this.removeActiveClassFromElements(isParent ? 'subcategory' : 'category', categoryNameEl.html);
     });
 
     return categoryNameEl;
