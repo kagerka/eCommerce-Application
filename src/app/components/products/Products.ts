@@ -1,7 +1,6 @@
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 
-import { IProducts } from '../../interfaces/Product.interface';
 import BaseComponent from '../BaseComponent';
 import './Products.scss';
 
@@ -178,7 +177,7 @@ class Products {
     return new BaseComponent({ tag: 'button', class: ['reset-button'], text: 'Reset' });
   }
 
-  private static createProductListener(link: string, currentProduct: IProducts): BaseComponent {
+  private static createProductListener(id: string, link: string): BaseComponent {
     const productLink = new BaseComponent({
       tag: 'a',
       class: ['product-card-link'],
@@ -189,13 +188,14 @@ class Products {
     });
 
     productLink.html.addEventListener('click', () => {
-      localStorage.setItem('currentProduct', JSON.stringify(currentProduct));
+      localStorage.setItem('id', JSON.stringify(id));
     });
 
     return productLink;
   }
 
   private static renderProductElements(
+    id: string,
     link: string,
     productImage: string,
     productTitle: string,
@@ -205,7 +205,6 @@ class Products {
     productCard: BaseComponent,
     productDiscount: number,
     formattedDiscount: string,
-    currentProduct: IProducts,
   ): void {
     const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });
     const infoContainer = new BaseComponent({ tag: 'div', class: ['info-container'] });
@@ -215,7 +214,7 @@ class Products {
     const priceText = `${formattedPrice} ${currencySymbol}`;
     const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: priceText });
     const description = new BaseComponent({ tag: 'p', class: ['product-description'], text: productDescription });
-    const productLink = this.createProductListener(link, currentProduct);
+    const productLink = this.createProductListener(id, link);
     productCard.html.append(productLink.html);
     productLink.html.append(imgContainer.html, infoContainer.html);
     imgContainer.html.append(img.html);
@@ -233,6 +232,7 @@ class Products {
     const productsJSON = localStorage.getItem('products');
 
     let path = JSON.parse(productsJSON!)[cardNumber]?.masterData?.current;
+    const productData = JSON.parse(productsJSON!)[cardNumber];
 
     if (!fullData) {
       path = JSON.parse(productsJSON!)[cardNumber];
@@ -252,10 +252,12 @@ class Products {
     const productDescription = path?.description.en;
     const productImage = path?.masterVariant.images[0].url;
     const link = path?.slug.en;
+    const id = productData?.id;
 
     const productCard = new BaseComponent({ tag: 'li', class: ['product-card'] });
 
     this.renderProductElements(
+      id,
       link,
       productImage,
       productTitle,
@@ -265,7 +267,6 @@ class Products {
       productCard,
       productDiscount,
       formattedDiscount,
-      path,
     );
 
     return productCard;
