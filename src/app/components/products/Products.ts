@@ -2,6 +2,8 @@ import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 
 import BaseComponent from '../BaseComponent';
+import Button from '../button/Button';
+import Input from '../input/Input';
 import './Products.scss';
 
 const iteratorStep = 1;
@@ -31,6 +33,14 @@ class Products {
 
   private resetButton: BaseComponent;
 
+  private searchForm: BaseComponent;
+
+  private searchInput: Input;
+
+  private searchButton: Button;
+
+  private searchButtonImg: BaseComponent;
+
   constructor() {
     this.catalogContainer = Products.createCatalogContainerElement();
     this.filterContainer = Products.createFilterContainerElement();
@@ -41,6 +51,10 @@ class Products {
     this.productsContainer = Products.createProductsContainerElement();
     Products.categoriesContainer = Products.createCategoriesContainer();
     Products.productsList = Products.createProductsList();
+    this.searchForm = Products.createSearchForm();
+    this.searchInput = Products.createInputElement();
+    this.searchButton = Products.createSearchButton();
+    this.searchButtonImg = Products.createSearchButtonImg();
     const filter = Products.createPriceDefining();
 
     this.priceContainer.append(filter.html);
@@ -60,7 +74,9 @@ class Products {
     Products.categoriesContainer.html.append(this.categoriesTitle.html);
 
     this.priceContainer.html.append(this.priceTitle.html);
-    this.productsContainer.html.append(Products.productsList.html);
+    this.productsContainer.html.append(this.searchForm.html, Products.productsList.html);
+    this.searchForm.html.append(this.searchInput.view.html, this.searchButton.view.html);
+    this.searchButton.view.html.append(this.searchButtonImg.html);
   }
 
   private resetProducts(): void {
@@ -192,6 +208,33 @@ class Products {
     });
 
     return productLink;
+  }
+
+  private static createSearchForm(): BaseComponent {
+    return new BaseComponent({ tag: 'form', class: ['search-form'], id: 'search' });
+  }
+
+  private static createInputElement(): Input {
+    return new Input({
+      type: 'text',
+      class: ['search-input'],
+      placeholder: 'Search...',
+    });
+  }
+
+  private static createSearchButton(): Button {
+    return new Button({
+      type: 'submit',
+      class: ['search-button'],
+    });
+  }
+
+  private static createSearchButtonImg(): BaseComponent {
+    return new BaseComponent({
+      tag: 'img',
+      class: ['search-img'],
+      src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Search_icon.svg/2048px-Search_icon.svg.png',
+    });
   }
 
   private static renderProductElements(
@@ -434,15 +477,6 @@ class Products {
     return categoryNameEl;
   }
 
-  private static removeActiveClassFromElements(className: string, excludeElement: HTMLElement): void {
-    const elements = document.getElementsByClassName(className);
-    for (let i = 0; i < elements.length; i += iteratorStep) {
-      if (elements[i] !== excludeElement) {
-        elements[i].classList.remove('active');
-      }
-    }
-  }
-
   private static handleCategoryClick(
     categoryNameEl: BaseComponent,
     pathPart: { name: { en: string }; parent: { id: string }; id: string },
@@ -454,7 +488,10 @@ class Products {
       Products.productsList.html.innerHTML = '';
       Products.resetPriceRange();
       for (let i = 0; i < els.length; i += iteratorStep) {
-        if (els[i].className === `subcategory ${pathPart.id}`) {
+        if (
+          els[i].className === `subcategory ${pathPart.id}` ||
+          els[i].className === `subcategory ${pathPart.id} active`
+        ) {
           ECommerceApi.getSelectedProducts(currentClient, token, els[i].id).then((resp) => {
             localStorage.setItem('products', JSON.stringify(resp.results));
             Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
@@ -495,9 +532,8 @@ class Products {
     this.handleCategoryClick(categoryNameEl, pathPart, token);
 
     categoryNameEl.html.addEventListener('click', () => {
+      this.resetCategoriesClass();
       categoryNameEl.html.classList.add('active');
-      this.removeActiveClassFromElements(isParent ? 'category' : 'subcategory', categoryNameEl.html);
-      this.removeActiveClassFromElements(isParent ? 'subcategory' : 'category', categoryNameEl.html);
     });
 
     return categoryNameEl;
