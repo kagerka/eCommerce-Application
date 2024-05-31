@@ -5,6 +5,10 @@ import leftArrowBtn from '../../utils/svg/leftArrow';
 import rightArrowBtn from '../../utils/svg/rightArrow';
 import './Product.scss';
 
+const gap = 16;
+const startPos = 0;
+const count = 1;
+
 class Product {
   private productPageContent: BaseComponent;
 
@@ -69,7 +73,6 @@ class Product {
     this.addImages(images, this.productImagesPreviewContainer.html);
 
     this.composeView();
-    Product.addResizeListener();
   }
 
   private composeView(): void {
@@ -98,7 +101,9 @@ class Product {
   private static addResizeListener(): void {
     window.addEventListener('resize', () => {
       const modalWindow = document.getElementsByClassName('modal-img-content')[0] as HTMLElement;
-      modalWindow.style.marginLeft = '0';
+      if (modalWindow) {
+        modalWindow.style.marginLeft = '0';
+      }
     });
   }
 
@@ -145,35 +150,8 @@ class Product {
         modalImgAndIconContainer.html.id = 'selected-modal';
       }
     });
+    Product.addResizeListener();
     return this.modalContainer;
-  }
-
-  private addModalImages(images: IProductImages[], containerEl: HTMLElement): void {
-    images.forEach((image, i) => {
-      const ZERO = 0;
-      const img = new BaseComponent({ tag: 'img', class: ['modal-image'], src: image.url });
-      const imgContainer = new BaseComponent({ tag: 'div', class: ['modal-img-icon-container'] });
-      let currentImg: BaseComponent;
-      if (i === ZERO) {
-        imgContainer.html.classList.add('selected-image');
-        this.productImagesSelectedContent.html.append(imgContainer.html);
-        imgContainer.html.append(img.html);
-        this.zoomImage(images, imgContainer.html);
-      } else {
-        this.productImagesPreviewContent.html.append(imgContainer.html);
-        imgContainer.html.append(img.html);
-      }
-
-      imgContainer.html.addEventListener('click', () => {
-        const selectedImg = document.querySelector('.selected-image');
-        currentImg = img;
-        const currentImageSrc = currentImg.html.getAttribute('src');
-        const selectedImgTag = selectedImg?.children[0] as HTMLImageElement;
-        if (currentImageSrc) selectedImgTag?.setAttribute('src', currentImageSrc);
-        imgContainer.html.classList.remove('image-preview');
-      });
-    });
-    Product.createModalSlider(containerEl);
   }
 
   private static createModalSlider(containerEl: HTMLElement): void {
@@ -186,15 +164,10 @@ class Product {
     containerEl.append(leftArrow.html, rightArrow.html);
     let num = 1;
     let position = 0;
-    const gap = 16;
-    const startPos = 0;
-    let width = (modal as HTMLElement).offsetWidth + gap;
-    const count = 1;
     const images = modalWindow.children;
     const numImages = images.length;
-
     rightArrow.html.addEventListener('click', () => {
-      width = (modal as HTMLElement).offsetWidth + gap;
+      const width = (modal as HTMLElement).offsetWidth + gap;
       position -= width * count;
       position = Math.max(position, -width * (numImages - count));
       modalWindow.style.marginLeft = `${position}px`;
@@ -206,7 +179,7 @@ class Product {
     });
 
     leftArrow.html.addEventListener('click', () => {
-      width = (modal as HTMLElement).offsetWidth + gap;
+      const width = (modal as HTMLElement).offsetWidth + gap;
       num -= count;
       if (num <= count) {
         num = numImages;
@@ -231,7 +204,7 @@ class Product {
       const modal = this.createImageModalContentElement(images, imageEl);
       this.productPageContent.html.append(modal.html);
       const modalWindow = document.getElementsByClassName('modal-window')[0] as HTMLElement;
-      this.addModalImages(images, modalWindow);
+      Product.createModalSlider(modalWindow);
     });
   }
 
@@ -243,7 +216,7 @@ class Product {
     containerEl.append(leftArrow.html, rightArrow.html);
     let position = 0;
     const width = 100;
-    const count = 1;
+
     rightArrow.html.addEventListener('click', () => {
       const elements = this.productImagesPreviewContent.html.children;
       const arrayOfElements = [...elements];
