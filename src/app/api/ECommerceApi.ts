@@ -4,6 +4,7 @@ import ICustomerProfile from '../interfaces/CustomerProfile.interface';
 import ITokenPassword from '../interfaces/TokenPassword.interface';
 import ICustomerData from '../interfaces/CustomerData.interface';
 import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface';
+import ICustomerUpdateRequest from '../interfaces/CustomerUpdateRequest.interface';
 
 class ECommerceApi {
   static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
@@ -100,6 +101,40 @@ class ECommerceApi {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async updateCustomer(
+    clientDetails: IAPIClientDetails,
+    requestDetails: ICustomerUpdateRequest,
+  ): Promise<ICustomerProfile> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/customers/${requestDetails.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${requestDetails.token}`,
+      },
+      body: JSON.stringify({
+        version: requestDetails.version,
+        actions: [
+          {
+            action: 'addAddress',
+            address: {
+              streetName: requestDetails.address.streetName,
+              streetNumber: requestDetails.address.streetNumber,
+              postalCode: requestDetails.address.postalCode,
+              city: requestDetails.address.city,
+              country: requestDetails.address.country,
+            },
+          },
+        ],
+      }),
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

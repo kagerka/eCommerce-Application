@@ -5,11 +5,11 @@ interface ICustomerProfile {
   lastModifiedAt: string;
   lastModifiedBy: {
     clientId: string;
-    isPlatformClient: false;
+    isPlatformClient: boolean;
   };
   createdBy: {
     clientId: string;
-    isPlatformClient: false;
+    isPlatformClient: boolean;
   };
   email: string;
   firstName: string;

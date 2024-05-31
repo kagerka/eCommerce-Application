@@ -1,5 +1,5 @@
-import { spa } from './api-clients';
+import { ecommerceApi } from './api-clients';
 
-const currentClient = spa;
+const currentClient = ecommerceApi;
 
 export default currentClient;

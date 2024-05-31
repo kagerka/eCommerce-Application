@@ -159,7 +159,7 @@ class App {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
       window.location.assign(
-        `${window.location.protocol}//${window.location.hostname}`,
+        `${window.location.protocol}//${window.location.hostname}:5173`,
         // for correct operation locally you need to add a port number
         // For example: ${window.location.protocol}//${window.location.hostname}:5173
       );
@@ -178,7 +178,7 @@ class App {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
       window.location.assign(
-        `${window.location.protocol}//${window.location.hostname}`,
+        `${window.location.protocol}//${window.location.hostname}:5173`,
         // for correct operation locally you need to add a port number
         // For example: ${window.location.protocol}//${window.location.hostname}:5173
       );
@@ -208,7 +208,7 @@ class App {
       }
     } else {
       window.location.assign(
-        `${window.location.protocol}//${window.location.hostname}`,
+        `${window.location.protocol}//${window.location.hostname}:5173`,
         // for correct operation locally you need to add a port number
         // For example: ${window.location.protocol}//${window.location.hostname}:5173
       );

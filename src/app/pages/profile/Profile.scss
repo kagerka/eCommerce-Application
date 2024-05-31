@@ -58,18 +58,24 @@
   gap: 20px;
 }
 
-.shipping-addresses-container,
-.billing-addresses-container {
+.shipping-address-container,
+.billing-address-container {
   display: flex;
   flex-direction: column;
   width: 50%;
-  font-weight: 500;
   padding: 0 20px;
   gap: 10px;
 }
 
-.address {
+.shipping-address-title,
+.billing-address-title {
+  font-weight: 500;
+}
+
+.shipping-address,
+.billing-address {
   font-weight: 400;
+  margin-bottom: 10px;
 }
 
 .country-container {
@@ -95,6 +101,16 @@
   font-weight: 400;
 }
 
+.edit-btn {
+  margin-top: 5px;
+  background-color: $green;
+  border: 0;
+  color: $white;
+  border-radius: 3px;
+  width: 70px;
+  height: 25px;
+}
+
 @media screen and (max-width: 800px) {
   .profile-name {
     flex-direction: column;
@@ -108,8 +124,8 @@
     flex-direction: column;
   }
 
-  .shipping-addresses-container,
-  .billing-addresses-container {
+  .shipping-address-container,
+  .billing-address-container {
     width: 100%;
   }
 }
