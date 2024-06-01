@@ -31,11 +31,11 @@ class Products {
 
   static productsList: BaseComponent;
 
-  private resetButton: BaseComponent;
+  static resetButton: BaseComponent;
 
   private searchForm: BaseComponent;
 
-  private searchInput: Input;
+  static searchInput: Input;
 
   private searchButton: Button;
 
@@ -51,12 +51,12 @@ class Products {
     this.categoriesTitle = Products.createCategoriesTitle();
     this.priceContainer = Products.createPriceContainer();
     this.priceTitle = Products.createPriceTitle();
-    this.resetButton = Products.createResetButton();
+    Products.resetButton = Products.createResetButton();
     this.productsContainer = Products.createProductsContainerElement();
     Products.categoriesContainer = Products.createCategoriesContainer();
     Products.productsList = Products.createProductsList();
     this.searchForm = Products.createSearchForm();
-    this.searchInput = Products.createInputElement();
+    Products.searchInput = Products.createInputElement();
     this.searchButton = Products.createSearchButton();
     this.searchButtonImg = Products.createSearchButtonImg();
     this.sortContainer = Products.createSortContainer();
@@ -66,7 +66,8 @@ class Products {
     this.priceContainer.append(filter.html);
 
     this.composeView();
-    this.resetProducts();
+    Products.resetProducts();
+    this.handleSearchEvents();
   }
 
   private composeView(): void {
@@ -75,26 +76,59 @@ class Products {
       Products.categoriesContainer.html,
 
       this.priceContainer.html,
-      this.resetButton.html,
+      Products.resetButton.html,
     );
     Products.categoriesContainer.html.append(this.categoriesTitle.html);
 
     this.priceContainer.html.append(this.priceTitle.html);
     this.productsContainer.html.append(this.searchForm.html, this.sortContainer.html, Products.productsList.html);
     this.sortContainer.html.append(Products.sortForm.html);
-    this.searchForm.html.append(this.searchInput.view.html, this.searchButton.view.html);
+    this.searchForm.html.append(Products.searchInput.view.html, this.searchButton.view.html);
     this.searchButton.view.html.append(this.searchButtonImg.html);
   }
 
-  private resetProducts(): void {
+  private handleSearchEvents(): void {
+    this.searchButtonImg.html.addEventListener('click', (event: Event) => {
+      event.preventDefault();
+      Products.searchProducts();
+    });
+    Products.searchInput.view.html.addEventListener('keydown', (event) => {
+      const keyboardEvent = <KeyboardEvent>event;
+      if (keyboardEvent.key === 'Enter') {
+        event.preventDefault();
+        Products.searchProducts();
+      }
+    });
+  }
+
+  private static searchProducts(): void {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
-    this.resetButton.html.addEventListener('click', async () => {
+    if (token) {
+      const inputRes = (Products.searchInput.view.html as HTMLInputElement).value;
+      ECommerceApi.getSearching(currentClient, token, inputRes).then((res) => {
+        Products.productsList.html.innerHTML = '';
+        localStorage.setItem('products', JSON.stringify(res.results));
+        Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+          Products.productsList.html.append(productCard.html);
+        });
+        Products.resetProducts();
+        Products.resetCategoriesClass();
+        Products.resetPriceRange();
+      });
+    }
+  }
+
+  static resetProducts(): void {
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    Products.resetButton.html.addEventListener('click', async () => {
       if (token) {
         localStorage.removeItem('currentCategoryID');
         const subcategory = document.getElementsByClassName('subcategory');
-        Products.productsList.html.innerHTML = '';
+
         const form = Products.sortForm.html as HTMLFormElement;
         form.reset();
+
+        (Products.searchInput.view.html as HTMLInputElement).value = '';
 
         for (let i = 0; i < subcategory.length; i += iteratorStep) {
           ECommerceApi.getSelectedProducts(currentClient, token, subcategory[i].id).then((resp) => {

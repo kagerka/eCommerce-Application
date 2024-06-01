@@ -227,16 +227,9 @@ class ECommerceApi {
     }
   }
 
-  static async getSearching(
-    clientDetails: IAPIClientDetails,
-    token: string,
-    sortBy: string,
-    sortRule: string,
-    categoryID?: string | null,
-  ): Promise<ICategories> {
-    const path = categoryID
-      ? `/product-projections/search?filter=categories.id:"${categoryID}"&sort=${sortBy} ${sortRule}`
-      : `/product-projections/search?sort=${sortBy} ${sortRule}`;
+  static async getSearching(clientDetails: IAPIClientDetails, token: string, inputRes: string): Promise<ICategories> {
+    const path = `/product-projections/search?limit=70&text.en=${inputRes}`;
+
     const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
       method: 'GET',
       headers: {
