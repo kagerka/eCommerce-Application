@@ -28,7 +28,9 @@ class BaseComponent {
   }
 
   protected addId(): void {
-    this.element.id = this.options.id!;
+    if (this.options.id) {
+      this.element.id = this.options.id;
+    }
   }
 
   protected addAttribute(): void {
