@@ -43,7 +43,7 @@ class Products {
 
   private sortContainer: BaseComponent;
 
-  private sortForm: BaseComponent;
+  static sortForm: BaseComponent;
 
   constructor() {
     this.catalogContainer = Products.createCatalogContainerElement();
@@ -60,7 +60,7 @@ class Products {
     this.searchButton = Products.createSearchButton();
     this.searchButtonImg = Products.createSearchButtonImg();
     this.sortContainer = Products.createSortContainer();
-    this.sortForm = Products.createSortForm();
+    Products.sortForm = Products.createSortForm();
     const filter = Products.createPriceDefining();
 
     this.priceContainer.append(filter.html);
@@ -81,7 +81,7 @@ class Products {
 
     this.priceContainer.html.append(this.priceTitle.html);
     this.productsContainer.html.append(this.searchForm.html, this.sortContainer.html, Products.productsList.html);
-    this.sortContainer.html.append(this.sortForm.html);
+    this.sortContainer.html.append(Products.sortForm.html);
     this.searchForm.html.append(this.searchInput.view.html, this.searchButton.view.html);
     this.searchButton.view.html.append(this.searchButtonImg.html);
   }
@@ -90,8 +90,11 @@ class Products {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
     this.resetButton.html.addEventListener('click', async () => {
       if (token) {
+        localStorage.removeItem('currentCategoryID');
         const subcategory = document.getElementsByClassName('subcategory');
         Products.productsList.html.innerHTML = '';
+        const form = Products.sortForm.html as HTMLFormElement;
+        form.reset();
 
         for (let i = 0; i < subcategory.length; i += iteratorStep) {
           ECommerceApi.getSelectedProducts(currentClient, token, subcategory[i].id).then((resp) => {
@@ -313,15 +316,16 @@ class Products {
       if (value === 'nameASC') sortRule = 'asc';
       if (value === 'nameDESC') sortRule = 'desc';
 
-      Products.getProsuctsSorting(sortBy, sortRule);
+      Products.getProductsSorting(sortBy, sortRule);
     });
   }
 
-  private static async getProsuctsSorting(sortBy: string, sortRule: string): Promise<void> {
+  private static async getProductsSorting(sortBy: string, sortRule: string): Promise<void> {
     const token = localStorage.getItem('tokenPassword')
       ? localStorage.getItem('tokenPassword')
       : localStorage.getItem('tokenAnonymous');
-    const resp = await ECommerceApi.getSorting(currentClient, token!, sortBy, sortRule);
+    const categoryID = localStorage.getItem('currentCategoryID') ? localStorage.getItem('currentCategoryID') : null;
+    const resp = await ECommerceApi.getSorting(currentClient, token!, sortBy, sortRule, categoryID);
     localStorage.setItem('products', JSON.stringify(resp.results));
     Products.productsList.html.innerHTML = '';
     Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
@@ -619,11 +623,18 @@ class Products {
     pathPart: { name: { en: string }; parent: { id: string }; id: string },
     token: string,
   ): void {
-    categoryNameEl.html.addEventListener('click', async () => {
+    localStorage.removeItem('currentCategoryID');
+    categoryNameEl.html.addEventListener('click', async (e) => {
+      const form = Products.sortForm.html as HTMLFormElement;
+      form.reset();
       categoryNameEl.html.classList.add('active');
       const els = document.getElementsByClassName('subcategory');
       Products.productsList.html.innerHTML = '';
       Products.resetPriceRange();
+
+      const target = e.target as HTMLElement;
+      localStorage.setItem('currentCategoryID', target.id);
+
       for (let i = 0; i < els.length; i += iteratorStep) {
         if (
           els[i].className === `subcategory ${pathPart.id}` ||
@@ -631,6 +642,7 @@ class Products {
         ) {
           ECommerceApi.getSelectedProducts(currentClient, token, els[i].id).then((resp) => {
             localStorage.setItem('products', JSON.stringify(resp.results));
+
             Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
               Products.productsList.html.append(productCard.html);
             });

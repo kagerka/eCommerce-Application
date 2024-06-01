@@ -207,8 +207,11 @@ class ECommerceApi {
     token: string,
     sortBy: string,
     sortRule: string,
+    categoryID?: string | null,
   ): Promise<ICategories> {
-    const path = `/product-projections/search?sort=${sortBy} ${sortRule}`;
+    const path = categoryID
+      ? `/product-projections/search?filter=categories.id:"${categoryID}"&sort=${sortBy} ${sortRule}`
+      : `/product-projections/search?sort=${sortBy} ${sortRule}`;
     const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
       method: 'GET',
       headers: {
