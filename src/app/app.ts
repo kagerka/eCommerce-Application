@@ -6,17 +6,13 @@ import BaseComponent from './components/BaseComponent';
 import Footer from './components/footer/Footer';
 import Header from './components/header/Header';
 import About from './pages/about/About';
+import Catalog from './pages/catalog/Catalog';
 import Login from './pages/login/Login';
 import MainPage from './pages/main/MainPage';
 import NotFound from './pages/notFound/NotFound';
 import Product from './pages/product/Product';
 import Profile from './pages/profile/Profile';
 import Registration from './pages/registation/Registration';
-import getBedrooms from './utils/productAttributes/getBedrooms';
-import getBrand from './utils/productAttributes/getBrand';
-import getPersons from './utils/productAttributes/getPersons';
-import getPrices from './utils/productAttributes/getPrices';
-import getSizes from './utils/productAttributes/getSizes';
 
 class App {
   private static container: HTMLElement = document.body;
@@ -41,6 +37,8 @@ class App {
 
   private profilePage: Profile;
 
+  private catalogPage: Catalog;
+
   private router: Navigo;
 
   constructor() {
@@ -54,6 +52,7 @@ class App {
     this.notFound = new NotFound();
     this.regPage = new Registration();
     this.profilePage = new Profile();
+    this.catalogPage = new Catalog();
     this.router = new Navigo('/');
     this.composeView();
     this.observerLogin();
@@ -149,45 +148,46 @@ class App {
       .on('/profile', () => {
         this.onProfile();
       })
+      .on('/catalog', () => {
+        this.onCatalog();
+      })
       .on('/catalog\\/(.*)/', () => {
         this.onProduct();
       })
       .notFound(() => {
-        this.pageContent.html.innerHTML = '';
-        this.pageContent.html.append(this.notFound.view.html);
-        this.checkBtns();
-        this.setLoginBtnHref();
+        this.onNotFound();
       })
       .resolve();
   }
 
-  private onProduct(): void {
-    const productJSON = localStorage.getItem('currentProduct');
-    const product = JSON.parse(productJSON || '');
-    const name = product.name.en;
-    const description = product.description.en;
-    const { images } = product.masterVariant;
-    const { attributes } = product.masterVariant;
-    const { variants } = product;
+  private onNotFound(): void {
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(this.notFound.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
+  }
 
-    const brand = getBrand(attributes);
-    const sizes = getSizes(variants, attributes);
-    const prices = getPrices(product);
-    const bedrooms = getBedrooms(variants, attributes);
-    const persons = getPersons(variants, attributes);
+  private onCatalog(): void {
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(this.catalogPage.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
+  }
 
+  private async onProduct(): Promise<void> {
+    const product = await Product.getProductDetails();
     const productPage = new Product(
-      name,
-      description,
-      images,
-      prices.formattedPrice,
-      prices.formattedDiscount,
-      prices.currencySymbol,
-      prices.productDiscount,
-      brand,
-      sizes,
-      bedrooms,
-      persons,
+      product.name,
+      product.description,
+      product.images,
+      product.formattedPrice,
+      product.formattedDiscount,
+      product.currencySymbol,
+      product.productDiscount,
+      product.brand,
+      product.sizes,
+      product.bedrooms,
+      product.persons,
     );
     this.pageContent.html.innerHTML = '';
     this.pageContent.html.append(productPage.view.html);
@@ -286,12 +286,12 @@ class App {
     if (!localStorage.getItem('tokenAnonymous') && !localStorage.getItem('tokenPassword')) {
       ECommerceApi.getAccessToken(currentClient).then((res) => {
         localStorage.setItem('tokenAnonymous', res.access_token);
-        MainPage.displayProducts();
-        MainPage.displayCategories();
+        Catalog.displayProducts();
+        Catalog.displayCategories();
       });
     }
-    MainPage.displayProducts();
-    MainPage.displayCategories();
+    Catalog.displayProducts();
+    Catalog.displayCategories();
     this.createRouter();
   }
 }

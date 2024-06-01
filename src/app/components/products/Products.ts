@@ -1,8 +1,10 @@
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
-
 import { IProducts } from '../../interfaces/Product.interface';
+
 import BaseComponent from '../BaseComponent';
+import Button from '../button/Button';
+import Input from '../input/Input';
 import './Products.scss';
 
 const iteratorStep = 1;
@@ -30,7 +32,25 @@ class Products {
 
   static productsList: BaseComponent;
 
-  private resetButton: BaseComponent;
+  static resetButton: BaseComponent;
+
+  private searchForm: BaseComponent;
+
+  static searchInput: Input;
+
+  private searchButton: Button;
+
+  private searchButtonImg: BaseComponent;
+
+  private sortContainer: BaseComponent;
+
+  static sortForm: BaseComponent;
+
+  static brandsContainer: BaseComponent;
+
+  private saleContainer: BaseComponent;
+
+  private saleTitle: BaseComponent;
 
   constructor() {
     this.catalogContainer = Products.createCatalogContainerElement();
@@ -38,38 +58,89 @@ class Products {
     this.categoriesTitle = Products.createCategoriesTitle();
     this.priceContainer = Products.createPriceContainer();
     this.priceTitle = Products.createPriceTitle();
-    this.resetButton = Products.createResetButton();
+    Products.brandsContainer = Products.createBrandsContainer();
+    Products.resetButton = Products.createResetButton();
     this.productsContainer = Products.createProductsContainerElement();
     Products.categoriesContainer = Products.createCategoriesContainer();
     Products.productsList = Products.createProductsList();
+    this.searchForm = Products.createSearchForm();
+    Products.searchInput = Products.createInputElement();
+    this.searchButton = Products.createSearchButton();
+    this.searchButtonImg = Products.createSearchButtonImg();
+    this.sortContainer = Products.createSortContainer();
+    Products.sortForm = Products.createSortForm();
+    this.saleContainer = Products.createSaleContainer();
+    this.saleTitle = Products.createSaleTitle();
     const filter = Products.createPriceDefining();
+
+    this.composeView();
 
     this.priceContainer.append(filter.html);
 
-    this.composeView();
-    this.resetProducts();
+    Products.resetProducts();
+    this.handleSearchEvents();
   }
 
   private composeView(): void {
     this.catalogContainer.html.append(this.filterContainer.html, this.productsContainer.html);
     this.filterContainer.html.append(
       Products.categoriesContainer.html,
-
       this.priceContainer.html,
-      this.resetButton.html,
+      this.saleContainer.html,
+      Products.brandsContainer.html,
+      Products.resetButton.html,
     );
     Products.categoriesContainer.html.append(this.categoriesTitle.html);
-
+    this.saleContainer.html.append(this.saleTitle.html);
     this.priceContainer.html.append(this.priceTitle.html);
-    this.productsContainer.html.append(Products.productsList.html);
+    this.productsContainer.html.append(this.searchForm.html, this.sortContainer.html, Products.productsList.html);
+    this.sortContainer.html.append(Products.sortForm.html);
+    this.searchForm.html.append(Products.searchInput.view.html, this.searchButton.view.html);
+    this.searchButton.view.html.append(this.searchButtonImg.html);
   }
 
-  private resetProducts(): void {
+  private handleSearchEvents(): void {
+    this.searchButtonImg.html.addEventListener('click', (event: Event) => {
+      event.preventDefault();
+      Products.searchProducts();
+    });
+    Products.searchInput.view.html.addEventListener('keydown', (event) => {
+      const keyboardEvent = <KeyboardEvent>event;
+      if (keyboardEvent.key === 'Enter') {
+        event.preventDefault();
+        Products.searchProducts();
+      }
+    });
+  }
+
+  private static searchProducts(): void {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
-    this.resetButton.html.addEventListener('click', async () => {
-      if (token) {
-        const subcategory = document.getElementsByClassName('subcategory');
+    if (token) {
+      const inputRes = (Products.searchInput.view.html as HTMLInputElement).value;
+      ECommerceApi.getSearching(currentClient, token, inputRes).then((res) => {
         Products.productsList.html.innerHTML = '';
+        localStorage.setItem('products', JSON.stringify(res.results));
+        Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+          Products.productsList.html.append(productCard.html);
+        });
+        Products.resetProducts();
+        Products.resetCategoriesClass();
+        Products.resetPriceRange();
+      });
+    }
+  }
+
+  static resetProducts(): void {
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    Products.resetButton.html.addEventListener('click', async () => {
+      if (token) {
+        localStorage.removeItem('currentCategoryID');
+        const subcategory = document.getElementsByClassName('subcategory');
+
+        const form = Products.sortForm.html as HTMLFormElement;
+        form.reset();
+
+        (Products.searchInput.view.html as HTMLInputElement).value = '';
 
         for (let i = 0; i < subcategory.length; i += iteratorStep) {
           ECommerceApi.getSelectedProducts(currentClient, token, subcategory[i].id).then((resp) => {
@@ -119,7 +190,7 @@ class Products {
       const productsJSON = localStorage.getItem('products');
       const products = JSON.parse(productsJSON!);
 
-      for (let i = 0; i < products.length - iteratorStep; i += iteratorStep) {
+      for (let i = 0; i <= products.length - iteratorStep; i += iteratorStep) {
         productCards.push(Products.createProductCard(i, fullData));
       }
     }
@@ -178,7 +249,205 @@ class Products {
     return new BaseComponent({ tag: 'button', class: ['reset-button'], text: 'Reset' });
   }
 
-  private static createProductListener(link: string, currentProduct: IProducts): BaseComponent {
+  private static createSortContainer(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['sort-container'] });
+  }
+
+  private static createBrandsContainer(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['categories-container'] });
+  }
+
+  private static createSaleContainer(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['categories-container'] });
+  }
+
+  private static createSaleTitle(): BaseComponent {
+    return new BaseComponent({ tag: 'h1', class: ['sale-title'], text: '🏷️ Sale' });
+  }
+
+  static displayBrands(): BaseComponent {
+    const brandContainer = new BaseComponent({ tag: 'ul', class: ['brand-container'] });
+    const brandTitle = new BaseComponent({ tag: 'h1', class: ['categories-title'], text: 'Brands' });
+    const productsJSON = localStorage.getItem('products');
+    const product = JSON.parse(productsJSON!);
+    const brandMap = new Map<string, string>();
+
+    brandContainer.html.append(brandTitle.html);
+
+    product?.forEach((item: IProducts) => {
+      const brandName = item?.masterData?.current?.masterVariant?.attributes[0]?.value;
+      const brandKey = item?.masterData?.current?.masterVariant?.attributes[0]?.name;
+
+      if (brandName && brandKey && brandKey.includes('brand')) {
+        brandMap.set(brandName, brandKey);
+      }
+    });
+
+    brandMap.forEach((brandKey, brandName) => {
+      const brand = new BaseComponent({
+        tag: 'li',
+        class: ['subcategory'],
+        text: brandName,
+        id: brandKey,
+      });
+
+      brandContainer.html.append(brand.html);
+      brand.html.addEventListener('click', () => {
+        Products.resetCategoriesClass();
+        brand.html.classList.add('active');
+      });
+      this.handleBrandClick(brand, brandName, brandKey);
+    });
+
+    return brandContainer;
+  }
+
+  private static handleBrandClick(brand: BaseComponent, brandName: string, brandKey: string): void {
+    brand.html.addEventListener('click', () => {
+      const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+
+      if (token) {
+        ECommerceApi.getProductsByBrand(currentClient, token, brandName, brandKey).then((res) => {
+          Products.productsList.html.innerHTML = '';
+          Products.resetPriceRange();
+
+          localStorage.setItem('products', JSON.stringify(res.results));
+          Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+            Products.productsList.html.append(productCard.html);
+          });
+        });
+      }
+    });
+  }
+
+  private static createPriceOptionsElements(): {
+    priceASC: BaseComponent;
+    priceDSC: BaseComponent;
+  } {
+    const priceASC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'priceASC']],
+      class: ['sort-select-item', 'priceASC'],
+      text: 'Price: Low to High',
+    });
+    const priceDSC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'priceDESC']],
+      class: ['sort-select-item', 'priceDESC'],
+      text: 'Price: High to Low',
+    });
+    return { priceASC, priceDSC };
+  }
+
+  private static createNameOptionsElements(): {
+    nameASC: BaseComponent;
+    nameDSC: BaseComponent;
+  } {
+    const nameASC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'nameASC']],
+      class: ['sort-select-item', 'nameASC'],
+      text: 'Name: A to Z',
+    });
+    const nameDSC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'nameDESC']],
+      class: ['sort-select-item', 'nameDESC'],
+      text: 'Name: Z to A',
+    });
+    return { nameASC, nameDSC };
+  }
+
+  private static createSelectFormElements(): {
+    sortLabel: BaseComponent;
+    sortSelectList: BaseComponent;
+    defaultSelectOption: BaseComponent;
+  } {
+    const sortLabel = new BaseComponent({
+      tag: 'label',
+      attribute: [['for', 'sortForm']],
+      class: ['sort-label'],
+      text: 'Sort by:',
+    });
+
+    const sortSelectList = new BaseComponent({
+      tag: 'select',
+      attribute: [
+        ['for', 'sort-select-list'],
+        ['name', 'sort-select-list'],
+        ['form', 'sort-form'],
+      ],
+      class: ['sort-select-list'],
+      id: 'sort-select-list',
+      text: 'Sort by:',
+    });
+
+    const defaultSelectOption = new BaseComponent({
+      tag: 'option',
+      attribute: [
+        ['value', ''],
+        ['selected', 'selected'],
+        ['disabled', 'disabled'],
+        ['hidden', 'hidden'],
+      ],
+      class: ['sort-select-item', 'default'],
+      text: 'Choose option',
+    });
+    return { sortLabel, sortSelectList, defaultSelectOption };
+  }
+
+  private static createSortForm(): BaseComponent {
+    const sortForm = new BaseComponent({ tag: 'form', class: ['sort-form'], id: 'sort-form' });
+    const selectFormElements = Products.createSelectFormElements();
+
+    const priceOptionsElements = Products.createPriceOptionsElements();
+    const nameOptionsElements = Products.createNameOptionsElements();
+
+    sortForm.html.append(selectFormElements.sortLabel.html, selectFormElements.sortSelectList.html);
+    selectFormElements.sortSelectList.html.append(
+      selectFormElements.defaultSelectOption.html,
+      priceOptionsElements.priceASC.html,
+      priceOptionsElements.priceDSC.html,
+      nameOptionsElements.nameASC.html,
+      nameOptionsElements.nameDSC.html,
+    );
+    Products.sortFormListener(sortForm, selectFormElements.sortSelectList);
+
+    return sortForm;
+  }
+
+  private static sortFormListener(sortForm: BaseComponent, sortSelectList: BaseComponent): void {
+    sortForm.html.addEventListener('change', () => {
+      const { value } = sortSelectList.html as HTMLSelectElement;
+      let sortBy = '';
+      let sortRule = '';
+
+      if (value === 'priceASC' || value === 'priceDESC') sortBy = 'price';
+      if (value === 'nameASC' || value === 'nameDESC') sortBy = 'name.en';
+      if (value === 'priceASC') sortRule = 'asc';
+      if (value === 'priceDESC') sortRule = 'desc';
+      if (value === 'nameASC') sortRule = 'asc';
+      if (value === 'nameDESC') sortRule = 'desc';
+
+      Products.getProductsSorting(sortBy, sortRule);
+    });
+  }
+
+  private static async getProductsSorting(sortBy: string, sortRule: string): Promise<void> {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const categoryID = localStorage.getItem('currentCategoryID') ? localStorage.getItem('currentCategoryID') : null;
+    const resp = await ECommerceApi.getSorting(currentClient, token!, sortBy, sortRule, categoryID);
+    localStorage.setItem('products', JSON.stringify(resp.results));
+    Products.productsList.html.innerHTML = '';
+    Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+      Products.productsList.html.append(productCard.html);
+    });
+    Products.resetCategoriesClass();
+  }
+
+  private static createProductListener(id: string, link: string): BaseComponent {
     const productLink = new BaseComponent({
       tag: 'a',
       class: ['product-card-link'],
@@ -189,13 +458,41 @@ class Products {
     });
 
     productLink.html.addEventListener('click', () => {
-      localStorage.setItem('currentProduct', JSON.stringify(currentProduct));
+      localStorage.setItem('id', JSON.stringify(id));
     });
 
     return productLink;
   }
 
+  private static createSearchForm(): BaseComponent {
+    return new BaseComponent({ tag: 'form', class: ['search-form'], id: 'search' });
+  }
+
+  private static createInputElement(): Input {
+    return new Input({
+      type: 'text',
+      class: ['search-input'],
+      placeholder: 'Search...',
+    });
+  }
+
+  private static createSearchButton(): Button {
+    return new Button({
+      type: 'submit',
+      class: ['search-button'],
+    });
+  }
+
+  private static createSearchButtonImg(): BaseComponent {
+    return new BaseComponent({
+      tag: 'img',
+      class: ['search-img'],
+      src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Search_icon.svg/2048px-Search_icon.svg.png',
+    });
+  }
+
   private static renderProductElements(
+    id: string,
     link: string,
     productImage: string,
     productTitle: string,
@@ -205,7 +502,6 @@ class Products {
     productCard: BaseComponent,
     productDiscount: number,
     formattedDiscount: string,
-    currentProduct: IProducts,
   ): void {
     const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });
     const infoContainer = new BaseComponent({ tag: 'div', class: ['info-container'] });
@@ -215,7 +511,7 @@ class Products {
     const priceText = `${formattedPrice} ${currencySymbol}`;
     const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: priceText });
     const description = new BaseComponent({ tag: 'p', class: ['product-description'], text: productDescription });
-    const productLink = this.createProductListener(link, currentProduct);
+    const productLink = this.createProductListener(id, link);
     productCard.html.append(productLink.html);
     productLink.html.append(imgContainer.html, infoContainer.html);
     imgContainer.html.append(img.html);
@@ -233,6 +529,7 @@ class Products {
     const productsJSON = localStorage.getItem('products');
 
     let path = JSON.parse(productsJSON!)[cardNumber]?.masterData?.current;
+    const productData = JSON.parse(productsJSON!)[cardNumber];
 
     if (!fullData) {
       path = JSON.parse(productsJSON!)[cardNumber];
@@ -252,10 +549,12 @@ class Products {
     const productDescription = path?.description.en;
     const productImage = path?.masterVariant.images[0].url;
     const link = path?.slug.en;
+    const id = productData?.id;
 
     const productCard = new BaseComponent({ tag: 'li', class: ['product-card'] });
 
     this.renderProductElements(
+      id,
       link,
       productImage,
       productTitle,
@@ -265,7 +564,6 @@ class Products {
       productCard,
       productDiscount,
       formattedDiscount,
-      path,
     );
 
     return productCard;
@@ -433,27 +731,28 @@ class Products {
     return categoryNameEl;
   }
 
-  private static removeActiveClassFromElements(className: string, excludeElement: HTMLElement): void {
-    const elements = document.getElementsByClassName(className);
-    for (let i = 0; i < elements.length; i += iteratorStep) {
-      if (elements[i] !== excludeElement) {
-        elements[i].classList.remove('active');
-      }
-    }
-  }
-
   private static handleCategoryClick(
     categoryNameEl: BaseComponent,
     pathPart: { name: { en: string }; parent: { id: string }; id: string },
     token: string,
   ): void {
-    categoryNameEl.html.addEventListener('click', async () => {
+    localStorage.removeItem('currentCategoryID');
+    categoryNameEl.html.addEventListener('click', async (e) => {
+      const form = Products.sortForm.html as HTMLFormElement;
+      form.reset();
       categoryNameEl.html.classList.add('active');
       const els = document.getElementsByClassName('subcategory');
       Products.productsList.html.innerHTML = '';
       Products.resetPriceRange();
+
+      const target = e.target as HTMLElement;
+      localStorage.setItem('currentCategoryID', target.id);
+
       for (let i = 0; i < els.length; i += iteratorStep) {
-        if (els[i].className === `subcategory ${pathPart.id}`) {
+        if (
+          els[i].className === `subcategory ${pathPart.id}` ||
+          els[i].className === `subcategory ${pathPart.id} active`
+        ) {
           ECommerceApi.getSelectedProducts(currentClient, token, els[i].id).then((resp) => {
             localStorage.setItem('products', JSON.stringify(resp.results));
             Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
@@ -494,9 +793,8 @@ class Products {
     this.handleCategoryClick(categoryNameEl, pathPart, token);
 
     categoryNameEl.html.addEventListener('click', () => {
+      this.resetCategoriesClass();
       categoryNameEl.html.classList.add('active');
-      this.removeActiveClassFromElements(isParent ? 'category' : 'subcategory', categoryNameEl.html);
-      this.removeActiveClassFromElements(isParent ? 'subcategory' : 'category', categoryNameEl.html);
     });
 
     return categoryNameEl;
