@@ -41,6 +41,10 @@ class Products {
 
   private searchButtonImg: BaseComponent;
 
+  private sortContainer: BaseComponent;
+
+  private sortForm: BaseComponent;
+
   constructor() {
     this.catalogContainer = Products.createCatalogContainerElement();
     this.filterContainer = Products.createFilterContainerElement();
@@ -55,6 +59,8 @@ class Products {
     this.searchInput = Products.createInputElement();
     this.searchButton = Products.createSearchButton();
     this.searchButtonImg = Products.createSearchButtonImg();
+    this.sortContainer = Products.createSortContainer();
+    this.sortForm = Products.createSortForm();
     const filter = Products.createPriceDefining();
 
     this.priceContainer.append(filter.html);
@@ -74,7 +80,8 @@ class Products {
     Products.categoriesContainer.html.append(this.categoriesTitle.html);
 
     this.priceContainer.html.append(this.priceTitle.html);
-    this.productsContainer.html.append(this.searchForm.html, Products.productsList.html);
+    this.productsContainer.html.append(this.searchForm.html, this.sortContainer.html, Products.productsList.html);
+    this.sortContainer.html.append(this.sortForm.html);
     this.searchForm.html.append(this.searchInput.view.html, this.searchButton.view.html);
     this.searchButton.view.html.append(this.searchButtonImg.html);
   }
@@ -191,6 +198,83 @@ class Products {
 
   private static createResetButton(): BaseComponent {
     return new BaseComponent({ tag: 'button', class: ['reset-button'], text: 'Reset' });
+  }
+
+  private static createSortContainer(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['sort-container'] });
+  }
+
+  private static createPriceOptionsElements(): {
+    priceASC: BaseComponent;
+    priceDSC: BaseComponent;
+  } {
+    const priceASC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'priceASC']],
+      class: ['sort-select-item', 'priceASC'],
+      text: 'Price: Low to High',
+    });
+    const priceDSC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'priceDSC']],
+      class: ['sort-select-item', 'priceDSC'],
+      text: 'Price: High to Low',
+    });
+    return { priceASC, priceDSC };
+  }
+
+  private static createNameOptionsElements(): {
+    nameASC: BaseComponent;
+    nameDSC: BaseComponent;
+  } {
+    const nameASC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'nameASC']],
+      class: ['sort-select-item', 'nameASC'],
+      text: 'Name: A to Z',
+    });
+    const nameDSC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'nameDSC']],
+      class: ['sort-select-item', 'nameDSC'],
+      text: 'Name: Z to A',
+    });
+    return { nameASC, nameDSC };
+  }
+
+  private static createSortForm(): BaseComponent {
+    const sortForm = new BaseComponent({ tag: 'form', class: ['sort-form'], id: 'sort-form' });
+    const sortLabel = new BaseComponent({
+      tag: 'label',
+      attribute: [['for', 'sortForm']],
+      class: ['sort-label'],
+      text: 'Sort by:',
+    });
+
+    const sortSelectList = new BaseComponent({
+      tag: 'select',
+      attribute: [
+        ['for', 'sort-select-list'],
+        ['name', 'sort-select-list'],
+        ['form', 'sort-form'],
+      ],
+      class: ['sort-select-list'],
+      id: 'sort-select-list',
+      text: 'Sort by:',
+    });
+
+    const priceOptionsElements = Products.createPriceOptionsElements();
+    const nameOptionsElements = Products.createNameOptionsElements();
+
+    sortForm.html.append(sortLabel.html, sortSelectList.html);
+    sortSelectList.html.append(
+      priceOptionsElements.priceASC.html,
+      priceOptionsElements.priceDSC.html,
+      nameOptionsElements.nameASC.html,
+      nameOptionsElements.nameDSC.html,
+    );
+
+    return sortForm;
   }
 
   private static createProductListener(id: string, link: string): BaseComponent {
