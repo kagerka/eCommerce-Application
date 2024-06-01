@@ -2,6 +2,8 @@
 // import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Button from '../../components/button/Button';
+import Modal from '../../components/modal/Modal';
+import EditForm from '../../components/edit-form/EditForm';
 import './Profile.scss';
 
 const EMPTY_ARR_LENGTH = 0;
@@ -105,6 +107,7 @@ class Profile {
     this.profileBillingStreet = Profile.createBillingStreetElement();
     this.editBillingBtn = Profile.createEditBtnElement();
     this.composeView();
+    this.editBtnHandle();
   }
 
   private composeShippingAdressView(): void {
@@ -379,6 +382,15 @@ class Profile {
         });
       }
     }
+  }
+
+  private editBtnHandle(): void {
+    this.editShippingBtn.view.html.addEventListener('click', () => {
+      const modal = new Modal();
+      this.profilePageContent.html.append(modal.view.html);
+      const editForm = new EditForm();
+      modal.container.html.append(editForm.view.html);
+    });
   }
 
   get firstName(): BaseComponent {
