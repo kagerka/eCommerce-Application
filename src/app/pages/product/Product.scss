@@ -14,7 +14,7 @@
   display: flex;
   flex-direction: column-reverse;
   justify-content: flex-end;
-  width: 420px;
+  width: 380px;
   flex-basis: 45%;
   align-items: center;
   gap: 16px;
@@ -30,13 +30,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 128px;
-  height: 128px;
+  width: 116px;
+  height: 116px;
 
   &.selected-image {
     cursor: pointer;
-    height: 420px;
-    width: 420px;
+    height: 380px;
+    width: 380px;
   }
 }
 
@@ -192,14 +192,14 @@
 .product-page-images-preview-container {
   position: relative;
   overflow: hidden;
-  max-width: 420px;
+  width: 380px;
   height: 130px;
 }
 
 .product-page-images-selected-container {
   position: relative;
   overflow: hidden;
-  max-width: 420px;
+  width: 380px;
 }
 
 .modal-window {

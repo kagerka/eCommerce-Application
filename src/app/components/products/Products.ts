@@ -41,6 +41,10 @@ class Products {
 
   private searchButtonImg: BaseComponent;
 
+  private sortContainer: BaseComponent;
+
+  static sortForm: BaseComponent;
+
   constructor() {
     this.catalogContainer = Products.createCatalogContainerElement();
     this.filterContainer = Products.createFilterContainerElement();
@@ -55,6 +59,8 @@ class Products {
     this.searchInput = Products.createInputElement();
     this.searchButton = Products.createSearchButton();
     this.searchButtonImg = Products.createSearchButtonImg();
+    this.sortContainer = Products.createSortContainer();
+    Products.sortForm = Products.createSortForm();
     const filter = Products.createPriceDefining();
 
     this.priceContainer.append(filter.html);
@@ -74,7 +80,8 @@ class Products {
     Products.categoriesContainer.html.append(this.categoriesTitle.html);
 
     this.priceContainer.html.append(this.priceTitle.html);
-    this.productsContainer.html.append(this.searchForm.html, Products.productsList.html);
+    this.productsContainer.html.append(this.searchForm.html, this.sortContainer.html, Products.productsList.html);
+    this.sortContainer.html.append(Products.sortForm.html);
     this.searchForm.html.append(this.searchInput.view.html, this.searchButton.view.html);
     this.searchButton.view.html.append(this.searchButtonImg.html);
   }
@@ -83,8 +90,11 @@ class Products {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
     this.resetButton.html.addEventListener('click', async () => {
       if (token) {
+        localStorage.removeItem('currentCategoryID');
         const subcategory = document.getElementsByClassName('subcategory');
         Products.productsList.html.innerHTML = '';
+        const form = Products.sortForm.html as HTMLFormElement;
+        form.reset();
 
         for (let i = 0; i < subcategory.length; i += iteratorStep) {
           ECommerceApi.getSelectedProducts(currentClient, token, subcategory[i].id).then((resp) => {
@@ -191,6 +201,137 @@ class Products {
 
   private static createResetButton(): BaseComponent {
     return new BaseComponent({ tag: 'button', class: ['reset-button'], text: 'Reset' });
+  }
+
+  private static createSortContainer(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['sort-container'] });
+  }
+
+  private static createPriceOptionsElements(): {
+    priceASC: BaseComponent;
+    priceDSC: BaseComponent;
+  } {
+    const priceASC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'priceASC']],
+      class: ['sort-select-item', 'priceASC'],
+      text: 'Price: Low to High',
+    });
+    const priceDSC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'priceDESC']],
+      class: ['sort-select-item', 'priceDESC'],
+      text: 'Price: High to Low',
+    });
+    return { priceASC, priceDSC };
+  }
+
+  private static createNameOptionsElements(): {
+    nameASC: BaseComponent;
+    nameDSC: BaseComponent;
+  } {
+    const nameASC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'nameASC']],
+      class: ['sort-select-item', 'nameASC'],
+      text: 'Name: A to Z',
+    });
+    const nameDSC = new BaseComponent({
+      tag: 'option',
+      attribute: [['value', 'nameDESC']],
+      class: ['sort-select-item', 'nameDESC'],
+      text: 'Name: Z to A',
+    });
+    return { nameASC, nameDSC };
+  }
+
+  private static createSelectFormElements(): {
+    sortLabel: BaseComponent;
+    sortSelectList: BaseComponent;
+    defaultSelectOption: BaseComponent;
+  } {
+    const sortLabel = new BaseComponent({
+      tag: 'label',
+      attribute: [['for', 'sortForm']],
+      class: ['sort-label'],
+      text: 'Sort by:',
+    });
+
+    const sortSelectList = new BaseComponent({
+      tag: 'select',
+      attribute: [
+        ['for', 'sort-select-list'],
+        ['name', 'sort-select-list'],
+        ['form', 'sort-form'],
+      ],
+      class: ['sort-select-list'],
+      id: 'sort-select-list',
+      text: 'Sort by:',
+    });
+
+    const defaultSelectOption = new BaseComponent({
+      tag: 'option',
+      attribute: [
+        ['value', ''],
+        ['selected', 'selected'],
+        ['disabled', 'disabled'],
+        ['hidden', 'hidden'],
+      ],
+      class: ['sort-select-item', 'default'],
+      text: 'Choose option',
+    });
+    return { sortLabel, sortSelectList, defaultSelectOption };
+  }
+
+  private static createSortForm(): BaseComponent {
+    const sortForm = new BaseComponent({ tag: 'form', class: ['sort-form'], id: 'sort-form' });
+    const selectFormElements = Products.createSelectFormElements();
+
+    const priceOptionsElements = Products.createPriceOptionsElements();
+    const nameOptionsElements = Products.createNameOptionsElements();
+
+    sortForm.html.append(selectFormElements.sortLabel.html, selectFormElements.sortSelectList.html);
+    selectFormElements.sortSelectList.html.append(
+      selectFormElements.defaultSelectOption.html,
+      priceOptionsElements.priceASC.html,
+      priceOptionsElements.priceDSC.html,
+      nameOptionsElements.nameASC.html,
+      nameOptionsElements.nameDSC.html,
+    );
+    Products.sortFormListener(sortForm, selectFormElements.sortSelectList);
+
+    return sortForm;
+  }
+
+  private static sortFormListener(sortForm: BaseComponent, sortSelectList: BaseComponent): void {
+    sortForm.html.addEventListener('change', () => {
+      const { value } = sortSelectList.html as HTMLSelectElement;
+      let sortBy = '';
+      let sortRule = '';
+
+      if (value === 'priceASC' || value === 'priceDESC') sortBy = 'price';
+      if (value === 'nameASC' || value === 'nameDESC') sortBy = 'name.en';
+      if (value === 'priceASC') sortRule = 'asc';
+      if (value === 'priceDESC') sortRule = 'desc';
+      if (value === 'nameASC') sortRule = 'asc';
+      if (value === 'nameDESC') sortRule = 'desc';
+
+      Products.getProductsSorting(sortBy, sortRule);
+    });
+  }
+
+  private static async getProductsSorting(sortBy: string, sortRule: string): Promise<void> {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const categoryID = localStorage.getItem('currentCategoryID') ? localStorage.getItem('currentCategoryID') : null;
+    const resp = await ECommerceApi.getSorting(currentClient, token!, sortBy, sortRule, categoryID);
+    localStorage.setItem('products', JSON.stringify(resp.results));
+    Products.productsList.html.innerHTML = '';
+    Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+      Products.productsList.html.append(productCard.html);
+    });
+    Products.resetCategoriesClass();
   }
 
   private static createProductListener(id: string, link: string): BaseComponent {
@@ -482,11 +623,18 @@ class Products {
     pathPart: { name: { en: string }; parent: { id: string }; id: string },
     token: string,
   ): void {
-    categoryNameEl.html.addEventListener('click', async () => {
+    localStorage.removeItem('currentCategoryID');
+    categoryNameEl.html.addEventListener('click', async (e) => {
+      const form = Products.sortForm.html as HTMLFormElement;
+      form.reset();
       categoryNameEl.html.classList.add('active');
       const els = document.getElementsByClassName('subcategory');
       Products.productsList.html.innerHTML = '';
       Products.resetPriceRange();
+
+      const target = e.target as HTMLElement;
+      localStorage.setItem('currentCategoryID', target.id);
+
       for (let i = 0; i < els.length; i += iteratorStep) {
         if (
           els[i].className === `subcategory ${pathPart.id}` ||
