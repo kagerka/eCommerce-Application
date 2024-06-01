@@ -1,0 +1,115 @@
+@import './../../../styles/colors.scss';
+@import './../../../styles/variables';
+
+.profile-content {
+  min-height: calc(100vh - $headerHeight - $footerHeight - 2 * $pageGap);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.profile-name {
+  display: flex;
+  width: 100%;
+  gap: 5px;
+  padding: 0 20px;
+}
+
+.profile-first-name,
+.profile-last-name {
+  display: flex;
+  margin: 0;
+}
+
+.date-birth-container {
+  display: flex;
+  gap: 10px;
+  padding: 0 20px;
+}
+
+.date-birth-title {
+  font-weight: 700;
+}
+
+.date-birth {
+  font-weight: 500;
+}
+
+.addresses {
+  border-top: 1px solid $green;
+  padding-top: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 15px;
+}
+
+.addresses-title {
+  text-align: center;
+}
+
+.addresses-container {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+}
+
+.shipping-addresses-container,
+.billing-addresses-container {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  font-weight: 500;
+  padding: 0 20px;
+  gap: 10px;
+}
+
+.address {
+  font-weight: 400;
+}
+
+.country-container {
+  display: flex;
+  gap: 5px;
+}
+
+.label {
+  display: none;
+  font-weight: 300;
+  font-size: 12px;
+  color: $white;
+  background-color: $darkGreen;
+  border-radius: 3px;
+  padding: 3px;
+}
+
+.label.show {
+  display: block;
+}
+
+.message {
+  font-weight: 400;
+}
+
+@media screen and (max-width: 800px) {
+  .profile-name {
+    flex-direction: column;
+  }
+  .addresses-title {
+    padding: 0 20px;
+    text-align: start;
+  }
+
+  .addresses-container {
+    flex-direction: column;
+  }
+
+  .shipping-addresses-container,
+  .billing-addresses-container {
+    width: 100%;
+  }
+}
