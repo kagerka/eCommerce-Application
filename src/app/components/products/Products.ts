@@ -307,7 +307,7 @@ class Products {
       let sortRule = '';
 
       if (value === 'priceASC' || value === 'priceDESC') sortBy = 'price';
-      if (value === 'nameASC' || value === 'nameDESC') sortBy = 'name';
+      if (value === 'nameASC' || value === 'nameDESC') sortBy = 'name.en';
       if (value === 'priceASC') sortRule = 'asc';
       if (value === 'priceDESC') sortRule = 'desc';
       if (value === 'nameASC') sortRule = 'asc';

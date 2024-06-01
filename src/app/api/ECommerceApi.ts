@@ -208,7 +208,7 @@ class ECommerceApi {
     sortBy: string,
     sortRule: string,
   ): Promise<ICategories> {
-    const path = `/product-projections/search?sort=${sortBy}.en ${sortRule}`;
+    const path = `/product-projections/search?sort=${sortBy} ${sortRule}`;
     const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
       method: 'GET',
       headers: {
