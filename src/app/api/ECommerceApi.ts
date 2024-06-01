@@ -201,6 +201,31 @@ class ECommerceApi {
       return json;
     }
   }
+
+  static async getSorting(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    sortBy: string,
+    sortRule: string,
+    categoryID?: string | null,
+  ): Promise<ICategories> {
+    const path = categoryID
+      ? `/product-projections/search?filter=categories.id:"${categoryID}"&sort=${sortBy} ${sortRule}`
+      : `/product-projections/search?sort=${sortBy} ${sortRule}`;
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
 }
 
 export default ECommerceApi;
