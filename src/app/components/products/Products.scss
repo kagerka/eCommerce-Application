@@ -453,6 +453,11 @@
   .price-container {
     flex-direction: column;
   }
+
+  .sort-form {
+    flex-direction: column;
+    align-items: end;
+  }
 }
 
 @media screen and (max-width: 420px) {

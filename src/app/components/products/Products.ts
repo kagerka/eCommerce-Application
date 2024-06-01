@@ -216,8 +216,8 @@ class Products {
     });
     const priceDSC = new BaseComponent({
       tag: 'option',
-      attribute: [['value', 'priceDSC']],
-      class: ['sort-select-item', 'priceDSC'],
+      attribute: [['value', 'priceDESC']],
+      class: ['sort-select-item', 'priceDESC'],
       text: 'Price: High to Low',
     });
     return { priceASC, priceDSC };
@@ -235,15 +235,18 @@ class Products {
     });
     const nameDSC = new BaseComponent({
       tag: 'option',
-      attribute: [['value', 'nameDSC']],
-      class: ['sort-select-item', 'nameDSC'],
+      attribute: [['value', 'nameDESC']],
+      class: ['sort-select-item', 'nameDESC'],
       text: 'Name: Z to A',
     });
     return { nameASC, nameDSC };
   }
 
-  private static createSortForm(): BaseComponent {
-    const sortForm = new BaseComponent({ tag: 'form', class: ['sort-form'], id: 'sort-form' });
+  private static createSelectFormElements(): {
+    sortLabel: BaseComponent;
+    sortSelectList: BaseComponent;
+    defaultSelectOption: BaseComponent;
+  } {
     const sortLabel = new BaseComponent({
       tag: 'label',
       attribute: [['for', 'sortForm']],
@@ -263,18 +266,68 @@ class Products {
       text: 'Sort by:',
     });
 
+    const defaultSelectOption = new BaseComponent({
+      tag: 'option',
+      attribute: [
+        ['value', ''],
+        ['selected', 'selected'],
+        ['disabled', 'disabled'],
+        ['hidden', 'hidden'],
+      ],
+      class: ['sort-select-item', 'default'],
+      text: 'Choose option',
+    });
+    return { sortLabel, sortSelectList, defaultSelectOption };
+  }
+
+  private static createSortForm(): BaseComponent {
+    const sortForm = new BaseComponent({ tag: 'form', class: ['sort-form'], id: 'sort-form' });
+    const selectFormElements = Products.createSelectFormElements();
+
     const priceOptionsElements = Products.createPriceOptionsElements();
     const nameOptionsElements = Products.createNameOptionsElements();
 
-    sortForm.html.append(sortLabel.html, sortSelectList.html);
-    sortSelectList.html.append(
+    sortForm.html.append(selectFormElements.sortLabel.html, selectFormElements.sortSelectList.html);
+    selectFormElements.sortSelectList.html.append(
+      selectFormElements.defaultSelectOption.html,
       priceOptionsElements.priceASC.html,
       priceOptionsElements.priceDSC.html,
       nameOptionsElements.nameASC.html,
       nameOptionsElements.nameDSC.html,
     );
+    Products.sortFormListener(sortForm, selectFormElements.sortSelectList);
 
     return sortForm;
+  }
+
+  private static sortFormListener(sortForm: BaseComponent, sortSelectList: BaseComponent): void {
+    sortForm.html.addEventListener('change', () => {
+      const { value } = sortSelectList.html as HTMLSelectElement;
+      let sortBy = '';
+      let sortRule = '';
+
+      if (value === 'priceASC' || value === 'priceDESC') sortBy = 'price';
+      if (value === 'nameASC' || value === 'nameDESC') sortBy = 'name';
+      if (value === 'priceASC') sortRule = 'asc';
+      if (value === 'priceDESC') sortRule = 'desc';
+      if (value === 'nameASC') sortRule = 'asc';
+      if (value === 'nameDESC') sortRule = 'desc';
+
+      Products.getProsuctsSorting(sortBy, sortRule);
+    });
+  }
+
+  private static async getProsuctsSorting(sortBy: string, sortRule: string): Promise<void> {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const resp = await ECommerceApi.getSorting(currentClient, token!, sortBy, sortRule);
+    localStorage.setItem('products', JSON.stringify(resp.results));
+    Products.productsList.html.innerHTML = '';
+    Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+      Products.productsList.html.append(productCard.html);
+    });
+    Products.resetCategoriesClass();
   }
 
   private static createProductListener(id: string, link: string): BaseComponent {
