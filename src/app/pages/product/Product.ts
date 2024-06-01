@@ -15,6 +15,13 @@ import './Product.scss';
 const gap = 16;
 const startPos = 0;
 const count = 1;
+const TWO = 2;
+const smallW = 144;
+const bigW = 436;
+let position = 0;
+let num = 1;
+let isLastSmall = false;
+let isLastBig = true;
 
 type TProductDetails = {
   name: string;
@@ -37,9 +44,11 @@ class Product {
 
   private productImagesPreviewContainer: BaseComponent;
 
-  private productImagesPreviewContent: BaseComponent;
+  private productImagesSelectedContainer: BaseComponent;
 
-  private productImagesSelectedContent: BaseComponent;
+  static productImagesPreviewContent: BaseComponent;
+
+  static productImagesSelectedContent: BaseComponent;
 
   private productInfoContent: BaseComponent;
 
@@ -75,8 +84,9 @@ class Product {
     this.productPageContent = Product.createProductPageContentElement();
     this.productImagesContent = Product.createProductImagesContentElement();
     this.productImagesPreviewContainer = Product.createProductImagesPreviewContainer();
-    this.productImagesPreviewContent = Product.createProductImagesPreviewContentElement();
-    this.productImagesSelectedContent = Product.createProductImagesSelectedContentElement();
+    this.productImagesSelectedContainer = Product.createProductImagesSelectedContainer();
+    Product.productImagesPreviewContent = Product.createProductImagesPreviewContentElement();
+    Product.productImagesSelectedContent = Product.createProductImagesSelectedContentElement();
     this.productInfoContent = Product.createProductInfoContentElement();
     this.productName = Product.createProductNameContainerElement(name);
     this.productPrice = Product.createProductPriceContainerElement(
@@ -104,10 +114,10 @@ class Product {
     );
     this.productImagesContent.html.append(
       this.productImagesPreviewContainer.html,
-      this.productImagesSelectedContent.html,
+      this.productImagesSelectedContainer.html,
     );
-    this.productImagesPreviewContainer.html.append(this.productImagesPreviewContent.html);
-    this.productImagesPreviewContainer.html.append(this.productImagesPreviewContent.html);
+    this.productImagesPreviewContainer.html.append(Product.productImagesPreviewContent.html);
+    this.productImagesSelectedContainer.html.append(Product.productImagesSelectedContent.html);
     this.productInfoContent.html.append(
       this.productName.html,
       this.productPrice.html,
@@ -138,6 +148,10 @@ class Product {
 
   private static createProductImagesPreviewContainer(): BaseComponent {
     return new BaseComponent({ tag: 'div', class: ['product-page-images-preview-container'] });
+  }
+
+  private static createProductImagesSelectedContainer(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['product-page-images-selected-container'] });
   }
 
   private static createProductImagesPreviewContentElement(): BaseComponent {
@@ -183,32 +197,32 @@ class Product {
     leftArrow.html.innerHTML = leftArrowBtn;
     rightArrow.html.innerHTML = rightArrowBtn;
     containerEl.append(leftArrow.html, rightArrow.html);
-    let num = 1;
-    let position = 0;
+    let modalNum = 1;
+    let modalPosition = 0;
     const images = modalWindow.children;
     const numImages = images.length;
     rightArrow.html.addEventListener('click', () => {
       const width = (modal as HTMLElement).offsetWidth + gap;
-      position -= width * count;
-      position = Math.max(position, -width * (numImages - count));
-      modalWindow.style.marginLeft = `${position}px`;
-      num += count;
-      if (numImages === num) {
-        num = count;
-        position = startPos;
+      modalPosition -= width * count;
+      modalPosition = Math.max(modalPosition, -width * (numImages - count));
+      modalWindow.style.marginLeft = `${modalPosition}px`;
+      modalNum += count;
+      if (numImages === modalNum) {
+        modalNum = count;
+        modalPosition = startPos;
       }
     });
 
     leftArrow.html.addEventListener('click', () => {
       const width = (modal as HTMLElement).offsetWidth + gap;
-      num -= count;
-      if (num <= count) {
-        num = numImages;
-        position = -width * (num - count);
+      modalNum -= count;
+      if (modalNum <= count) {
+        modalNum = numImages;
+        modalPosition = -width * (modalNum - count);
       } else {
-        position += width * count;
+        modalPosition += width * count;
       }
-      modalWindow.style.marginLeft = `${position}px`;
+      modalWindow.style.marginLeft = `${modalPosition}px`;
     });
   }
 
@@ -229,48 +243,112 @@ class Product {
     });
   }
 
-  private createSliderIcons(containerEl: HTMLElement): void {
+  private static createSliderIcons(containerEl: HTMLElement): void {
     const leftArrow = new BaseComponent({ tag: 'div', class: ['left-arrow-icon'] });
     const rightArrow = new BaseComponent({ tag: 'div', class: ['right-arrow-icon'] });
-    leftArrow.html.innerHTML = leftArrowBtn;
-    rightArrow.html.innerHTML = rightArrowBtn;
-    containerEl.append(leftArrow.html, rightArrow.html);
-    let position = 0;
-    const width = 100;
+    Product.addArrows(containerEl, leftArrow, rightArrow);
+    const elements = this.productImagesPreviewContent.html.children;
+    const numImages = elements.length;
+    const images = [...elements].filter((elem) => elem.className.match('product-page-image-container'));
 
     rightArrow.html.addEventListener('click', () => {
-      const elements = this.productImagesPreviewContent.html.children;
-      const arrayOfElements = [...elements];
-      const images = arrayOfElements.filter((elem) => elem.className.match('product-page-image-container'));
-      position -= width * count;
-      position = Math.max(position, -width * (images.length - count));
-      this.productImagesPreviewContent.html.style.marginLeft = `${position}px`;
+      if ((numImages === num + TWO && !isLastSmall) || (numImages === TWO && num === count)) {
+        Product.chooseNextActiveCard();
+        this.productImagesSelectedContent.html.style.marginLeft = `${(position / smallW) * bigW - bigW}px`;
+        isLastSmall = true;
+      } else if (numImages === num + count && isLastSmall) {
+        Product.chooseNextActiveCard();
+        this.productImagesSelectedContent.html.style.marginLeft = `${(position / smallW) * bigW - TWO * bigW}px`;
+      } else if (numImages > num + TWO) {
+        position -= smallW * count;
+        isLastSmall = false;
+        position = Math.max(position, -smallW * (images.length - count));
+        this.productImagesPreviewContent.html.style.marginLeft = `${position}px`;
+        Product.chooseNextActiveCard();
+        this.productImagesSelectedContent.html.style.marginLeft = `${(position / smallW) * bigW}px`;
+      }
     });
     leftArrow.html.addEventListener('click', () => {
-      position += width * count;
-      const ZERO = 0;
-      position = Math.min(position, ZERO);
-      this.productImagesPreviewContent.html.style.marginLeft = `${position}px`;
+      if (num > count && num <= numImages - TWO && numImages !== TWO) {
+        position += smallW * count;
+        this.productImagesPreviewContent.html.style.marginLeft = `${position}px`;
+        this.productImagesSelectedContent.html.style.marginLeft = `${(position / smallW) * bigW}px`;
+        Product.choosePrevActiveCard();
+      } else if (
+        ((num === numImages || num === numImages - count) && numImages !== TWO) ||
+        (numImages === TWO && num === TWO)
+      ) {
+        Product.choosePrevActiveCard();
+        Product.findLastSelectedCard();
+      }
     });
+  }
+
+  private static findLastSelectedCard(): void {
+    if (isLastBig) {
+      this.productImagesSelectedContent.html.style.marginLeft = `${(position / smallW) * bigW - bigW}px`;
+      isLastBig = false;
+    } else {
+      this.productImagesSelectedContent.html.style.marginLeft = `${(position / smallW) * bigW}px`;
+      isLastBig = true;
+    }
+  }
+
+  private static addArrows(containerEl: HTMLElement, leftArrow: BaseComponent, rightArrow: BaseComponent): void {
+    containerEl.append(leftArrow.html, rightArrow.html);
+    const elements = this.productImagesPreviewContent.html.children;
+    const numImages = elements.length;
+    if (numImages > count) {
+      leftArrow.html.innerHTML = leftArrowBtn;
+      rightArrow.html.innerHTML = rightArrowBtn;
+    }
+  }
+
+  private static chooseNextActiveCard(): void {
+    Product.resetActiveCardStatus();
+    this.productImagesPreviewContent.html.children[num].id = 'active-card';
+    num += count;
+  }
+
+  private static choosePrevActiveCard(): void {
+    num -= count;
+    Product.resetActiveCardStatus();
+    this.productImagesPreviewContent.html.children[num - count].id = 'active-card';
+  }
+
+  private static resetActiveCardStatus(): void {
+    const cards = document.getElementsByClassName('product-page-image-container');
+    for (let i = 0; i < cards.length; i += count) {
+      cards[i].id = '';
+    }
   }
 
   private addImages(images: IProductImages[], containerEl: HTMLElement): void {
     images.forEach((image, i) => {
-      const ZERO = 0;
       const img = new BaseComponent({ tag: 'img', class: ['product-page-image'], src: image.url });
+      const imgSelected = new BaseComponent({ tag: 'img', class: ['selected-product-page-image'], src: image.url });
       const imgContainer = new BaseComponent({ tag: 'div', class: ['product-page-image-container'] });
+      const imgContainerSelected = new BaseComponent({ tag: 'div', class: ['selected-image'] });
       let currentImg: BaseComponent;
-      if (i === ZERO) {
-        imgContainer.html.classList.add('selected-image');
-        this.productImagesSelectedContent.html.append(imgContainer.html);
+
+      if (i === startPos) {
+        Product.productImagesPreviewContent.html.append(imgContainer.html);
+        imgContainer.html.id = 'active-card';
         imgContainer.html.append(img.html);
-        this.zoomImage(images, imgContainer.html);
       } else {
-        this.productImagesPreviewContent.html.append(imgContainer.html);
+        Product.productImagesPreviewContent.html.append(imgContainer.html);
         imgContainer.html.append(img.html);
       }
+      Product.productImagesSelectedContent.html.append(imgContainerSelected.html);
+      imgContainerSelected.html.append(imgSelected.html);
+      this.zoomImage(images, imgContainerSelected.html);
 
       imgContainer.html.addEventListener('click', () => {
+        const imageCards = document.getElementsByClassName('product-page-image-container');
+        for (let j = 0; j < imageCards.length; j += count) {
+          imageCards[j].id = '';
+        }
+        imgContainer.html.id = 'active-card';
         const selectedImg = document.querySelector('.selected-image');
         currentImg = img;
         const currentImageSrc = currentImg.html.getAttribute('src');
@@ -280,7 +358,7 @@ class Product {
       });
     });
 
-    this.createSliderIcons(containerEl);
+    Product.createSliderIcons(containerEl);
   }
 
   private static createProductInfoContentElement(): BaseComponent {
