@@ -243,6 +243,10 @@ class EditForm {
     }
   }
 
+  get submit(): Button {
+    return this.submitBtn;
+  }
+
   get view(): BaseComponent {
     return this.content;
   }

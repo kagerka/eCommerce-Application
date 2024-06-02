@@ -4,13 +4,14 @@ import BaseComponent from '../../components/BaseComponent';
 import Button from '../../components/button/Button';
 import Modal from '../../components/modal/Modal';
 import EditForm from '../../components/edit-form/EditForm';
+// import ICustomerSignInResult from '../../interfaces/CustomerSignInResult.interface';
 import './Profile.scss';
 
 const EMPTY_ARR_LENGTH = 0;
 const SINGLE_ADDRESS = 1;
 
 interface IAddress {
-  id: string;
+  id?: string;
   streetName: string;
   postalCode: string;
   city: string;
@@ -107,7 +108,7 @@ class Profile {
     this.profileBillingStreet = Profile.createBillingStreetElement();
     this.editBillingBtn = Profile.createEditBtnElement();
     this.composeView();
-    this.editBtnHandle();
+    this.editBtnsHandle();
   }
 
   private composeShippingAdressView(): void {
@@ -271,39 +272,6 @@ class Profile {
     return new Button({ type: 'button', class: ['edit-btn', 'btn'], text: 'Edit' });
   }
 
-  // private shippingBtnHandler(): void {
-  //   this.editShippingBtn.view.html.addEventListener('click', () => {
-  //     // const id = Profile.getCustomerField('id');
-  //     // if (id !== undefined) {
-  //     ECommerceApi.updateCustomer(currentClient, {
-  //       id,
-  //       token: 'MnBVxvQ3xUG1CCg4rvuTM1VMgEdLc48u',
-  //       version: 3,
-  //       address: {
-  //         streetName: 'nabo',
-  //         streetNumber: '167',
-  //         postalCode: '22222',
-  //         city: 'Urupinsk',
-  //         country: 'RU',
-  //       },
-  //     });
-  //   },
-  //     // }
-  //   );
-  // }
-
-  // private static getCustomerField(field: string): string | undefined {
-  //   let value;
-  //   if (localStorage.getItem('customer') !== null) {
-  //     const customerJSON = localStorage.getItem('customer');
-  //     if (customerJSON !== null) {
-  //       const customer = JSON.parse(customerJSON);
-  //       value = customer[field];
-  //     }
-  //   }
-  //   return value;
-  // }
-
   public displayAddress(): void {
     if (localStorage.getItem('customer') !== null) {
       const customerJSON = localStorage.getItem('customer');
@@ -384,8 +352,62 @@ class Profile {
     }
   }
 
-  private editBtnHandle(): void {
+  // private static requestUpdateCustomer(dataAddress: IAddress): void {
+  //   let tokenPsw: string;
+  //   if (localStorage.getItem('tokenPassword') !== null) {
+  //     const tokenJSON = localStorage.getItem('tokenPassword');
+  //     if (tokenJSON !== null) {
+  //       tokenPsw = JSON.parse(tokenJSON);
+  //       if (localStorage.getItem('customer') !== null) {
+  //         const customerJSON = localStorage.getItem('customer');
+  //         if (customerJSON !== null) {
+  //           const customer = JSON.parse(customerJSON);
+  //           ECommerceApi.updateCustomer(currentClient, {
+  //             id: customer.id,
+  //             token: 'Iyzh10TQYlzRlnvJiV5YttJyokuz-RfM',
+  //             version: customer.version,
+  //             address: {
+  //               streetName: dataAddress.streetName,
+  //               streetNumber: '',
+  //               postalCode: dataAddress.postalCode,
+  //               city: dataAddress.city,
+  //               country: dataAddress.country,
+  //             },
+  //           });
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+
+  private editBtnsHandle(): void {
     this.editShippingBtn.view.html.addEventListener('click', () => {
+      const modal = new Modal();
+      this.profilePageContent.html.append(modal.view.html);
+      const editForm = new EditForm();
+      modal.container.html.append(editForm.view.html);
+      // editForm.submit.view.html.addEventListener('click', (event) => {
+      //   event.preventDefault();
+      //   console.log('submit');
+
+      //   ECommerceApi.updateCustomer(currentClient, {
+      //     id: 'c4744ca2-43c7-4508-996e-51a650abec11',
+      //     token: 'LUYWI-hYa3PmAAITDeUSFXU8poFszXw9',
+      //     version: 1,
+      //     address: {
+      //       streetName: 'lklklk',
+      //       streetNumber: '',
+      //       postalCode: '909090',
+      //       city: 'KK',
+      //       country: 'RU',
+      //     },
+      //   }).then((res) => res.addresses[res.addresses.length - SINGLE_ADDRESS])
+      // .then((data) => {
+
+      // });
+      // });
+    });
+    this.editBillingBtn.view.html.addEventListener('click', () => {
       const modal = new Modal();
       this.profilePageContent.html.append(modal.view.html);
       const editForm = new EditForm();
