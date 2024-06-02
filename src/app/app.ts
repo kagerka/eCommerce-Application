@@ -6,11 +6,13 @@ import BaseComponent from './components/BaseComponent';
 import Footer from './components/footer/Footer';
 import Header from './components/header/Header';
 import About from './pages/about/About';
+import Catalog from './pages/catalog/Catalog';
 import Login from './pages/login/Login';
 import MainPage from './pages/main/MainPage';
 import NotFound from './pages/notFound/NotFound';
-import Registration from './pages/registation/Registration';
+import Product from './pages/product/Product';
 import Profile from './pages/profile/Profile';
+import Registration from './pages/registation/Registration';
 
 class App {
   private static container: HTMLElement = document.body;
@@ -35,6 +37,8 @@ class App {
 
   private profilePage: Profile;
 
+  private catalogPage: Catalog;
+
   private router: Navigo;
 
   constructor() {
@@ -48,6 +52,7 @@ class App {
     this.notFound = new NotFound();
     this.regPage = new Registration();
     this.profilePage = new Profile();
+    this.catalogPage = new Catalog();
     this.router = new Navigo('/');
     this.composeView();
     this.observerLogin();
@@ -103,8 +108,6 @@ class App {
           if (this.header.logoutBtn.html.getAttribute('logout-success') === 'true') {
             this.pageContent.html.innerHTML = '';
             this.pageContent.html.append(this.mainPage.view.html);
-            this.mainPage.loginBtn.html.setAttribute('href', '/');
-            this.mainPage.regBtn.html.setAttribute('href', '/');
             this.checkBtns();
             this.setLoginBtnHref();
           }
@@ -145,24 +148,61 @@ class App {
       .on('/profile', () => {
         this.onProfile();
       })
+      .on('/catalog', () => {
+        this.onCatalog();
+      })
+      .on('/catalog\\/(.*)/', () => {
+        this.onProduct();
+      })
       .notFound(() => {
-        this.pageContent.html.innerHTML = '';
-        this.pageContent.html.append(this.notFound.view.html);
-        this.checkBtns();
-        this.setLoginBtnHref();
+        this.onNotFound();
       })
       .resolve();
+  }
+
+  private onNotFound(): void {
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(this.notFound.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
+  }
+
+  private onCatalog(): void {
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(this.catalogPage.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
+  }
+
+  private async onProduct(): Promise<void> {
+    const product = await Product.getProductDetails();
+    const productPage = new Product(
+      product.name,
+      product.description,
+      product.images,
+      product.formattedPrice,
+      product.formattedDiscount,
+      product.currencySymbol,
+      product.productDiscount,
+      product.brand,
+      product.sizes,
+      product.bedrooms,
+      product.persons,
+    );
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(productPage.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
   }
 
   private onLogin(): void {
     if (localStorage.getItem('isAuth')) {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
-      window.location.assign(
-        `${window.location.protocol}//${window.location.hostname}:5173`,
-        // for correct operation locally you need to add a port number
-        // For example: ${window.location.protocol}//${window.location.hostname}:5173
-      );
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      // for correct operation locally you need to add a port number
+      // For example: ${window.location.protocol}//${window.location.hostname}:5173
+
       this.checkBtns();
       this.setLoginBtnHref();
     } else {
@@ -177,11 +217,10 @@ class App {
     if (localStorage.getItem('isAuth')) {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
-      window.location.assign(
-        `${window.location.protocol}//${window.location.hostname}:5173`,
-        // for correct operation locally you need to add a port number
-        // For example: ${window.location.protocol}//${window.location.hostname}:5173
-      );
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      // for correct operation locally you need to add a port number
+      // For example: ${window.location.protocol}//${window.location.hostname}:5173
+
       this.checkBtns();
       this.setLoginBtnHref();
     } else {
@@ -207,11 +246,9 @@ class App {
         this.setLoginBtnHref();
       }
     } else {
-      window.location.assign(
-        `${window.location.protocol}//${window.location.hostname}:5173`,
-        // for correct operation locally you need to add a port number
-        // For example: ${window.location.protocol}//${window.location.hostname}:5173
-      );
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      // for correct operation locally you need to add a port number
+      // For example: ${window.location.protocol}//${window.location.hostname}:5173
       this.checkBtns();
       this.setLoginBtnHref();
     }
@@ -220,12 +257,8 @@ class App {
   private setLoginBtnHref(): void {
     if (localStorage.getItem('isAuth')) {
       this.header.loginBtn.html.setAttribute('href', '/');
-      this.mainPage.regBtn.html.setAttribute('href', '/');
-      this.mainPage.loginBtn.html.setAttribute('href', '/');
     } else {
       this.header.loginBtn.html.setAttribute('href', '/login');
-      this.mainPage.regBtn.html.setAttribute('href', '/registration');
-      this.mainPage.loginBtn.html.setAttribute('href', '/login');
     }
   }
 
@@ -253,9 +286,12 @@ class App {
     if (!localStorage.getItem('tokenAnonymous') && !localStorage.getItem('tokenPassword')) {
       ECommerceApi.getAccessToken(currentClient).then((res) => {
         localStorage.setItem('tokenAnonymous', res.access_token);
+        Catalog.displayProducts();
+        Catalog.displayCategories();
       });
     }
-
+    Catalog.displayProducts();
+    Catalog.displayCategories();
     this.createRouter();
   }
 }

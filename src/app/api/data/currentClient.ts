@@ -1,5 +1,6 @@
-import { ecommerceApi } from './api-clients';
+import { sportStore } from './api-clients';
 
-const currentClient = ecommerceApi;
+// const currentClient = spa;
+const currentClient = sportStore;
 
 export default currentClient;

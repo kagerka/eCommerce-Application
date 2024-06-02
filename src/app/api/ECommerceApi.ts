@@ -1,10 +1,11 @@
 import IAPIClientDetails from '../interfaces/APIClientDetails.interface';
 import IAccessToken from '../interfaces/AccessToken.interface';
-import ICustomerProfile from '../interfaces/CustomerProfile.interface';
-import ITokenPassword from '../interfaces/TokenPassword.interface';
 import ICustomerData from '../interfaces/CustomerData.interface';
+import ICustomerProfile from '../interfaces/CustomerProfile.interface';
 import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface';
 import ICustomerUpdateRequest from '../interfaces/CustomerUpdateRequest.interface';
+import { ICategories, IProducts, IQueryProducts } from '../interfaces/Product.interface';
+import ITokenPassword from '../interfaces/TokenPassword.interface';
 
 class ECommerceApi {
   static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
@@ -135,6 +136,140 @@ class ECommerceApi {
           },
         ],
       }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getProducts(clientDetails: IAPIClientDetails, token: string, limit: number): Promise<IQueryProducts> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/products?limit=${limit}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getProductByID(clientDetails: IAPIClientDetails, token: string, id: string): Promise<IProducts> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/products/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getCategories(clientDetails: IAPIClientDetails, token: string): Promise<ICategories> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/categories`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getSelectedProducts(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    categoryId: string,
+  ): Promise<ICategories> {
+    const path = '/product-projections/search?filter=categories.id:';
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}"${categoryId}"`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getPriceRange(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    min: number,
+    max: number,
+  ): Promise<ICategories> {
+    const path = `/product-projections/search?filter=variants.price.centAmount:range (${min} to ${max})`;
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getSorting(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    sortBy: string,
+    sortRule: string,
+    categoryID?: string | null,
+  ): Promise<ICategories> {
+    const path = categoryID
+      ? `/product-projections/search?filter=categories.id:"${categoryID}"&sort=${sortBy} ${sortRule}`
+      : `/product-projections/search?sort=${sortBy} ${sortRule}`;
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}&limit=70`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getSearching(clientDetails: IAPIClientDetails, token: string, inputRes: string): Promise<ICategories> {
+    const path = `/product-projections/search?limit=70&text.en=${inputRes}`;
+
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

@@ -26,6 +26,10 @@ class Header {
 
   private homeNavListLink: BaseComponent;
 
+  private catalogNavListItem: BaseComponent;
+
+  private catalogNavListLink: BaseComponent;
+
   private aboutNavListItem: BaseComponent;
 
   public aboutNavListLink: BaseComponent;
@@ -53,6 +57,8 @@ class Header {
     this.navList = Header.createNavListElement();
     this.homeNavListItem = Header.createHomeNavListItemElement();
     this.homeNavListLink = Header.createHomeNavListLinkElement();
+    this.catalogNavListItem = Header.createCatalogNavListItemElement();
+    this.catalogNavListLink = Header.createCatalogNavListLinkElement();
     this.aboutNavListItem = Header.createAboutNavListItemElement();
     this.aboutNavListLink = Header.createAboutNavListLinkElement();
 
@@ -77,8 +83,9 @@ class Header {
 
     this.headerNavContainer.html.append(this.headerNav.html);
     this.headerNav.html.append(this.navList.html);
-    this.navList.html.append(this.homeNavListItem.html, this.aboutNavListItem.html);
+    this.navList.html.append(this.homeNavListItem.html, this.catalogNavListItem.html, this.aboutNavListItem.html);
     this.homeNavListItem.html.append(this.homeNavListLink.html);
+    this.catalogNavListItem.html.append(this.catalogNavListLink.html);
     this.aboutNavListItem.html.append(this.aboutNavListLink.html);
     this.headerButtonsContainer.html.append(
       this.profileButton.html,
@@ -155,6 +162,22 @@ class Header {
     });
   }
 
+  private static createCatalogNavListItemElement(): BaseComponent {
+    return new BaseComponent({ tag: 'li', class: ['nav-list-item'] });
+  }
+
+  private static createCatalogNavListLinkElement(): BaseComponent {
+    return new BaseComponent({
+      tag: 'a',
+      class: ['nav-list-link'],
+      attribute: [
+        ['href', '/catalog'],
+        ['data-navigo', ''],
+      ],
+      text: 'Catalog',
+    });
+  }
+
   private static createAboutNavListItemElement(): BaseComponent {
     return new BaseComponent({ tag: 'li', class: ['nav-list-item'] });
   }
@@ -178,7 +201,7 @@ class Header {
   private static createProfileButtonElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
-      class: ['profile-button'],
+      class: ['profile-button', 'hide'],
       attribute: [
         ['href', '/profile'],
         ['data-navigo', ''],
