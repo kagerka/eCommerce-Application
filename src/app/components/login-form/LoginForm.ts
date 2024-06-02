@@ -18,6 +18,7 @@ import {
   RULE_SEPARATOR,
   RULE_SPACE,
 } from '../../utils/validation/inputErrorTexts';
+import Products from '../products/Products';
 
 class LoginForm {
   private passwordInputStatus: boolean;
@@ -417,6 +418,7 @@ class LoginForm {
           const token = localStorage.getItem('tokenPassword');
           if (token) {
             ECommerceApi.getCustomer(currentClient, token);
+            Products.resetCatalog();
           }
         }
       }

@@ -179,7 +179,7 @@
 }
 
 .sale-title:hover,
-.sale-title:active {
+.sale-title.active {
   cursor: pointer;
   outline: 0.4rem solid $lightGray;
   border-radius: 5px;

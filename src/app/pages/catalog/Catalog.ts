@@ -44,7 +44,7 @@ class Catalog {
       : localStorage.getItem('tokenAnonymous');
     if (token) {
       try {
-        const res = await ECommerceApi.getProducts(currentClient, token, products.limit);
+        const res = await ECommerceApi.getProducts(currentClient, token);
         products.results = res.results;
         localStorage.setItem('products', JSON.stringify(products.results));
         await Products.createProductCardsFromLocalStorage(true).forEach((productCard) => {

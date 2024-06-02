@@ -111,8 +111,8 @@ class ECommerceApi {
     }
   }
 
-  static async getProducts(clientDetails: IAPIClientDetails, token: string, limit: number): Promise<IQueryProducts> {
-    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/products?limit=${limit}`, {
+  static async getProducts(clientDetails: IAPIClientDetails, token: string): Promise<IQueryProducts> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/products?limit=70`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

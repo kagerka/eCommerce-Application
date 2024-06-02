@@ -48,10 +48,6 @@ class Products {
 
   static brandsContainer: BaseComponent;
 
-  private saleContainer: BaseComponent;
-
-  private saleTitle: BaseComponent;
-
   constructor() {
     this.catalogContainer = Products.createCatalogContainerElement();
     this.filterContainer = Products.createFilterContainerElement();
@@ -69,15 +65,13 @@ class Products {
     this.searchButtonImg = Products.createSearchButtonImg();
     this.sortContainer = Products.createSortContainer();
     Products.sortForm = Products.createSortForm();
-    this.saleContainer = Products.createSaleContainer();
-    this.saleTitle = Products.createSaleTitle();
     const filter = Products.createPriceDefining();
 
     this.composeView();
 
     this.priceContainer.append(filter.html);
 
-    Products.resetProducts();
+    Products.handleResetButton();
     this.handleSearchEvents();
   }
 
@@ -86,12 +80,10 @@ class Products {
     this.filterContainer.html.append(
       Products.categoriesContainer.html,
       this.priceContainer.html,
-      this.saleContainer.html,
       Products.brandsContainer.html,
       Products.resetButton.html,
     );
     Products.categoriesContainer.html.append(this.categoriesTitle.html);
-    this.saleContainer.html.append(this.saleTitle.html);
     this.priceContainer.html.append(this.priceTitle.html);
     this.productsContainer.html.append(this.searchForm.html, this.sortContainer.html, Products.productsList.html);
     this.sortContainer.html.append(Products.sortForm.html);
@@ -123,38 +115,40 @@ class Products {
         Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
           Products.productsList.html.append(productCard.html);
         });
-        Products.resetProducts();
-        Products.resetCategoriesClass();
-        Products.resetPriceRange();
+        Products.resetCatalog();
       });
     }
   }
 
-  static resetProducts(): void {
-    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+  static handleResetButton(): void {
     Products.resetButton.html.addEventListener('click', async () => {
-      if (token) {
-        localStorage.removeItem('currentCategoryID');
-        const subcategory = document.getElementsByClassName('subcategory');
-
-        const form = Products.sortForm.html as HTMLFormElement;
-        form.reset();
-
-        (Products.searchInput.view.html as HTMLInputElement).value = '';
-
-        for (let i = 0; i < subcategory.length; i += iteratorStep) {
-          ECommerceApi.getSelectedProducts(currentClient, token, subcategory[i].id).then((resp) => {
-            Products.resetCategoriesClass();
-            Products.resetPriceRange();
-
-            localStorage.setItem('products', JSON.stringify(resp.results));
-            Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
-              Products.productsList.html.append(productCard.html);
-            });
-          });
-        }
-      }
+      this.resetCatalog();
     });
+  }
+
+  static resetCatalog(): void {
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    if (token) {
+      localStorage.removeItem('currentCategoryID');
+      const subcategory = document.getElementsByClassName('subcategory');
+
+      const form = Products.sortForm.html as HTMLFormElement;
+      form.reset();
+
+      (Products.searchInput.view.html as HTMLInputElement).value = '';
+
+      for (let i = 0; i < subcategory.length; i += iteratorStep) {
+        ECommerceApi.getSelectedProducts(currentClient, token, subcategory[i].id).then((resp) => {
+          Products.resetCategoriesClass();
+          Products.resetPriceRange();
+
+          localStorage.setItem('products', JSON.stringify(resp.results));
+          Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+            Products.productsList.html.append(productCard.html);
+          });
+        });
+      }
+    }
   }
 
   static resetPriceRange(): void {
@@ -257,14 +251,6 @@ class Products {
     return new BaseComponent({ tag: 'div', class: ['categories-container'] });
   }
 
-  private static createSaleContainer(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['categories-container'] });
-  }
-
-  private static createSaleTitle(): BaseComponent {
-    return new BaseComponent({ tag: 'h1', class: ['sale-title'], text: '🏷️ Sale' });
-  }
-
   static displayBrands(): BaseComponent {
     const brandContainer = new BaseComponent({ tag: 'ul', class: ['brand-container'] });
     const brandTitle = new BaseComponent({ tag: 'h1', class: ['categories-title'], text: 'Brands' });
@@ -293,6 +279,9 @@ class Products {
 
       brandContainer.html.append(brand.html);
       brand.html.addEventListener('click', () => {
+        const form = Products.sortForm.html as HTMLFormElement;
+        form.reset();
+        (Products.searchInput.view.html as HTMLInputElement).value = '';
         Products.resetCategoriesClass();
         brand.html.classList.add('active');
       });
@@ -545,10 +534,10 @@ class Products {
     const formattedPrice = (productPrice / cents).toFixed(hundredthsRound);
     const formattedDiscount = (productDiscount / cents).toFixed(hundredthsRound);
 
-    const productTitle = path?.name.en;
-    const productDescription = path?.description.en;
-    const productImage = path?.masterVariant.images[0].url;
-    const link = path?.slug.en;
+    const productTitle = path?.name?.en;
+    const productDescription = path?.description?.en;
+    const productImage = path?.masterVariant?.images[0]?.url;
+    const link = path?.slug?.en;
     const id = productData?.id;
 
     const productCard = new BaseComponent({ tag: 'li', class: ['product-card'] });
