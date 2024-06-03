@@ -1,6 +1,6 @@
 import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
-import './Modal.scss';
+import './modal.scss';
 
 class Modal {
   private overlay: BaseComponent;

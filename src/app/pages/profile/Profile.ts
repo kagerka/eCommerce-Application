@@ -2,7 +2,7 @@ import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Button from '../../components/button/Button';
-import Modal from '../../components/modal/Modal';
+import Modal from '../../components/modal/modal';
 import EditForm from '../../components/edit-form/EditForm';
 import './Profile.scss';
 
