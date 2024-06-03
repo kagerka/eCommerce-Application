@@ -256,25 +256,27 @@ class Products {
     const brandTitle = new BaseComponent({ tag: 'h1', class: ['categories-title'], text: 'Brands' });
     const productsJSON = localStorage.getItem('products');
     const product = JSON.parse(productsJSON!);
-    const brandMap = new Map<string, string>();
 
     brandContainer.html.append(brandTitle.html);
+    const nameArr: string[] = [];
+    const keyArr: string[] = [];
 
     product?.forEach((item: IProducts) => {
       const brandName = item?.masterData?.current?.masterVariant?.attributes[0]?.value;
       const brandKey = item?.masterData?.current?.masterVariant?.attributes[0]?.name;
-
       if (brandName && brandKey && brandKey.includes('brand')) {
-        brandMap.set(brandName, brandKey);
+        nameArr.push(brandName);
+        keyArr.push(brandKey);
       }
     });
+    const uniqueNames = new Set(nameArr);
+    const uniqueKeys = new Set(keyArr);
 
-    brandMap.forEach((brandKey, brandName) => {
+    uniqueNames.forEach((brandName) => {
       const brand = new BaseComponent({
         tag: 'li',
         class: ['subcategory'],
         text: brandName,
-        id: brandKey,
       });
 
       brandContainer.html.append(brand.html);
@@ -285,7 +287,10 @@ class Products {
         Products.resetCategoriesClass();
         brand.html.classList.add('active');
       });
-      this.handleBrandClick(brand, brandName, brandKey);
+
+      uniqueKeys.forEach((item) => {
+        this.handleBrandClick(brand, brandName, item);
+      });
     });
 
     return brandContainer;
@@ -296,8 +301,8 @@ class Products {
       const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
 
       if (token) {
+        Products.productsList.html.innerHTML = '';
         ECommerceApi.getProductsByBrand(currentClient, token, brandName, brandKey).then((res) => {
-          Products.productsList.html.innerHTML = '';
           Products.resetPriceRange();
 
           localStorage.setItem('products', JSON.stringify(res.results));
