@@ -11,10 +11,17 @@
 
 .profile-top-container {
   display: flex;
+  justify-content: space-between;
+}
+
+.edit-mode-btn-container {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .profile-name {
   display: flex;
+  align-items: center;
   width: 100%;
   gap: 5px;
   padding: 0 20px;
@@ -26,10 +33,11 @@
   margin: 0;
 }
 
-.edit-mode-btn {
+.edit-mode-btn,
+.edit-password-btn {
   min-width: 120px;
   width: 120px;
-  height: 35px;
+  height: 45px;
   border-radius: 5px;
   background-color: $green;
   padding: 0 20px;
@@ -44,6 +52,7 @@
   border: none;
   margin-top: 10px;
   margin-right: 20px;
+  font-size: 16px;
 
   &:hover {
     background-color: $darkGreen;
@@ -172,10 +181,6 @@
     flex-flow: column-reverse;
   }
 
-  .profile-name {
-    flex-direction: column;
-  }
-
   .edit-mode-btn-container {
     display: flex;
     justify-content: flex-end;
@@ -193,11 +198,5 @@
   .shipping-address-container,
   .billing-address-container {
     width: 100%;
-  }
-}
-
-@media screen and (max-width: 700px) {
-  .edit-mode-btn {
-    height: 28px;
   }
 }

@@ -4,7 +4,9 @@ import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Button from '../../components/button/Button';
 import EditForm from '../../components/edit-form/EditForm';
+import EditPasswordForm from '../../components/edit-password-form/EditPasswordForm';
 import Modal from '../../components/modal/modal';
+import ICustomerData from '../../interfaces/CustomerData.interface';
 import './Profile.scss';
 
 const EMPTY_ARR_LENGTH = 0;
@@ -32,6 +34,8 @@ class Profile {
   private profileEditModeBtnContainer: BaseComponent;
 
   private profileEditModeBtn: Button;
+
+  private profileEditPasswordBtn: Button;
 
   private profileDateOfBirthContainer: BaseComponent;
 
@@ -97,6 +101,7 @@ class Profile {
     this.profileLastName = Profile.createProfileLastNameElement();
     this.profileEditModeBtnContainer = Profile.createEditModeBtnContainerElement();
     this.profileEditModeBtn = Profile.createEditModeBtnElement();
+    this.profileEditPasswordBtn = Profile.createEditPasswordBtnElement();
     this.profileDateOfBirthContainer = Profile.createDateOfBirthContainerElement();
     this.profileDateOfBirthTitle = Profile.createDateOfBirthTitleElement();
     this.profileDateOfBirth = Profile.createDateOfBirthElement();
@@ -126,7 +131,6 @@ class Profile {
     this.profileBillingStreet = Profile.createBillingStreetElement();
     this.editBillingBtn = Profile.createEditBtnElement();
     this.composeView();
-    this.editModeBtnHandle();
   }
 
   private composeShippingAdressView(): void {
@@ -155,7 +159,10 @@ class Profile {
     this.profileDateOfBirthContainer.html.append(this.profileDateOfBirthTitle.html, this.profileDateOfBirth.html);
     this.profileEmailContainer.html.append(this.profileEmailTitle.html, this.profileEmail.html);
     this.profileName.html.append(this.profileFirstName.html, this.profileLastName.html);
-    this.profileEditModeBtnContainer.html.append(this.profileEditModeBtn.view.html);
+    this.profileEditModeBtnContainer.html.append(
+      this.profileEditModeBtn.view.html,
+      this.profileEditPasswordBtn.view.html,
+    );
     this.profileTopContainer.html.append(this.profileName.html, this.profileEditModeBtnContainer.html);
     this.composeShippingAdressView();
     this.profileShippingAddressContainer.html.append(
@@ -177,6 +184,8 @@ class Profile {
       this.profileEmailContainer.html,
       this.profileAddresses.html,
     );
+    this.editModeBtnHandle();
+    this.editPasswordBtnHandle();
   }
 
   private static createProfilePageContentElement(): BaseComponent {
@@ -204,7 +213,11 @@ class Profile {
   }
 
   private static createEditModeBtnElement(): Button {
-    return new Button({ type: 'button', class: ['edit-mode-btn'], text: 'Edit Mode' });
+    return new Button({ type: 'button', class: ['edit-mode-btn'], text: 'Edit profile info' });
+  }
+
+  private static createEditPasswordBtnElement(): Button {
+    return new Button({ type: 'button', class: ['edit-password-btn'], text: 'Edit password' });
   }
 
   private static createDateOfBirthContainerElement(): BaseComponent {
@@ -414,6 +427,75 @@ class Profile {
     });
   }
 
+  private editPasswordBtnHandle(): void {
+    this.profileEditPasswordBtn.view.html.addEventListener('click', () => {
+      const modal = new Modal();
+      this.profilePageContent.html.append(modal.view.html);
+      const editPasswordForm = new EditPasswordForm();
+      modal.container.html.append(editPasswordForm.view.html);
+      editPasswordForm.dataForm.html.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (editPasswordForm.dataForm.html instanceof HTMLFormElement) {
+          const data = new FormData(editPasswordForm.dataForm.html);
+          const newPassword = {
+            currentPassword: data.get('current-password') as string,
+            newPassword: data.get('new-password') as string,
+            confirmPassword: data.get('confirm-password') as string,
+          };
+          Profile.sendUpdatePassword(newPassword);
+          modal.destroy();
+        }
+      });
+    });
+  }
+
+  static sendUpdatePassword(newPassword: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): void {
+    if (localStorage.getItem('tokenPassword') !== null) {
+      const tokenPsw = localStorage.getItem('tokenPassword');
+      if (localStorage.getItem('customer') !== null && tokenPsw !== null) {
+        const customerJSON = localStorage.getItem('customer');
+        if (customerJSON !== null) {
+          const customer = JSON.parse(customerJSON);
+          const customerData = { customerID: customer.id, version: customer.version, newPassword };
+
+          ECommerceApi.updateCustomerPassword(currentClient, tokenPsw, customerData)
+            .then((response) => {
+              const { version } = response;
+              customer.version = version;
+              localStorage.setItem('customer', JSON.stringify(response));
+              Profile.toastSuccess();
+              const customerAuth = {
+                email: response.email,
+                password: newPassword.newPassword,
+              };
+              Profile.reAuthCustomer(customerAuth);
+            })
+            .catch(() => {
+              Profile.toastError();
+            });
+        }
+      }
+    }
+  }
+
+  private static reAuthCustomer(customer: ICustomerData): void {
+    ECommerceApi.getTokenPassword(currentClient, customer)
+      .then((res) => {
+        localStorage.setItem('tokenPassword', res.access_token);
+        ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
+          localStorage.setItem('isAuth', JSON.stringify(true));
+          localStorage.setItem('customer', JSON.stringify(data.customer));
+        });
+      })
+      .catch((error) => {
+        throw new Error(`Error update authentication: ${error}`);
+      });
+  }
+
   public displayUserInfo(): void {
     if (localStorage.getItem('customer') !== null) {
       const customerJSON = localStorage.getItem('customer');
@@ -441,12 +523,17 @@ class Profile {
           const customer = JSON.parse(customerJSON);
           const customerData = { customerID: customer.id, version: customer.version, newUserInfo };
 
-          ECommerceApi.updateCustomerData(currentClient, tokenPsw, customerData).then((response) => {
-            const { version } = response;
-            customer.version = version;
-            localStorage.setItem('customer', JSON.stringify(response));
-            this.displayUserInfo();
-          });
+          ECommerceApi.updateCustomerData(currentClient, tokenPsw, customerData)
+            .then((response) => {
+              const { version } = response;
+              customer.version = version;
+              localStorage.setItem('customer', JSON.stringify(response));
+              this.displayUserInfo();
+              Profile.toastSuccess();
+            })
+            .catch(() => {
+              Profile.toastError();
+            });
         }
       }
     }

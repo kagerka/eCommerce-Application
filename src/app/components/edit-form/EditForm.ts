@@ -53,10 +53,10 @@ class EditForm {
   private submitBtn: Button;
 
   constructor() {
-    this.firstNameInputStatus = false;
-    this.lastNameInputStatus = false;
-    this.dateInputStatus = false;
-    this.emailInputStatus = false;
+    this.firstNameInputStatus = true;
+    this.lastNameInputStatus = true;
+    this.dateInputStatus = true;
+    this.emailInputStatus = true;
     this.content = new BaseComponent({ tag: 'div', class: ['edit-content'] });
     this.title = new BaseComponent({ tag: 'h3', class: ['edit-form-title'], text: 'Edit Your Profile' });
     this.form = new BaseComponent({ tag: 'form', class: ['edit-form'] });
@@ -79,6 +79,12 @@ class EditForm {
   }
 
   private composeView(): void {
+    const customer = JSON.parse(localStorage.getItem('customer') || '');
+    (this.firstNameInput.view.html as HTMLInputElement).value = customer.firstName;
+    (this.lastNameInput.view.html as HTMLInputElement).value = customer.lastName;
+    (this.dateInput.view.html as HTMLInputElement).value = customer.dateOfBirth;
+    (this.emailInput.view.html as HTMLInputElement).value = customer.email;
+    this.checkStatuses();
     this.firstNameInputContainer.html.append(this.firstNameInput.view.html, this.firstNameError.html);
     this.lastNameInputContainer.html.append(this.lastNameInput.view.html, this.lastNameError.html);
     this.dateInputContainer.html.append(this.dateInput.view.html, this.dateError.html);
