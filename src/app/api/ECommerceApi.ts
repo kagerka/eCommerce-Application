@@ -6,6 +6,7 @@ import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface'
 import { ICategories, IProducts, IQueryProducts } from '../interfaces/Product.interface';
 
 import ITokenPassword from '../interfaces/TokenPassword.interface';
+import { TActions, TCustomerData } from '../interfaces/UpdateCustomerInfo.interface';
 
 class ECommerceApi {
   static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
@@ -236,6 +237,53 @@ class ECommerceApi {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  private static getActionsVariant(data: TCustomerData): TActions {
+    const actions: TActions = { action: '' };
+    if (data.newEmailAddress) {
+      actions.action = 'changeEmail';
+      actions.email = data.newEmailAddress;
+    }
+    if (data.newFirstName) {
+      actions.action = 'setFirstName';
+      actions.firstName = data.newFirstName;
+    }
+    if (data.newLastName) {
+      actions.action = 'setLastName';
+      actions.lastName = data.newLastName;
+    }
+    if (data.newDateOfBirth) {
+      actions.action = 'setDateOfBirth';
+      actions.dateOfBirth = data.newDateOfBirth;
+    }
+    return actions;
+  }
+
+  static async updateCustomerData(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    data: TCustomerData,
+  ): Promise<ICustomerProfile> {
+    const actions = ECommerceApi.getActionsVariant(data);
+
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/customers/${data.customerID}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        version: data.version,
+        actions: [actions],
+      }),
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

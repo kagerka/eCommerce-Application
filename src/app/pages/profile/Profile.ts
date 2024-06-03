@@ -1,3 +1,5 @@
+import ECommerceApi from '../../api/ECommerceApi';
+import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import './Profile.scss';
 
@@ -236,6 +238,18 @@ class Profile {
         );
         Profile.insertAddressData(addresses, billingAddressIds, defaultBillingAddressId, this.profileBillingAddresses);
       }
+    }
+  }
+
+  private static changeUserInfo(newInfo: string): void {
+    const token = localStorage.getItem('tokenPassword');
+    const customer = JSON.parse(localStorage.getItem('customer') || '');
+    const isAuth = localStorage.getItem('isAuth');
+    if (token && customer && isAuth) {
+      const customerData = { customerID: customer.id, version: customer.version, newInfo };
+      ECommerceApi.updateCustomerData(currentClient, token, customerData).then((res) => {
+        localStorage.setItem('customer', JSON.stringify(res));
+      });
     }
   }
 
