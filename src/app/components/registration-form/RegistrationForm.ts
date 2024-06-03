@@ -17,6 +17,7 @@ import validateRegExp from '../../utils/validation/validateRegExp';
 import BaseComponent from '../BaseComponent';
 import Input from '../input/Input';
 import '../login-form/LoginForm.scss';
+import Products from '../products/Products';
 import LoginInfo from './LoginInfo';
 import './RegistrationForm.scss';
 import SecondAddress from './SecondAddress';
@@ -524,6 +525,7 @@ class RegistrationForm extends SecondAddress {
       this.createOneAddressForm();
       this.createTwoAddressesForm();
       this.checkStatuses();
+      Products.resetCatalog();
     });
   }
 

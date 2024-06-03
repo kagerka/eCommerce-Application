@@ -146,8 +146,8 @@ class ECommerceApi {
     }
   }
 
-  static async getProducts(clientDetails: IAPIClientDetails, token: string, limit: number): Promise<IQueryProducts> {
-    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/products?limit=${limit}`, {
+  static async getProducts(clientDetails: IAPIClientDetails, token: string): Promise<IQueryProducts> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/products?limit=70`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -264,6 +264,29 @@ class ECommerceApi {
 
   static async getSearching(clientDetails: IAPIClientDetails, token: string, inputRes: string): Promise<ICategories> {
     const path = `/product-projections/search?limit=70&text.en=${inputRes}`;
+
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getProductsByBrand(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    brandName: string,
+    brandKey: string,
+  ): Promise<ICategories> {
+    const path = `/product-projections/search?filter=variants.attributes.${brandKey}:"${brandName}"`;
 
     const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
       method: 'GET',
