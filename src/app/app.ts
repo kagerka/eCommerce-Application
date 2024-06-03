@@ -163,7 +163,6 @@ class App {
       })
       .on('/catalog\\/(.*)/', () => {
         this.onProduct();
-        this.checkBreadcrumbs(['Home', 'Catalog', 'Product']);
       })
       .notFound(() => {
         this.onNotFound();
@@ -226,6 +225,9 @@ class App {
     this.pageContent.html.append(productPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    const currentProduct = JSON.parse(localStorage.getItem('productData') || '');
+    const link = currentProduct.masterData.current.slug.en;
+    this.checkBreadcrumbs(['Home', 'Catalog', link]);
   }
 
   private onLogin(): void {
