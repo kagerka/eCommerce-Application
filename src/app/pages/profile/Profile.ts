@@ -3,8 +3,8 @@ import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Button from '../../components/button/Button';
-import Modal from '../../components/modal/modal';
 import EditForm from '../../components/edit-form/EditForm';
+import Modal from '../../components/modal/modal';
 import './Profile.scss';
 
 const EMPTY_ARR_LENGTH = 0;
@@ -38,6 +38,12 @@ class Profile {
   private profileDateOfBirthTitle: BaseComponent;
 
   private profileDateOfBirth: BaseComponent;
+
+  private profileEmailContainer: BaseComponent;
+
+  private profileEmailTitle: BaseComponent;
+
+  private profileEmail: BaseComponent;
 
   private profileAddresses: BaseComponent;
 
@@ -94,6 +100,9 @@ class Profile {
     this.profileDateOfBirthContainer = Profile.createDateOfBirthContainerElement();
     this.profileDateOfBirthTitle = Profile.createDateOfBirthTitleElement();
     this.profileDateOfBirth = Profile.createDateOfBirthElement();
+    this.profileEmailContainer = Profile.createEmailContainerElement();
+    this.profileEmailTitle = Profile.createEmailTitleElement();
+    this.profileEmail = Profile.createEmailElement();
     this.profileAddressesContainer = Profile.createAddressesContainerElement();
     this.profileAddresses = this.createAddressesElement();
     this.profileShippingAddressContainer = Profile.createShippingAddressContainerElement();
@@ -144,6 +153,7 @@ class Profile {
 
   private composeView(): void {
     this.profileDateOfBirthContainer.html.append(this.profileDateOfBirthTitle.html, this.profileDateOfBirth.html);
+    this.profileEmailContainer.html.append(this.profileEmailTitle.html, this.profileEmail.html);
     this.profileName.html.append(this.profileFirstName.html, this.profileLastName.html);
     this.profileEditModeBtnContainer.html.append(this.profileEditModeBtn.view.html);
     this.profileTopContainer.html.append(this.profileName.html, this.profileEditModeBtnContainer.html);
@@ -164,6 +174,7 @@ class Profile {
     this.profilePageContent.html.append(
       this.profileTopContainer.html,
       this.profileDateOfBirthContainer.html,
+      this.profileEmailContainer.html,
       this.profileAddresses.html,
     );
   }
@@ -206,6 +217,18 @@ class Profile {
 
   private static createDateOfBirthElement(): BaseComponent {
     return new BaseComponent({ tag: 'div', class: ['date-birth'] });
+  }
+
+  private static createEmailContainerElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['email-container'] });
+  }
+
+  private static createEmailTitleElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['email-title'], text: 'E-mail:' });
+  }
+
+  private static createEmailElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['email'] });
   }
 
   private createAddressesElement(): BaseComponent {
@@ -378,17 +401,55 @@ class Profile {
         event.preventDefault();
         if (editForm.dataForm.html instanceof HTMLFormElement) {
           const data = new FormData(editForm.dataForm.html);
-          const res = {
-            country: data.get('country') as string,
-            postalCode: data.get('postal-code') as string,
-            city: data.get('city') as string,
-            street: data.get('street-name') as string,
+          const newUserInfo = {
+            newFirstName: data.get('first-name') as string,
+            newLastName: data.get('last-name') as string,
+            newDateOfBirth: data.get('date') as string,
+            newEmailAddress: data.get('email') as string,
           };
-          this.sendUpdateDataCustomer(res);
+          this.sendUpdateUserInfo(newUserInfo);
           modal.destroy();
         }
       });
     });
+  }
+
+  public displayUserInfo(): void {
+    if (localStorage.getItem('customer') !== null) {
+      const customerJSON = localStorage.getItem('customer');
+      if (customerJSON !== null) {
+        const customer = JSON.parse(customerJSON);
+        this.firstName.html.textContent = customer.firstName;
+        this.lastName.html.textContent = customer.lastName;
+        this.dateOfBirth.html.textContent = customer.dateOfBirth;
+        this.profileEmail.html.textContent = customer.email;
+      }
+    }
+  }
+
+  sendUpdateUserInfo(newUserInfo: {
+    newEmailAddress?: string;
+    newFirstName?: string;
+    newLastName?: string;
+    newDateOfBirth?: string;
+  }): void {
+    if (localStorage.getItem('tokenPassword') !== null) {
+      const tokenPsw = localStorage.getItem('tokenPassword');
+      if (localStorage.getItem('customer') !== null && tokenPsw !== null) {
+        const customerJSON = localStorage.getItem('customer');
+        if (customerJSON !== null) {
+          const customer = JSON.parse(customerJSON);
+          const customerData = { customerID: customer.id, version: customer.version, newUserInfo };
+
+          ECommerceApi.updateCustomerData(currentClient, tokenPsw, customerData).then((response) => {
+            const { version } = response;
+            customer.version = version;
+            localStorage.setItem('customer', JSON.stringify(response));
+            this.displayUserInfo();
+          });
+        }
+      }
+    }
   }
 
   sendUpdateDataCustomer(data: { country: string; postalCode: string; city: string; street: string }): void {
@@ -440,6 +501,10 @@ class Profile {
 
   get dateOfBirth(): BaseComponent {
     return this.profileDateOfBirth;
+  }
+
+  get email(): BaseComponent {
+    return this.profileEmail;
   }
 
   get view(): BaseComponent {

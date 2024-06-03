@@ -244,6 +244,7 @@ class App {
         this.profilePage.firstName.html.textContent = customer.firstName;
         this.profilePage.lastName.html.textContent = customer.lastName;
         this.profilePage.dateOfBirth.html.textContent = customer.dateOfBirth;
+        this.profilePage.email.html.textContent = customer.email;
         if (customer.shippingAddressIds.length === EMPTY_ARR_LENGTH) {
           customer.shippingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE].id);
         }
@@ -307,4 +308,3 @@ class App {
 }
 
 export default App;
-
