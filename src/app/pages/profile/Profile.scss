@@ -9,6 +9,10 @@
   flex-grow: 1;
 }
 
+.profile-top-container {
+  display: flex;
+}
+
 .profile-name {
   display: flex;
   width: 100%;
@@ -20,6 +24,30 @@
 .profile-last-name {
   display: flex;
   margin: 0;
+}
+
+.edit-mode-btn {
+  min-width: 120px;
+  width: 120px;
+  height: 35px;
+  border-radius: 5px;
+  background-color: $green;
+  padding: 0 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: $white;
+  text-align: center;
+  transition: 0.5s all;
+  outline: none;
+  border: none;
+  margin-top: 10px;
+  margin-right: 20px;
+
+  &:hover {
+    background-color: $darkGreen;
+  }
 }
 
 .date-birth-container {
@@ -58,18 +86,24 @@
   gap: 20px;
 }
 
-.shipping-addresses-container,
-.billing-addresses-container {
+.shipping-address-container,
+.billing-address-container {
   display: flex;
   flex-direction: column;
   width: 50%;
-  font-weight: 500;
   padding: 0 20px;
   gap: 10px;
 }
 
-.address {
+.shipping-address-title,
+.billing-address-title {
+  font-weight: 500;
+}
+
+.shipping-address,
+.billing-address {
   font-weight: 400;
+  margin-bottom: 10px;
 }
 
 .country-container {
@@ -95,10 +129,31 @@
   font-weight: 400;
 }
 
+.edit-btn {
+  margin-top: 5px;
+  background-color: $green;
+  border: 0;
+  color: $white;
+  border-radius: 3px;
+  width: 70px;
+  height: 25px;
+}
+
 @media screen and (max-width: 800px) {
+  .profile-top-container {
+    flex-direction: column;
+    flex-flow: column-reverse;
+  }
+
   .profile-name {
     flex-direction: column;
   }
+
+  .edit-mode-btn-container {
+    display: flex;
+    justify-content: flex-end;
+  }
+
   .addresses-title {
     padding: 0 20px;
     text-align: start;
@@ -108,8 +163,14 @@
     flex-direction: column;
   }
 
-  .shipping-addresses-container,
-  .billing-addresses-container {
+  .shipping-address-container,
+  .billing-address-container {
     width: 100%;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  .edit-mode-btn {
+    height: 28px;
   }
 }
