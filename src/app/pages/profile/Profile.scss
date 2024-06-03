@@ -181,10 +181,6 @@
     flex-flow: column-reverse;
   }
 
-  .profile-name {
-    flex-direction: column;
-  }
-
   .edit-mode-btn-container {
     display: flex;
     justify-content: flex-end;
@@ -202,12 +198,5 @@
   .shipping-address-container,
   .billing-address-container {
     width: 100%;
-  }
-}
-
-@media screen and (max-width: 700px) {
-  .edit-mode-btn,
-  .edit-password-btn {
-    height: 28px;
   }
 }
