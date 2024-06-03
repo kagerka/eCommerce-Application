@@ -85,10 +85,10 @@ class EditForm {
   private submitBtn: Button;
 
   constructor() {
-    this.firstNameInputStatus = false;
-    this.lastNameInputStatus = false;
-    this.dateInputStatus = false;
-    this.emailInputStatus = false;
+    this.firstNameInputStatus = true;
+    this.lastNameInputStatus = true;
+    this.dateInputStatus = true;
+    this.emailInputStatus = true;
     // this.postInputStatus = false;
     // this.countryInputStatus = false;
     // this.cityInputStatus = false;
@@ -124,6 +124,12 @@ class EditForm {
   }
 
   private composeView(): void {
+    const customer = JSON.parse(localStorage.getItem('customer') || '');
+    (this.firstNameInput.view.html as HTMLInputElement).value = customer.firstName;
+    (this.lastNameInput.view.html as HTMLInputElement).value = customer.lastName;
+    (this.dateInput.view.html as HTMLInputElement).value = customer.dateOfBirth;
+    (this.emailInput.view.html as HTMLInputElement).value = customer.email;
+    this.checkStatuses();
     this.firstNameInputContainer.html.append(this.firstNameInput.view.html, this.firstNameError.html);
     this.lastNameInputContainer.html.append(this.lastNameInput.view.html, this.lastNameError.html);
     this.dateInputContainer.html.append(this.dateInput.view.html, this.dateError.html);
@@ -394,10 +400,6 @@ class EditForm {
         class: ['error-message'],
         text: EMAIL_ERROR,
       });
-      // errorFormat.html.append(this.tooltipContainer.html);
-      // LoginInfo.cleanInsideElement(this.tooltipMessage.html);
-      // const rules = LoginInfo.createTooltipItemElement(EMAIL_RULES);
-      // this.tooltipMessage.html.append(rules.html);
       const { value } = this.emailInput.view.html;
       const regExp =
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

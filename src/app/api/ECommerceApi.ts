@@ -6,7 +6,7 @@ import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface'
 import ICustomerUpdateRequest from '../interfaces/CustomerUpdateRequest.interface';
 import { ICategories, IProducts, IQueryProducts } from '../interfaces/Product.interface';
 import ITokenPassword from '../interfaces/TokenPassword.interface';
-import { TActions, TCustomerData } from '../interfaces/UpdateCustomerInfo.interface';
+import { TActions, TCustomerData, TCustomerPassword } from '../interfaces/UpdateCustomerInfo.interface';
 
 class ECommerceApi {
   static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
@@ -356,6 +356,32 @@ class ECommerceApi {
         }),
       },
     );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async updateCustomerPassword(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    customerData: TCustomerPassword,
+  ): Promise<ICustomerProfile> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        id: customerData.customerID,
+        version: customerData.version,
+        currentPassword: customerData.newPassword.currentPassword,
+        newPassword: customerData.newPassword.newPassword,
+      }),
+    });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     } else {

@@ -16,3 +16,9 @@ export type TCustomerData = {
     newDateOfBirth?: string;
   };
 };
+
+export type TCustomerPassword = {
+  customerID: string;
+  version: number;
+  newPassword: { currentPassword: string; newPassword: string; confirmPassword: string };
+};
