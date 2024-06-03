@@ -4,7 +4,6 @@ import BaseComponent from '../../components/BaseComponent';
 import Button from '../../components/button/Button';
 import Modal from '../../components/modal/Modal';
 import EditForm from '../../components/edit-form/EditForm';
-// import ICustomerSignInResult from '../../interfaces/CustomerSignInResult.interface';
 import './Profile.scss';
 
 const EMPTY_ARR_LENGTH = 0;
