@@ -280,45 +280,59 @@ class ECommerceApi {
     }
   }
 
-  private static getActionsVariant(data: TCustomerData): TActions {
-    const actions: TActions = { action: '' };
-    if (data.newEmailAddress) {
+  private static getActionsVariant(customerData: TCustomerData): TActions[] {
+    const result = [];
+    let actions: TActions = { action: '' };
+    const resetActions = (): void => {
+      actions = { action: '' };
+    };
+    if (customerData.newUserInfo.newEmailAddress) {
       actions.action = 'changeEmail';
-      actions.email = data.newEmailAddress;
+      actions.email = customerData.newUserInfo.newEmailAddress;
+      result.push(actions);
+      resetActions();
     }
-    if (data.newFirstName) {
+    if (customerData.newUserInfo.newFirstName) {
       actions.action = 'setFirstName';
-      actions.firstName = data.newFirstName;
+      actions.firstName = customerData.newUserInfo.newFirstName;
+      result.push(actions);
+      resetActions();
     }
-    if (data.newLastName) {
+    if (customerData.newUserInfo.newLastName) {
       actions.action = 'setLastName';
-      actions.lastName = data.newLastName;
+      actions.lastName = customerData.newUserInfo.newLastName;
+      result.push(actions);
+      resetActions();
     }
-    if (data.newDateOfBirth) {
+    if (customerData.newUserInfo.newDateOfBirth) {
       actions.action = 'setDateOfBirth';
-      actions.dateOfBirth = data.newDateOfBirth;
+      actions.dateOfBirth = customerData.newUserInfo.newDateOfBirth;
+      result.push(actions);
+      resetActions();
     }
-    return actions;
+    return result;
   }
 
   static async updateCustomerData(
     clientDetails: IAPIClientDetails,
     token: string,
-    data: TCustomerData,
+    customerData: TCustomerData,
   ): Promise<ICustomerProfile> {
-    const actions = ECommerceApi.getActionsVariant(data);
-
-    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/customers/${data.customerID}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+    const actions = ECommerceApi.getActionsVariant(customerData);
+    const response = await fetch(
+      `${clientDetails.APIURL}/${clientDetails.projectKey}/customers/${customerData.customerID}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          version: customerData.version,
+          actions: actions.map((el) => el),
+        }),
       },
-      body: JSON.stringify({
-        version: data.version,
-        actions: [actions],
-      }),
-    });
+    );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     } else {

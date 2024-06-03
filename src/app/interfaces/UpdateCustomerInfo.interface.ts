@@ -9,8 +9,10 @@ export type TActions = {
 export type TCustomerData = {
   customerID: string;
   version: number;
-  newEmailAddress?: string;
-  newFirstName?: string;
-  newLastName?: string;
-  newDateOfBirth?: string;
+  newUserInfo: {
+    newEmailAddress?: string;
+    newFirstName?: string;
+    newLastName?: string;
+    newDateOfBirth?: string;
+  };
 };
