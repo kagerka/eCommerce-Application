@@ -1,12 +1,5 @@
-import currentClient from '../../api/data/currentClient';
-import './LoginForm.scss';
-import BaseComponent from '../BaseComponent';
-import Button from '../button/Button';
-import Input from '../input/Input';
 import ECommerceApi from '../../api/ECommerceApi';
-import validateLength from '../../utils/validation/validateLength';
-import validateRegExp from '../../utils/validation/validateRegExp';
-import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
+import currentClient from '../../api/data/currentClient';
 import {
   INCORRECTLY_ENTER,
   MIN_PASSWORD_LENGTH,
@@ -18,7 +11,14 @@ import {
   RULE_SEPARATOR,
   RULE_SPACE,
 } from '../../utils/validation/inputErrorTexts';
+import validateLeadingTrailingSpace from '../../utils/validation/validateLeadingTrailingSpace';
+import validateLength from '../../utils/validation/validateLength';
+import validateRegExp from '../../utils/validation/validateRegExp';
+import BaseComponent from '../BaseComponent';
+import Button from '../button/Button';
+import Input from '../input/Input';
 import Products from '../products/Products';
+import './LoginForm.scss';
 
 class LoginForm {
   private passwordInputStatus: boolean;
