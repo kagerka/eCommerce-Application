@@ -7,7 +7,7 @@ a {
 }
 
 .main-content {
-  min-height: calc(100vh - $headerHeight - $footerHeight - 2 * $pageGap);
+  min-height: calc(100vh - $headerHeight - $footerHeight - 27px - 2 * $pageGap);
   display: flex;
   flex-grow: 1;
   flex-direction: column;
@@ -71,21 +71,3 @@ a {
   position: relative;
   max-width: 100%;
 }
-
-// @media screen and (max-width: 1000px) {
-//   .main-content {
-//     padding: 0 30px;
-//   }
-// }
-
-// @media screen and (max-width: 600px) {
-//   .main-content {
-//     padding: 0 20px;
-//   }
-// }
-
-// @media screen and (max-width: 500px) {
-//   .main-content {
-//     padding: 0 15px;
-//   }
-// }
