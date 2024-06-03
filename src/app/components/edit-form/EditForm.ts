@@ -51,7 +51,7 @@ class EditForm {
     this.cityInputStatus = false;
     this.streetInputStatus = false;
     this.content = new BaseComponent({ tag: 'div', class: ['edit-content'] });
-    this.title = new BaseComponent({ tag: 'h3', class: ['edit-form-title'], text: 'Edit Address' });
+    this.title = new BaseComponent({ tag: 'h3', class: ['edit-form-title'], text: 'Edit Your Profile' });
     this.form = new BaseComponent({ tag: 'form', class: ['edit-form'] });
     this.streetInputContainer = EditForm.createInputContainerElement('street');
     this.streetNameInput = EditForm.createInputElement('text', 'street-name', 'Street');
@@ -63,6 +63,7 @@ class EditForm {
     this.cityInput = EditForm.createInputElement('text', 'city', 'City');
     this.cityError = EditForm.createErrorElement('city');
     this.countryInput = SecondAddress.createSelectElement();
+    this.countryInput.html.setAttribute('name', 'country');
     this.submitBtn = new Button({ type: 'submit', class: ['edit-form-submit'], text: 'Edit', disabled: true });
 
     this.composeView();
@@ -97,6 +98,7 @@ class EditForm {
     return new Input({
       type,
       class: ['edit-input', `edit-input-${el}`],
+      name: el,
       placeholder,
     });
   }
@@ -241,6 +243,10 @@ class EditForm {
     } else {
       this.submitBtn.view.html.setAttribute('disabled', '');
     }
+  }
+
+  get dataForm(): BaseComponent {
+    return this.form;
   }
 
   get submit(): Button {

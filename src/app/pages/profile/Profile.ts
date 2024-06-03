@@ -1,5 +1,5 @@
-// import ECommerceApi from '../../api/ECommerceApi';
-// import currentClient from '../../api/data/currentClient';
+import ECommerceApi from '../../api/ECommerceApi';
+import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Button from '../../components/button/Button';
 import Modal from '../../components/modal/Modal';
@@ -8,7 +8,7 @@ import EditForm from '../../components/edit-form/EditForm';
 import './Profile.scss';
 
 const EMPTY_ARR_LENGTH = 0;
-const SINGLE_ADDRESS = 1;
+const SINGLE = 1;
 
 interface IAddress {
   id?: string;
@@ -21,11 +21,17 @@ interface IAddress {
 class Profile {
   private profilePageContent: BaseComponent;
 
+  private profileTopContainer: BaseComponent;
+
   private profileName: BaseComponent;
 
   private profileFirstName: BaseComponent;
 
   private profileLastName: BaseComponent;
+
+  private profileEditModeBtnContainer: BaseComponent;
+
+  private profileEditModeBtn: Button;
 
   private profileDateOfBirthContainer: BaseComponent;
 
@@ -79,9 +85,12 @@ class Profile {
 
   constructor() {
     this.profilePageContent = Profile.createProfilePageContentElement();
+    this.profileTopContainer = Profile.createTopContainerElement();
     this.profileName = Profile.createProfileNameContainerElement();
     this.profileFirstName = Profile.createProfileFirstNameElement();
     this.profileLastName = Profile.createProfileLastNameElement();
+    this.profileEditModeBtnContainer = Profile.createEditModeBtnContainerElement();
+    this.profileEditModeBtn = Profile.createEditModeBtnElement();
     this.profileDateOfBirthContainer = Profile.createDateOfBirthContainerElement();
     this.profileDateOfBirthTitle = Profile.createDateOfBirthTitleElement();
     this.profileDateOfBirth = Profile.createDateOfBirthElement();
@@ -108,7 +117,7 @@ class Profile {
     this.profileBillingStreet = Profile.createBillingStreetElement();
     this.editBillingBtn = Profile.createEditBtnElement();
     this.composeView();
-    this.editBtnsHandle();
+    this.editModeBtnHandle();
   }
 
   private composeShippingAdressView(): void {
@@ -136,6 +145,8 @@ class Profile {
   private composeView(): void {
     this.profileDateOfBirthContainer.html.append(this.profileDateOfBirthTitle.html, this.profileDateOfBirth.html);
     this.profileName.html.append(this.profileFirstName.html, this.profileLastName.html);
+    this.profileEditModeBtnContainer.html.append(this.profileEditModeBtn.view.html);
+    this.profileTopContainer.html.append(this.profileName.html, this.profileEditModeBtnContainer.html);
     this.composeShippingAdressView();
     this.profileShippingAddressContainer.html.append(
       this.profileShippingAddressTitle.html,
@@ -151,7 +162,7 @@ class Profile {
       this.profileBillingAddressContainer.html,
     );
     this.profilePageContent.html.append(
-      this.profileName.html,
+      this.profileTopContainer.html,
       this.profileDateOfBirthContainer.html,
       this.profileAddresses.html,
     );
@@ -159,6 +170,10 @@ class Profile {
 
   private static createProfilePageContentElement(): BaseComponent {
     return new BaseComponent({ tag: 'div', class: ['profile-content'] });
+  }
+
+  private static createTopContainerElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['profile-top-container'] });
   }
 
   private static createProfileNameContainerElement(): BaseComponent {
@@ -171,6 +186,14 @@ class Profile {
 
   private static createProfileLastNameElement(): BaseComponent {
     return new BaseComponent({ tag: 'h2', class: ['profile-last-name'] });
+  }
+
+  private static createEditModeBtnContainerElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['edit-mode-btn-container'] });
+  }
+
+  private static createEditModeBtnElement(): Button {
+    return new Button({ type: 'button', class: ['edit-mode-btn'], text: 'Edit Mode' });
   }
 
   private static createDateOfBirthContainerElement(): BaseComponent {
@@ -272,43 +295,6 @@ class Profile {
     return new Button({ type: 'button', class: ['edit-btn', 'btn'], text: 'Edit' });
   }
 
-  public displayAddress(): void {
-    if (localStorage.getItem('customer') !== null) {
-      const customerJSON = localStorage.getItem('customer');
-      if (customerJSON !== null) {
-        const customer = JSON.parse(customerJSON);
-        if (
-          customer.addresses.length === SINGLE_ADDRESS &&
-          customer.shippingAddressIds.length === EMPTY_ARR_LENGTH &&
-          customer.billingAddressIds.length === EMPTY_ARR_LENGTH
-        ) {
-          const SINGLE = 1;
-          const lastAddress = customer.addresses[customer.addresses.length - SINGLE];
-
-          let countryName;
-          if (lastAddress.country === 'RU') {
-            countryName = 'Russia';
-          } else {
-            countryName = 'United States';
-          }
-
-          this.profileShippingCountry.html.textContent = `country: ${countryName}`;
-          this.profileShippingPostalCode.html.textContent = `postal code: ${lastAddress.postalCode}`;
-          this.profileShippingCity.html.textContent = `city: ${lastAddress.city}`;
-          this.profileShippingStreet.html.textContent = '';
-          this.profileShippingStreet.html.textContent = `street: ${lastAddress.streetName}`;
-
-          this.profileBillingCountry.html.textContent = `country: ${countryName}`;
-          this.profileBillingPostalCode.html.textContent = `postal code: ${lastAddress.postalCode}`;
-          this.profileBillingCity.html.textContent = `city: ${lastAddress.city}`;
-          this.profileBillingStreet.html.textContent = `street: ${lastAddress.streetName}`;
-        } else {
-          this.displayAllAdresses();
-        }
-      }
-    }
-  }
-
   private static fullCountryName(country: string): string {
     let countryName;
     if (country === 'RU') {
@@ -319,7 +305,7 @@ class Profile {
     return countryName;
   }
 
-  private displayAllAdresses(): void {
+  public displayAllAddresses(): void {
     if (localStorage.getItem('customer') !== null) {
       const customerJSON = localStorage.getItem('customer');
       if (customerJSON !== null) {
@@ -327,24 +313,28 @@ class Profile {
         const { addresses, shippingAddressIds, billingAddressIds, defaultShippingAddressId, defaultBillingAddressId } =
           customer;
         addresses.forEach((address: IAddress) => {
-          if (address.id === shippingAddressIds[0]) {
-            const countryName = Profile.fullCountryName(address.country);
-            this.profileShippingCountry.html.textContent = `country: ${countryName}`;
-            this.profileShippingPostalCode.html.textContent = `postal code: ${address.postalCode}`;
-            this.profileShippingCity.html.textContent = `city: ${address.city}`;
-            this.profileShippingStreet.html.textContent = `street: ${address.streetName}`;
-            if (address.id === defaultShippingAddressId) {
-              this.profileShippingLabel.html.classList.add('show');
+          if (shippingAddressIds.length !== EMPTY_ARR_LENGTH) {
+            if (address.id === shippingAddressIds[shippingAddressIds.length - SINGLE]) {
+              const countryName = Profile.fullCountryName(address.country);
+              this.profileShippingCountry.html.textContent = `country: ${countryName}`;
+              this.profileShippingPostalCode.html.textContent = `postal code: ${address.postalCode}`;
+              this.profileShippingCity.html.textContent = `city: ${address.city}`;
+              this.profileShippingStreet.html.textContent = `street: ${address.streetName}`;
+              if (address.id === defaultShippingAddressId) {
+                this.profileShippingLabel.html.classList.add('show');
+              }
             }
           }
-          if (address.id === billingAddressIds[0]) {
-            const countryName = Profile.fullCountryName(address.country);
-            this.profileBillingCountry.html.textContent = `country: ${countryName}`;
-            this.profileBillingPostalCode.html.textContent = `postal code: ${address.postalCode}`;
-            this.profileBillingCity.html.textContent = `city: ${address.city}`;
-            this.profileBillingStreet.html.textContent = `street: ${address.streetName}`;
-            if (address.id === defaultBillingAddressId) {
-              this.profileBillingLabel.html.classList.add('show');
+          if (billingAddressIds.length !== EMPTY_ARR_LENGTH) {
+            if (address.id === billingAddressIds[billingAddressIds.length - SINGLE]) {
+              const countryName = Profile.fullCountryName(address.country);
+              this.profileBillingCountry.html.textContent = `country: ${countryName}`;
+              this.profileBillingPostalCode.html.textContent = `postal code: ${address.postalCode}`;
+              this.profileBillingCity.html.textContent = `city: ${address.city}`;
+              this.profileBillingStreet.html.textContent = `street: ${address.streetName}`;
+              if (address.id === defaultBillingAddressId) {
+                this.profileBillingLabel.html.classList.add('show');
+              }
             }
           }
         });
@@ -352,67 +342,61 @@ class Profile {
     }
   }
 
-  // private static requestUpdateCustomer(dataAddress: IAddress): void {
-  //   let tokenPsw: string;
-  //   if (localStorage.getItem('tokenPassword') !== null) {
-  //     const tokenJSON = localStorage.getItem('tokenPassword');
-  //     if (tokenJSON !== null) {
-  //       tokenPsw = JSON.parse(tokenJSON);
-  //       if (localStorage.getItem('customer') !== null) {
-  //         const customerJSON = localStorage.getItem('customer');
-  //         if (customerJSON !== null) {
-  //           const customer = JSON.parse(customerJSON);
-  //           ECommerceApi.updateCustomer(currentClient, {
-  //             id: customer.id,
-  //             token: 'Iyzh10TQYlzRlnvJiV5YttJyokuz-RfM',
-  //             version: customer.version,
-  //             address: {
-  //               streetName: dataAddress.streetName,
-  //               streetNumber: '',
-  //               postalCode: dataAddress.postalCode,
-  //               city: dataAddress.city,
-  //               country: dataAddress.country,
-  //             },
-  //           });
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
-  private editBtnsHandle(): void {
-    this.editShippingBtn.view.html.addEventListener('click', () => {
+  private editModeBtnHandle(): void {
+    this.profileEditModeBtn.view.html.addEventListener('click', () => {
       const modal = new Modal();
       this.profilePageContent.html.append(modal.view.html);
       const editForm = new EditForm();
       modal.container.html.append(editForm.view.html);
-      // editForm.submit.view.html.addEventListener('click', (event) => {
-      //   event.preventDefault();
-      //   console.log('submit');
-
-      //   ECommerceApi.updateCustomer(currentClient, {
-      //     id: 'c4744ca2-43c7-4508-996e-51a650abec11',
-      //     token: 'LUYWI-hYa3PmAAITDeUSFXU8poFszXw9',
-      //     version: 1,
-      //     address: {
-      //       streetName: 'lklklk',
-      //       streetNumber: '',
-      //       postalCode: '909090',
-      //       city: 'KK',
-      //       country: 'RU',
-      //     },
-      //   }).then((res) => res.addresses[res.addresses.length - SINGLE_ADDRESS])
-      // .then((data) => {
-
-      // });
-      // });
+      editForm.dataForm.html.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (editForm.dataForm.html instanceof HTMLFormElement) {
+          const data = new FormData(editForm.dataForm.html);
+          const res = {
+            country: data.get('country') as string,
+            postalCode: data.get('postal-code') as string,
+            city: data.get('city') as string,
+            street: data.get('street-name') as string,
+          };
+          this.sendUpdateDataCustomer(res);
+          modal.destroy();
+        }
+      });
     });
-    this.editBillingBtn.view.html.addEventListener('click', () => {
-      const modal = new Modal();
-      this.profilePageContent.html.append(modal.view.html);
-      const editForm = new EditForm();
-      modal.container.html.append(editForm.view.html);
-    });
+  }
+
+  sendUpdateDataCustomer(data: { country: string; postalCode: string; city: string; street: string }): void {
+    if (localStorage.getItem('tokenPassword') !== null) {
+      const tokenPsw = localStorage.getItem('tokenPassword');
+      if (localStorage.getItem('customer') !== null && tokenPsw !== null) {
+        const customerJSON = localStorage.getItem('customer');
+        if (customerJSON !== null) {
+          const customer = JSON.parse(customerJSON);
+          ECommerceApi.updateCustomer(currentClient, {
+            id: customer.id,
+            token: tokenPsw,
+            version: customer.version,
+            address: {
+              streetName: data.street,
+              streetNumber: '',
+              postalCode: data.postalCode,
+              city: data.city,
+              country: data.country,
+            },
+          }).then((response) => {
+            const { version } = response;
+            const address = response.addresses[response.addresses.length - SINGLE];
+            const addressId = response.addresses[response.addresses.length - SINGLE].id;
+            customer.shippingAddressIds.push(addressId);
+            customer.billingAddressIds.push(addressId);
+            customer.addresses.push(address);
+            customer.version = version;
+            localStorage.setItem('customer', JSON.stringify(customer));
+            this.displayAllAddresses();
+          });
+        }
+      }
+    }
   }
 
   get firstName(): BaseComponent {

@@ -3,7 +3,7 @@ export interface IInputOptions {
   type: InputTypesType;
   class?: string[];
   name?: string;
-  value?: string | number;
+  value?: string;
   placeholder?: string;
   callback?: (event: Event) => void;
 }

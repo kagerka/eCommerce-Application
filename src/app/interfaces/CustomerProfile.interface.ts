@@ -15,7 +15,7 @@ interface ICustomerProfile {
   firstName: string;
   lastName: string;
   password: string;
-  addresses: { country: string; city: string; streetName: string; postalCode: string }[];
+  addresses: { id?: string; country: string; city: string; streetName: string; postalCode: string }[];
   defaultShippingAddress?: number;
   defaultBillingAddress?: number;
   shippingAddressIds: [];

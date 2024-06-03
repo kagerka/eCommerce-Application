@@ -14,6 +14,9 @@ import Product from './pages/product/Product';
 import Profile from './pages/profile/Profile';
 import Registration from './pages/registation/Registration';
 
+const EMPTY_ARR_LENGTH = 0;
+const SINGLE = 1;
+
 class App {
   private static container: HTMLElement = document.body;
 
@@ -241,7 +244,14 @@ class App {
         this.profilePage.firstName.html.textContent = customer.firstName;
         this.profilePage.lastName.html.textContent = customer.lastName;
         this.profilePage.dateOfBirth.html.textContent = customer.dateOfBirth;
-        this.profilePage.displayAddress();
+        if (customer.shippingAddressIds.length === EMPTY_ARR_LENGTH) {
+          customer.shippingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE].id);
+        }
+        if (customer.billingAddressIds.length === EMPTY_ARR_LENGTH) {
+          customer.billingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE].id);
+        }
+        localStorage.setItem('customer', JSON.stringify(customer));
+        this.profilePage.displayAllAddresses();
         this.checkBtns();
         this.setLoginBtnHref();
       }

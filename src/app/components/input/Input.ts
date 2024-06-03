@@ -23,6 +23,14 @@ class Input {
         });
       }
     }
+
+    if (options.name) {
+      this.addNameAttribute(options.name);
+    }
+
+    if (options.value) {
+      this.addValueAttribute(options.value);
+    }
   }
 
   private static createInputElement(opt: IInputOptions): BaseComponent {

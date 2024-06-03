@@ -49,6 +49,10 @@ class Modal {
     });
   }
 
+  public destroy(): void {
+    this.overlay.html.remove();
+  }
+
   get view(): BaseComponent {
     return this.overlay;
   }

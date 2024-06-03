@@ -9,6 +9,10 @@
   flex-grow: 1;
 }
 
+.profile-top-container {
+  display: flex;
+}
+
 .profile-name {
   display: flex;
   width: 100%;
@@ -20,6 +24,30 @@
 .profile-last-name {
   display: flex;
   margin: 0;
+}
+
+.edit-mode-btn {
+  min-width: 120px;
+  width: 120px;
+  height: 35px;
+  border-radius: 5px;
+  background-color: $green;
+  padding: 0 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: $white;
+  text-align: center;
+  transition: 0.5s all;
+  outline: none;
+  border: none;
+  margin-top: 10px;
+  margin-right: 20px;
+
+  &:hover {
+    background-color: $darkGreen;
+  }
 }
 
 .date-birth-container {
@@ -112,9 +140,20 @@
 }
 
 @media screen and (max-width: 800px) {
+  .profile-top-container {
+    flex-direction: column;
+    flex-flow: column-reverse;
+  }
+
   .profile-name {
     flex-direction: column;
   }
+
+  .edit-mode-btn-container {
+    display: flex;
+    justify-content: flex-end;
+  }
+
   .addresses-title {
     padding: 0 20px;
     text-align: start;
@@ -127,5 +166,11 @@
   .shipping-address-container,
   .billing-address-container {
     width: 100%;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  .edit-mode-btn {
+    height: 28px;
   }
 }
