@@ -139,6 +139,30 @@
   height: 25px;
 }
 
+.toast-success {
+  width: 200px;
+  height: 100px;
+  color: $green;
+  background-color: $gray;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-radius: 3px;
+}
+
+.toast-error {
+  width: 200px;
+  height: 100px;
+  color: $red;
+  background-color: $gray;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-radius: 3px;
+}
+
 @media screen and (max-width: 800px) {
   .profile-top-container {
     flex-direction: column;

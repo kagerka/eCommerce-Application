@@ -1,3 +1,4 @@
+import Toastify from 'toastify-js';
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
@@ -341,6 +342,32 @@ class Profile {
     }
   }
 
+  private static toastSuccess(): void {
+    Toastify({
+      text: 'Your profile has been edited successfully',
+      className: 'toast-success',
+      gravity: 'bottom',
+      style: {
+        position: 'absolute',
+        bottom: '15px',
+        right: '15px',
+      },
+    }).showToast();
+  }
+
+  private static toastError(): void {
+    Toastify({
+      text: 'Oops! Something went wrong :(',
+      className: 'toast-error',
+      gravity: 'bottom',
+      style: {
+        position: 'absolute',
+        bottom: '15px',
+        right: '15px',
+      },
+    }).showToast();
+  }
+
   private editModeBtnHandle(): void {
     this.profileEditModeBtn.view.html.addEventListener('click', () => {
       const modal = new Modal();
@@ -382,17 +409,22 @@ class Profile {
               city: data.city,
               country: data.country,
             },
-          }).then((response) => {
-            const { version } = response;
-            const address = response.addresses[response.addresses.length - SINGLE];
-            const addressId = response.addresses[response.addresses.length - SINGLE].id;
-            customer.shippingAddressIds.push(addressId);
-            customer.billingAddressIds.push(addressId);
-            customer.addresses.push(address);
-            customer.version = version;
-            localStorage.setItem('customer', JSON.stringify(customer));
-            this.displayAllAddresses();
-          });
+          })
+            .then((response) => {
+              const { version } = response;
+              const address = response.addresses[response.addresses.length - SINGLE];
+              const addressId = response.addresses[response.addresses.length - SINGLE].id;
+              customer.shippingAddressIds.push(addressId);
+              customer.billingAddressIds.push(addressId);
+              customer.addresses.push(address);
+              customer.version = version;
+              localStorage.setItem('customer', JSON.stringify(customer));
+              this.displayAllAddresses();
+              Profile.toastSuccess();
+            })
+            .catch(() => {
+              Profile.toastError();
+            });
         }
       }
     }
