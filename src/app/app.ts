@@ -3,6 +3,7 @@ import ECommerceApi from './api/ECommerceApi';
 import currentClient from './api/data/currentClient';
 import './app.scss';
 import BaseComponent from './components/BaseComponent';
+import Breadcrumb from './components/breadcrumb/Breadcrumb';
 import Footer from './components/footer/Footer';
 import Header from './components/header/Header';
 import About from './pages/about/About';
@@ -42,11 +43,14 @@ class App {
 
   private catalogPage: Catalog;
 
+  private breadcrumbContainer: BaseComponent;
+
   private router: Navigo;
 
   constructor() {
     this.content = new BaseComponent({ tag: 'div', class: ['app'] });
     this.header = new Header();
+    this.breadcrumbContainer = new BaseComponent({ tag: 'div', class: ['breadcrumbs'] });
     this.pageContent = new BaseComponent({ tag: 'div', class: ['content'] });
     this.footer = new Footer();
     this.loginPage = new Login();
@@ -66,7 +70,12 @@ class App {
   }
 
   private composeView(): void {
-    this.content.html.append(this.header.view.html, this.pageContent.html, this.footer.view.html);
+    this.content.html.append(
+      this.header.view.html,
+      this.breadcrumbContainer.html,
+      this.pageContent.html,
+      this.footer.view.html,
+    );
   }
 
   private observerLogin(): void {
@@ -125,40 +134,39 @@ class App {
   private createRouter(): void {
     this.router
       .on('/about', () => {
-        this.pageContent.html.innerHTML = '';
-        this.pageContent.html.append(this.aboutPage.view.html);
-        this.checkBtns();
-        this.setLoginBtnHref();
+        this.onAbout();
+        this.checkBreadcrumbs(['Home', 'About']);
       })
       .on('/login', () => {
         this.onLogin();
+        this.checkBreadcrumbs(['Home', 'Login']);
       })
       .on('/logout', () => {
-        this.pageContent.html.innerHTML = '';
-        this.pageContent.html.append(this.mainPage.view.html);
-        this.checkBtns();
-        this.setLoginBtnHref();
+        this.onLogout();
+        this.checkBreadcrumbs(['Home', 'Logout']);
       })
       .on('/registration', () => {
         this.onReg();
+        this.checkBreadcrumbs(['Home', 'Registration']);
       })
       .on('/', () => {
-        this.pageContent.html.innerHTML = '';
-        this.pageContent.html.append(this.mainPage.view.html);
-        this.checkBtns();
-        this.setLoginBtnHref();
+        this.onMain();
+        this.checkBreadcrumbs(['Home']);
       })
       .on('/profile', () => {
         this.onProfile();
+        this.checkBreadcrumbs(['Home', 'Profile']);
       })
       .on('/catalog', () => {
         this.onCatalog();
+        this.checkBreadcrumbs(['Home', 'Catalog']);
       })
       .on('/catalog\\/(.*)/', () => {
         this.onProduct();
       })
       .notFound(() => {
         this.onNotFound();
+        this.checkBreadcrumbs(['Home', 'Page not found']);
       })
       .resolve();
   }
@@ -166,6 +174,27 @@ class App {
   private onNotFound(): void {
     this.pageContent.html.innerHTML = '';
     this.pageContent.html.append(this.notFound.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
+  }
+
+  private onAbout(): void {
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(this.aboutPage.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
+  }
+
+  private onMain(): void {
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(this.mainPage.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
+  }
+
+  private onLogout(): void {
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(this.mainPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
   }
@@ -196,6 +225,9 @@ class App {
     this.pageContent.html.append(productPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    const currentProduct = JSON.parse(localStorage.getItem('productData') || '');
+    const link = currentProduct.masterData.current.slug.en;
+    this.checkBreadcrumbs(['Home', 'Catalog', link]);
   }
 
   private onLogin(): void {
@@ -290,6 +322,12 @@ class App {
       this.header.logoutBtn.html.classList.add('hide');
       this.header.profileBtn.html.classList.add('hide');
     }
+  }
+
+  private checkBreadcrumbs(urls: string[]): void {
+    const breadcrumb = new Breadcrumb(urls);
+    this.breadcrumbContainer.html.innerHTML = '';
+    this.breadcrumbContainer.html.append(breadcrumb.view.html);
   }
 
   run(): void {
