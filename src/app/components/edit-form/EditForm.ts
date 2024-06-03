@@ -1,11 +1,9 @@
 import { InputTypesType } from '../../interfaces/InputOptions.interface';
 import {
   AGE_ERROR,
-  CITY_ERROR,
   EMAIL_ERROR,
   NAME_ERROR,
-  POSTCODE_ERROR,
-  STREET_ERROR,
+  // STREET_ERROR,
   SURNAME_ERROR,
 } from '../../utils/validation/inputErrorTexts';
 import validateDateOfBirth from '../../utils/validation/validateBirthDate';
@@ -50,13 +48,13 @@ class EditForm {
 
   private emailError: BaseComponent;
 
-  private postInputStatus: boolean;
+  // private postInputStatus: boolean;
 
-  private countryInputStatus: boolean;
+  // private countryInputStatus: boolean;
 
-  private cityInputStatus: boolean;
+  // private cityInputStatus: boolean;
 
-  private streetInputStatus: boolean;
+  // private streetInputStatus: boolean;
 
   private content: BaseComponent;
 
@@ -64,25 +62,25 @@ class EditForm {
 
   private form: BaseComponent;
 
-  private streetInputContainer: BaseComponent;
+  // private streetInputContainer: BaseComponent;
 
-  private streetNameInput: Input;
+  // private streetNameInput: Input;
 
-  private streetError: BaseComponent;
+  // private streetError: BaseComponent;
 
-  private postalCodeInputContainer: BaseComponent;
+  // private postalCodeInputContainer: BaseComponent;
 
-  private postalCodeInput: Input;
+  // private postalCodeInput: Input;
 
-  private postalCodeError: BaseComponent;
+  // private postalCodeError: BaseComponent;
 
-  private cityInput: Input;
+  // private cityInput: Input;
 
-  private cityInputContainer: BaseComponent;
+  // private cityInputContainer: BaseComponent;
 
   private countryInput: BaseComponent;
 
-  private cityError: BaseComponent;
+  // private cityError: BaseComponent;
 
   private submitBtn: Button;
 
@@ -91,14 +89,14 @@ class EditForm {
     this.lastNameInputStatus = false;
     this.dateInputStatus = false;
     this.emailInputStatus = false;
-    this.postInputStatus = false;
-    this.countryInputStatus = false;
-    this.cityInputStatus = false;
-    this.streetInputStatus = false;
+    // this.postInputStatus = false;
+    // this.countryInputStatus = false;
+    // this.cityInputStatus = false;
+    // this.streetInputStatus = false;
     this.content = new BaseComponent({ tag: 'div', class: ['edit-content'] });
     this.title = new BaseComponent({ tag: 'h3', class: ['edit-form-title'], text: 'Edit Your Profile' });
     this.form = new BaseComponent({ tag: 'form', class: ['edit-form'] });
-    this.streetInputContainer = EditForm.createInputContainerElement('street');
+    // this.streetInputContainer = EditForm.createInputContainerElement('street');
     this.firstNameInputContainer = EditForm.createInputContainerElement('first-name');
     this.firstNameInput = EditForm.createInputElement('text', 'first-name', 'Name');
     this.firstNameError = EditForm.createErrorElement('first-name');
@@ -111,14 +109,14 @@ class EditForm {
     this.emailInputContainer = EditForm.createInputContainerElement('email');
     this.emailInput = EditForm.createInputElement('email', 'email', 'E-mail');
     this.emailError = EditForm.createErrorElement('email');
-    this.streetNameInput = EditForm.createInputElement('text', 'street-name', 'Street');
-    this.streetError = EditForm.createErrorElement('street');
-    this.postalCodeInputContainer = EditForm.createInputContainerElement('postal-code');
-    this.postalCodeInput = EditForm.createInputElement('text', 'postal-code', 'Postal code');
-    this.postalCodeError = EditForm.createErrorElement('postal-code');
-    this.cityInputContainer = EditForm.createInputContainerElement('city');
-    this.cityInput = EditForm.createInputElement('text', 'city', 'City');
-    this.cityError = EditForm.createErrorElement('city');
+    // this.streetNameInput = EditForm.createInputElement('text', 'street-name', 'Street');
+    // this.streetError = EditForm.createErrorElement('street');
+    // this.postalCodeInputContainer = EditForm.createInputContainerElement('postal-code');
+    // this.postalCodeInput = EditForm.createInputElement('text', 'postal-code', 'Postal code');
+    // this.postalCodeError = EditForm.createErrorElement('postal-code');
+    // this.cityInputContainer = EditForm.createInputContainerElement('city');
+    // this.cityInput = EditForm.createInputElement('text', 'city', 'City');
+    // this.cityError = EditForm.createErrorElement('city');
     this.countryInput = SecondAddress.createSelectElement();
     this.countryInput.html.setAttribute('name', 'country');
     this.submitBtn = new Button({ type: 'submit', class: ['edit-form-submit'], text: 'Edit', disabled: true });
@@ -145,10 +143,10 @@ class EditForm {
       this.submitBtn.view.html,
     );
     this.content.html.append(this.title.html, this.form.html);
-    this.handleCountryInput();
-    this.handlePostInput();
-    this.handleStreetInput();
-    this.handleCityInput();
+    // this.handleCountryInput();
+    // this.handlePostInput();
+    // this.handleStreetInput();
+    // this.handleCityInput();
     this.handleFirstNameInput();
     this.handleLastNameInput();
     this.handleDateInput();
@@ -178,116 +176,116 @@ class EditForm {
     });
   }
 
-  private static getSelectedValue(): string | null {
-    const selectedOption = <HTMLSelectElement>document.querySelector('option:checked');
-    return selectedOption ? selectedOption.value : null;
-  }
+  // private static getSelectedValue(): string | null {
+  //   const selectedOption = <HTMLSelectElement>document.querySelector('option:checked');
+  //   return selectedOption ? selectedOption.value : null;
+  // }
 
-  private handleCountryInput(): void {
-    this.countryInput.html.addEventListener('change', () => {
-      this.countryInputStatus = true;
-      this.postInputStatus = false;
-      this.validatePostInput();
-      this.checkStatuses();
-    });
-  }
+  // private handleCountryInput(): void {
+  //   this.countryInput.html.addEventListener('change', () => {
+  //     this.countryInputStatus = true;
+  //     this.postInputStatus = false;
+  //     this.validatePostInput();
+  //     this.checkStatuses();
+  //   });
+  // }
 
-  private validatePostInput(): void {
-    if (!(this.postalCodeInput.view.html instanceof HTMLInputElement)) return;
+  // private validatePostInput(): void {
+  //   if (!(this.postalCodeInput.view.html instanceof HTMLInputElement)) return;
 
-    const errorFormat = new BaseComponent({
-      tag: 'div',
-      class: ['error-message'],
-      text: POSTCODE_ERROR,
-    });
-    const reg = EditForm.getSelectedValue();
-    const { value } = this.postalCodeInput.view.html;
-    const isValidCode = reg === 'US' ? /^\d{5}(-\d{4})?$/.test(value) : /^\d{6}$/.test(value);
+  //   const errorFormat = new BaseComponent({
+  //     tag: 'div',
+  //     class: ['error-message'],
+  //     text: POSTCODE_ERROR,
+  //   });
+  //   const reg = EditForm.getSelectedValue();
+  //   const { value } = this.postalCodeInput.view.html;
+  //   const isValidCode = reg === 'US' ? /^\d{5}(-\d{4})?$/.test(value) : /^\d{6}$/.test(value);
 
-    this.postInputStatus = isValidCode;
-    const targetElement = this.postalCodeInput.view.html;
-    const targetErrorElement = this.postalCodeError.html;
+  //   this.postInputStatus = isValidCode;
+  //   const targetElement = this.postalCodeInput.view.html;
+  //   const targetErrorElement = this.postalCodeError.html;
 
-    if (isValidCode) {
-      EditForm.addClassSuccess(targetElement);
-      EditForm.cleanInsideElement(targetErrorElement);
-    } else {
-      EditForm.addClassError(targetElement);
-      EditForm.cleanInsideElement(targetErrorElement);
-      targetErrorElement.append(errorFormat.html);
-    }
-  }
+  //   if (isValidCode) {
+  //     EditForm.addClassSuccess(targetElement);
+  //     EditForm.cleanInsideElement(targetErrorElement);
+  //   } else {
+  //     EditForm.addClassError(targetElement);
+  //     EditForm.cleanInsideElement(targetErrorElement);
+  //     targetErrorElement.append(errorFormat.html);
+  //   }
+  // }
 
-  private handlePostInput(): void {
-    this.postalCodeInput.view.html.addEventListener('input', () => {
-      this.validatePostInput();
-      this.checkStatuses();
-    });
-  }
+  // private handlePostInput(): void {
+  //   this.postalCodeInput.view.html.addEventListener('input', () => {
+  //     this.validatePostInput();
+  //     this.checkStatuses();
+  //   });
+  // }
 
-  private handleCityInput(): void {
-    this.cityInput.view.html.addEventListener('input', () => {
-      this.validateCityInput();
-      this.checkStatuses();
-    });
-  }
+  // private handleCityInput(): void {
+  //   this.cityInput.view.html.addEventListener('input', () => {
+  //     this.validateCityInput();
+  //     this.checkStatuses();
+  //   });
+  // }
 
-  private validateCityInput(): void {
-    if (this.cityInput.view.html instanceof HTMLInputElement) {
-      const errorFormat = new BaseComponent({
-        tag: 'div',
-        class: ['error-message'],
-        text: CITY_ERROR,
-      });
-      const { value } = this.cityInput.view.html;
+  // private validateCityInput(): void {
+  //   if (this.cityInput.view.html instanceof HTMLInputElement) {
+  //     const errorFormat = new BaseComponent({
+  //       tag: 'div',
+  //       class: ['error-message'],
+  //       text: CITY_ERROR,
+  //     });
+  //     const { value } = this.cityInput.view.html;
 
-      const regExp = /^[A-Za-z ]+$/;
-      const isValidateRegExp = validateRegExp(value, regExp);
-      const isValidateLeadingTrailingSpace = validateLeadingTrailingSpace(value);
+  //     const regExp = /^[A-Za-z ]+$/;
+  //     const isValidateRegExp = validateRegExp(value, regExp);
+  //     const isValidateLeadingTrailingSpace = validateLeadingTrailingSpace(value);
 
-      if (isValidateRegExp && isValidateLeadingTrailingSpace) {
-        this.cityInputStatus = true;
-        EditForm.addClassSuccess(this.cityInput.view.html);
-        EditForm.cleanInsideElement(this.cityError.html);
-      } else {
-        this.cityInputStatus = false;
-        EditForm.addClassError(this.cityInput.view.html);
-        EditForm.cleanInsideElement(this.cityError.html);
-        this.cityError.html.append(errorFormat.html);
-      }
-    }
-  }
+  //     if (isValidateRegExp && isValidateLeadingTrailingSpace) {
+  //       this.cityInputStatus = true;
+  //       EditForm.addClassSuccess(this.cityInput.view.html);
+  //       EditForm.cleanInsideElement(this.cityError.html);
+  //     } else {
+  //       this.cityInputStatus = false;
+  //       EditForm.addClassError(this.cityInput.view.html);
+  //       EditForm.cleanInsideElement(this.cityError.html);
+  //       this.cityError.html.append(errorFormat.html);
+  //     }
+  //   }
+  // }
 
-  private handleStreetInput(): void {
-    this.streetNameInput.view.html.addEventListener('input', () => {
-      this.validateStreetInput();
-      this.checkStatuses();
-    });
-  }
+  // private handleStreetInput(): void {
+  //   this.streetNameInput.view.html.addEventListener('input', () => {
+  //     this.validateStreetInput();
+  //     this.checkStatuses();
+  //   });
+  // }
 
-  private validateStreetInput(): void {
-    if (this.streetNameInput.view.html instanceof HTMLInputElement) {
-      const errorFormat = new BaseComponent({
-        tag: 'div',
-        class: ['error-message'],
-        text: STREET_ERROR,
-      });
-      const EMPTY_INPUT = 0;
-      const { value } = this.streetNameInput.view.html;
-      const hasAtLeastOneCharacter = value.trim().length > EMPTY_INPUT;
+  // private validateStreetInput(): void {
+  //   if (this.streetNameInput.view.html instanceof HTMLInputElement) {
+  //     const errorFormat = new BaseComponent({
+  //       tag: 'div',
+  //       class: ['error-message'],
+  //       text: STREET_ERROR,
+  //     });
+  //     const EMPTY_INPUT = 0;
+  //     const { value } = this.streetNameInput.view.html;
+  //     const hasAtLeastOneCharacter = value.trim().length > EMPTY_INPUT;
 
-      if (hasAtLeastOneCharacter) {
-        this.streetInputStatus = true;
-        EditForm.addClassSuccess(this.streetNameInput.view.html);
-        EditForm.cleanInsideElement(this.streetError.html);
-      } else {
-        this.streetInputStatus = false;
-        EditForm.addClassError(this.streetNameInput.view.html);
-        EditForm.cleanInsideElement(this.streetError.html);
-        this.streetError.html.append(errorFormat.html);
-      }
-    }
-  }
+  //     if (hasAtLeastOneCharacter) {
+  //       this.streetInputStatus = true;
+  //       EditForm.addClassSuccess(this.streetNameInput.view.html);
+  //       EditForm.cleanInsideElement(this.streetError.html);
+  //     } else {
+  //       this.streetInputStatus = false;
+  //       EditForm.addClassError(this.streetNameInput.view.html);
+  //       EditForm.cleanInsideElement(this.streetError.html);
+  //       this.streetError.html.append(errorFormat.html);
+  //     }
+  //   }
+  // }
 
   private handleFirstNameInput(): void {
     this.firstNameInput.view.html.addEventListener('input', () => {
