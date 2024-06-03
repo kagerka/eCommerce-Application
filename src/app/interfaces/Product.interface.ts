@@ -26,6 +26,14 @@ export interface IProducts {
               centAmount: number;
               currencyCode: number;
             };
+            iscounted: {
+              value: {
+                type: string;
+                fractionDigits: number;
+                centAmount: number;
+                currencyCode: string;
+              };
+            };
             id: string;
           },
         ];
