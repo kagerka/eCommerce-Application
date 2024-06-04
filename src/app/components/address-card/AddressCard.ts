@@ -1,4 +1,6 @@
 import BaseComponent from '../BaseComponent';
+// import Addresses from '../addresses/Addresses';
+import Button from '../button/Button';
 import './AddressCard.scss';
 
 class AddressCard {
@@ -16,6 +18,10 @@ class AddressCard {
 
   private streetName: BaseComponent;
 
+  private btnsContainer: BaseComponent;
+
+  private deleteButton: Button;
+
   constructor() {
     this.address = AddressCard.createAddressElement();
     this.countryContainer = AddressCard.createCountryContainerElement();
@@ -24,16 +30,20 @@ class AddressCard {
     this.postalCode = AddressCard.createPostalCodeElement();
     this.cityName = AddressCard.createCityElement();
     this.streetName = AddressCard.createStreetElement();
+    this.btnsContainer = AddressCard.createBtnsContainerElement();
+    this.deleteButton = AddressCard.createDeleteBtnElement();
     this.composeView();
   }
 
   private composeView(): void {
+    this.btnsContainer.html.append(this.deleteButton.view.html);
     this.countryContainer.html.append(this.countryName.html, this.labelBlock.html);
     this.address.html.append(
       this.countryContainer.html,
       this.postalCode.html,
       this.cityName.html,
       this.streetName.html,
+      this.btnsContainer.html,
     );
   }
 
@@ -65,6 +75,14 @@ class AddressCard {
     return new BaseComponent({ tag: 'div', class: ['street-name'] });
   }
 
+  private static createBtnsContainerElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['btns-container'] });
+  }
+
+  private static createDeleteBtnElement(): Button {
+    return new Button({ type: 'button', class: ['delete-btn'] });
+  }
+
   public get country(): BaseComponent {
     return this.countryName;
   }
@@ -83,6 +101,10 @@ class AddressCard {
 
   public get label(): BaseComponent {
     return this.labelBlock;
+  }
+
+  public get deleteBtn(): Button {
+    return this.deleteButton;
   }
 
   public get cardContainer(): BaseComponent {
