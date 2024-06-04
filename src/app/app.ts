@@ -234,7 +234,7 @@ class App {
     if (localStorage.getItem('isAuth')) {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
-      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}:5173`);
       // for correct operation locally you need to add a port number
       // For example: ${window.location.protocol}//${window.location.hostname}:5173
 
@@ -252,7 +252,7 @@ class App {
     if (localStorage.getItem('isAuth')) {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
-      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}:5173`);
       // for correct operation locally you need to add a port number
       // For example: ${window.location.protocol}//${window.location.hostname}:5173
 
@@ -284,12 +284,12 @@ class App {
           customer.billingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE].id);
         }
         localStorage.setItem('customer', JSON.stringify(customer));
-        this.profilePage.displayAllAddresses();
+        this.profilePage.rerenderAllAddresses();
         this.checkBtns();
         this.setLoginBtnHref();
       }
     } else {
-      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}:5173`);
       // for correct operation locally you need to add a port number
       // For example: ${window.location.protocol}//${window.location.hostname}:5173
       this.checkBtns();

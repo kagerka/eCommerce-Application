@@ -7,6 +7,7 @@ import ICustomerUpdateRequest from '../interfaces/CustomerUpdateRequest.interfac
 import { ICategories, IProducts, IQueryProducts } from '../interfaces/Product.interface';
 import ITokenPassword from '../interfaces/TokenPassword.interface';
 import { TActions, TCustomerData, TCustomerPassword } from '../interfaces/UpdateCustomerInfo.interface';
+import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
 
 class ECommerceApi {
   static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
@@ -134,6 +135,62 @@ class ECommerceApi {
               city: requestDetails.address.city,
               country: requestDetails.address.country,
             },
+          },
+        ],
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async addShippingAddressID(
+    clientDetails: IAPIClientDetails,
+    requestDetails: IAddShippingAddressID,
+  ): Promise<ICustomerProfile> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/customers/${requestDetails.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${requestDetails.token}`,
+      },
+      body: JSON.stringify({
+        version: requestDetails.version,
+        actions: [
+          {
+            action: 'addShippingAddressId',
+            addressId: requestDetails.addressId,
+          },
+        ],
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async addBillingAddressID(
+    clientDetails: IAPIClientDetails,
+    requestDetails: IAddShippingAddressID,
+  ): Promise<ICustomerProfile> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/customers/${requestDetails.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${requestDetails.token}`,
+      },
+      body: JSON.stringify({
+        version: requestDetails.version,
+        actions: [
+          {
+            action: 'addBillingAddressId',
+            addressId: requestDetails.addressId,
           },
         ],
       }),
