@@ -7,6 +7,7 @@ import ICustomerUpdateRequest from '../interfaces/CustomerUpdateRequest.interfac
 import { ICategories, IProducts, IQueryProducts } from '../interfaces/Product.interface';
 import ITokenPassword from '../interfaces/TokenPassword.interface';
 import { TActions, TCustomerData, TCustomerPassword } from '../interfaces/UpdateCustomerInfo.interface';
+import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
 
 class ECommerceApi {
   static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
