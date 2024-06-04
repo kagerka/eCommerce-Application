@@ -201,6 +201,40 @@ class Profile {
     }
   }
 
+  private setDefaultAddress(btn: Button, data: { id: string; version: number }): void {
+    if (localStorage.getItem('tokenPassword') !== null) {
+      const tokenPsw = localStorage.getItem('tokenPassword');
+      if (tokenPsw !== null) {
+        btn.view.html.addEventListener('click', () => {
+          const { id, type } = btn.view.html.dataset;
+          if (type === 'shipping' && id !== undefined) {
+            ECommerceApi.setDefaultShippingAddress(currentClient, {
+              id: data.id,
+              token: tokenPsw,
+              version: data.version,
+              addressId: id,
+            }).then((shippingRes) => {
+              localStorage.setItem('customer', JSON.stringify(shippingRes));
+              this.rerenderAllAddresses();
+            });
+          }
+
+          if (type === 'billing' && id !== undefined) {
+            ECommerceApi.setDefaultBillingAddress(currentClient, {
+              id: data.id,
+              token: tokenPsw,
+              version: data.version,
+              addressId: id,
+            }).then((billingRes) => {
+              localStorage.setItem('customer', JSON.stringify(billingRes));
+              this.rerenderAllAddresses();
+            });
+          }
+        });
+      }
+    }
+  }
+
   private displayShippingAddresses(): void {
     if (localStorage.getItem('customer') !== null) {
       const customerJSON = localStorage.getItem('customer');
@@ -220,6 +254,9 @@ class Profile {
                 addressCard.street.html.textContent = `street: ${address.streetName}`;
                 addressCard.deleteBtn.view.html.setAttribute('data-id', shippingAddressId);
                 addressCard.deleteBtn.view.html.setAttribute('data-type', 'shipping');
+                addressCard.defaultBtn.view.html.setAttribute('data-id', shippingAddressId);
+                addressCard.defaultBtn.view.html.setAttribute('data-type', 'shipping');
+                this.setDefaultAddress(addressCard.defaultBtn, { id, version });
                 this.removeAddressCard(addressCard.deleteBtn, { id, version });
                 if (address.id === defaultShippingAddressId) {
                   addressCard.label.html.classList.add('show');
@@ -252,6 +289,9 @@ class Profile {
                 addressCard.street.html.textContent = `street: ${address.streetName}`;
                 addressCard.deleteBtn.view.html.setAttribute('data-id', billingAddressId);
                 addressCard.deleteBtn.view.html.setAttribute('data-type', 'billing');
+                addressCard.defaultBtn.view.html.setAttribute('data-id', billingAddressId);
+                addressCard.defaultBtn.view.html.setAttribute('data-type', 'billing');
+                this.setDefaultAddress(addressCard.defaultBtn, { id, version });
                 this.removeAddressCard(addressCard.deleteBtn, { id, version });
                 if (address.id === defaultBillingAddressId) {
                   addressCard.label.html.classList.add('show');

@@ -259,6 +259,62 @@ class ECommerceApi {
     }
   }
 
+  static async setDefaultShippingAddress(
+    clientDetails: IAPIClientDetails,
+    requestDetails: IAddShippingAddressID,
+  ): Promise<ICustomerProfile> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/customers/${requestDetails.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${requestDetails.token}`,
+      },
+      body: JSON.stringify({
+        version: requestDetails.version,
+        actions: [
+          {
+            action: 'setDefaultShippingAddress',
+            addressId: requestDetails.addressId,
+          },
+        ],
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async setDefaultBillingAddress(
+    clientDetails: IAPIClientDetails,
+    requestDetails: IAddShippingAddressID,
+  ): Promise<ICustomerProfile> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/customers/${requestDetails.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${requestDetails.token}`,
+      },
+      body: JSON.stringify({
+        version: requestDetails.version,
+        actions: [
+          {
+            action: 'setDefaultBillingAddress',
+            addressId: requestDetails.addressId,
+          },
+        ],
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
   static async getProducts(clientDetails: IAPIClientDetails, token: string): Promise<IQueryProducts> {
     const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/products?limit=70`, {
       method: 'GET',
