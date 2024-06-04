@@ -1,0 +1,31 @@
+@import './../../../styles/colors.scss';
+
+.address {
+  width: 300px;
+  height: 150px;
+  border: 2px solid $green;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.country-container {
+}
+
+.country {
+}
+
+.label {
+}
+
+.postal-code {
+}
+
+.city {
+}
+
+.street-name {
+}

@@ -6,6 +6,7 @@ import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface'
 import ICustomerUpdateRequest from '../interfaces/CustomerUpdateRequest.interface';
 import { ICategories, IProducts, IQueryProducts } from '../interfaces/Product.interface';
 import ITokenPassword from '../interfaces/TokenPassword.interface';
+import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
 
 class ECommerceApi {
   static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
@@ -111,7 +112,7 @@ class ECommerceApi {
     }
   }
 
-static async updateCustomer(
+  static async updateCustomer(
     clientDetails: IAPIClientDetails,
     requestDetails: ICustomerUpdateRequest,
   ): Promise<ICustomerProfile> {
@@ -133,6 +134,62 @@ static async updateCustomer(
               city: requestDetails.address.city,
               country: requestDetails.address.country,
             },
+          },
+        ],
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async addShippingAddressID(
+    clientDetails: IAPIClientDetails,
+    requestDetails: IAddShippingAddressID,
+  ): Promise<ICustomerProfile> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/customers/${requestDetails.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${requestDetails.token}`,
+      },
+      body: JSON.stringify({
+        version: requestDetails.version,
+        actions: [
+          {
+            action: 'addShippingAddressId',
+            addressId: requestDetails.addressId,
+          },
+        ],
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async addBillingAddressID(
+    clientDetails: IAPIClientDetails,
+    requestDetails: IAddShippingAddressID,
+  ): Promise<ICustomerProfile> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/customers/${requestDetails.id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${requestDetails.token}`,
+      },
+      body: JSON.stringify({
+        version: requestDetails.version,
+        actions: [
+          {
+            action: 'addBillingAddressId',
+            addressId: requestDetails.addressId,
           },
         ],
       }),
@@ -278,7 +335,7 @@ static async updateCustomer(
       return json;
     }
   }
-  
+
   static async getProductsByBrand(
     clientDetails: IAPIClientDetails,
     token: string,

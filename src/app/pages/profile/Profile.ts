@@ -3,8 +3,10 @@ import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Button from '../../components/button/Button';
 import Modal from '../../components/modal/modal';
-import EditForm from '../../components/edit-form/EditForm';
 import './Profile.scss';
+import Addresses from '../../components/addresses/Addresses';
+import EditAddressForm from '../../components/edit-address-form/EditAddressForm';
+import AddressCard from '../../components/address-card/AddressCard';
 
 const EMPTY_ARR_LENGTH = 0;
 const SINGLE = 1;
@@ -38,49 +40,7 @@ class Profile {
 
   private profileDateOfBirth: BaseComponent;
 
-  private profileAddresses: BaseComponent;
-
-  private profileAddressesContainer: BaseComponent;
-
-  private profileShippingAddressContainer: BaseComponent;
-
-  private profileShippingAddressTitle: BaseComponent;
-
-  private profileShippingAddress: BaseComponent;
-
-  private profileShippingCountryContainer: BaseComponent;
-
-  private profileShippingCountry: BaseComponent;
-
-  private profileShippingLabel: BaseComponent;
-
-  private profileShippingPostalCode: BaseComponent;
-
-  private profileShippingCity: BaseComponent;
-
-  private profileShippingStreet: BaseComponent;
-
-  private editShippingBtn: Button;
-
-  private profileBillingAddressContainer: BaseComponent;
-
-  private profileBillingAddressTitle: BaseComponent;
-
-  private profileBillingAddress: BaseComponent;
-
-  private profileBillingCountryContainer: BaseComponent;
-
-  private profileBillingCountry: BaseComponent;
-
-  private profileBillingLabel: BaseComponent;
-
-  private profileBillingPostalCode: BaseComponent;
-
-  private profileBillingCity: BaseComponent;
-
-  private profileBillingStreet: BaseComponent;
-
-  private editBillingBtn: Button;
+  private addresses: Addresses;
 
   constructor() {
     this.profilePageContent = Profile.createProfilePageContentElement();
@@ -93,52 +53,10 @@ class Profile {
     this.profileDateOfBirthContainer = Profile.createDateOfBirthContainerElement();
     this.profileDateOfBirthTitle = Profile.createDateOfBirthTitleElement();
     this.profileDateOfBirth = Profile.createDateOfBirthElement();
-    this.profileAddressesContainer = Profile.createAddressesContainerElement();
-    this.profileAddresses = this.createAddressesElement();
-    this.profileShippingAddressContainer = Profile.createShippingAddressContainerElement();
-    this.profileShippingAddressTitle = Profile.createShippingAddressTitleElement();
-    this.profileShippingAddress = Profile.createShippingAddressElement();
-    this.profileShippingCountryContainer = Profile.createShippingCountryContainerElement();
-    this.profileShippingCountry = Profile.createShippingCountryElement();
-    this.profileShippingLabel = Profile.createShippingLabelElement();
-    this.profileShippingPostalCode = Profile.createShippingPostalCodeElement();
-    this.profileShippingCity = Profile.createShippingCityElement();
-    this.profileShippingStreet = Profile.createShippingStreetElement();
-    this.editShippingBtn = Profile.createEditBtnElement();
-    this.profileBillingAddressContainer = Profile.createBillingAddressContainerElement();
-    this.profileBillingAddressTitle = Profile.createBillingAddressTitleElement();
-    this.profileBillingAddress = Profile.createBillingAddressElement();
-    this.profileBillingCountryContainer = Profile.createBillingCountryContainerElement();
-    this.profileBillingCountry = Profile.createBillingCountryElement();
-    this.profileBillingLabel = Profile.createBillingLabelElement();
-    this.profileBillingPostalCode = Profile.createBillingPostalCodeElement();
-    this.profileBillingCity = Profile.createBillingCityElement();
-    this.profileBillingStreet = Profile.createBillingStreetElement();
-    this.editBillingBtn = Profile.createEditBtnElement();
+    this.addresses = new Addresses();
     this.composeView();
-    this.editModeBtnHandle();
-  }
-
-  private composeShippingAdressView(): void {
-    this.profileShippingCountryContainer.html.append(this.profileShippingCountry.html, this.profileShippingLabel.html);
-    this.profileShippingAddress.html.append(
-      this.profileShippingCountryContainer.html,
-      this.profileShippingPostalCode.html,
-      this.profileShippingCity.html,
-      this.profileShippingStreet.html,
-      this.editShippingBtn.view.html,
-    );
-  }
-
-  private composeBillingAdressView(): void {
-    this.profileBillingCountryContainer.html.append(this.profileBillingCountry.html, this.profileBillingLabel.html);
-    this.profileBillingAddress.html.append(
-      this.profileBillingCountryContainer.html,
-      this.profileBillingPostalCode.html,
-      this.profileBillingCity.html,
-      this.profileBillingStreet.html,
-      this.editBillingBtn.view.html,
-    );
+    this.addAddressBtnHandle();
+    this.rerenderAllAddresses();
   }
 
   private composeView(): void {
@@ -146,24 +64,10 @@ class Profile {
     this.profileName.html.append(this.profileFirstName.html, this.profileLastName.html);
     this.profileEditModeBtnContainer.html.append(this.profileEditModeBtn.view.html);
     this.profileTopContainer.html.append(this.profileName.html, this.profileEditModeBtnContainer.html);
-    this.composeShippingAdressView();
-    this.profileShippingAddressContainer.html.append(
-      this.profileShippingAddressTitle.html,
-      this.profileShippingAddress.html,
-    );
-    this.composeBillingAdressView();
-    this.profileBillingAddressContainer.html.append(
-      this.profileBillingAddressTitle.html,
-      this.profileBillingAddress.html,
-    );
-    this.profileAddressesContainer.html.append(
-      this.profileShippingAddressContainer.html,
-      this.profileBillingAddressContainer.html,
-    );
     this.profilePageContent.html.append(
       this.profileTopContainer.html,
       this.profileDateOfBirthContainer.html,
-      this.profileAddresses.html,
+      this.addresses.view.html,
     );
   }
 
@@ -207,93 +111,6 @@ class Profile {
     return new BaseComponent({ tag: 'div', class: ['date-birth'] });
   }
 
-  private createAddressesElement(): BaseComponent {
-    const addresses = new BaseComponent({ tag: 'div', class: ['addresses'] });
-    const title = new BaseComponent({ tag: 'div', class: ['addresses-title'], text: 'Addresses' });
-    addresses.html.append(title.html, this.profileAddressesContainer.html);
-    return addresses;
-  }
-
-  private static createAddressesContainerElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['addresses-container'] });
-  }
-
-  private static createShippingAddressContainerElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['shipping-address-container'] });
-  }
-
-  private static createShippingAddressTitleElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['shipping-address-title'], text: 'shipping address' });
-  }
-
-  private static createShippingAddressElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['shipping-address'], attribute: [['data-id', '']] });
-  }
-
-  private static createShippingCountryContainerElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['country-container'] });
-  }
-
-  private static createShippingCountryElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['country'] });
-  }
-
-  private static createShippingLabelElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['label'], text: 'default address' });
-  }
-
-  private static createShippingPostalCodeElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['postal-code'] });
-  }
-
-  private static createShippingCityElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['city'] });
-  }
-
-  private static createShippingStreetElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['street-name'] });
-  }
-
-  private static createBillingAddressContainerElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['billing-address-container'] });
-  }
-
-  private static createBillingAddressTitleElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['billing-address-title'], text: 'billing address' });
-  }
-
-  private static createBillingAddressElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['billing-address'] });
-  }
-
-  private static createBillingCountryContainerElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['country-container'] });
-  }
-
-  private static createBillingCountryElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['country'] });
-  }
-
-  private static createBillingLabelElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['label'], text: 'default address' });
-  }
-
-  private static createBillingPostalCodeElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['postal-code'] });
-  }
-
-  private static createBillingCityElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['city'] });
-  }
-
-  private static createBillingStreetElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['street-name'] });
-  }
-
-  private static createEditBtnElement(): Button {
-    return new Button({ type: 'button', class: ['edit-btn', 'btn'], text: 'Edit' });
-  }
-
   private static fullCountryName(country: string): string {
     let countryName;
     if (country === 'RU') {
@@ -304,67 +121,102 @@ class Profile {
     return countryName;
   }
 
-  public displayAllAddresses(): void {
+  public rerenderAllAddresses(): void {
+    this.addresses.shippingAddresses.html.innerHTML = '';
+    this.addresses.billingAddresses.html.innerHTML = '';
+    this.displayShippingAddresses();
+    this.displayBillingAddresses();
+  }
+
+  private displayShippingAddresses(): void {
     if (localStorage.getItem('customer') !== null) {
       const customerJSON = localStorage.getItem('customer');
       if (customerJSON !== null) {
         const customer = JSON.parse(customerJSON);
-        const { addresses, shippingAddressIds, billingAddressIds, defaultShippingAddressId, defaultBillingAddressId } =
-          customer;
+        const { addresses, shippingAddressIds, defaultShippingAddressId } = customer;
         addresses.forEach((address: IAddress) => {
           if (shippingAddressIds.length !== EMPTY_ARR_LENGTH) {
-            if (address.id === shippingAddressIds[shippingAddressIds.length - SINGLE]) {
-              const countryName = Profile.fullCountryName(address.country);
-              this.profileShippingCountry.html.textContent = `country: ${countryName}`;
-              this.profileShippingPostalCode.html.textContent = `postal code: ${address.postalCode}`;
-              this.profileShippingCity.html.textContent = `city: ${address.city}`;
-              this.profileShippingStreet.html.textContent = `street: ${address.streetName}`;
-              if (address.id === defaultShippingAddressId) {
-                this.profileShippingLabel.html.classList.add('show');
+            shippingAddressIds.forEach((shippingAddressId: string) => {
+              if (address.id === shippingAddressId) {
+                const addressCard = new AddressCard();
+                const countryName = Profile.fullCountryName(address.country);
+                addressCard.cardContainer.html.setAttribute('id', shippingAddressId);
+                addressCard.country.html.textContent = `country: ${countryName}`;
+                addressCard.post.html.textContent = `postal code: ${address.postalCode}`;
+                addressCard.city.html.textContent = `city: ${address.city}`;
+                addressCard.street.html.textContent = `street: ${address.streetName}`;
+                if (address.id === defaultShippingAddressId) {
+                  addressCard.label.html.classList.add('show');
+                }
+                this.addresses.shippingAddresses.html.append(addressCard.cardContainer.html);
               }
-            }
-          }
-          if (billingAddressIds.length !== EMPTY_ARR_LENGTH) {
-            if (address.id === billingAddressIds[billingAddressIds.length - SINGLE]) {
-              const countryName = Profile.fullCountryName(address.country);
-              this.profileBillingCountry.html.textContent = `country: ${countryName}`;
-              this.profileBillingPostalCode.html.textContent = `postal code: ${address.postalCode}`;
-              this.profileBillingCity.html.textContent = `city: ${address.city}`;
-              this.profileBillingStreet.html.textContent = `street: ${address.streetName}`;
-              if (address.id === defaultBillingAddressId) {
-                this.profileBillingLabel.html.classList.add('show');
-              }
-            }
+            });
           }
         });
       }
     }
   }
 
-  private editModeBtnHandle(): void {
-    this.profileEditModeBtn.view.html.addEventListener('click', () => {
+  private displayBillingAddresses(): void {
+    if (localStorage.getItem('customer') !== null) {
+      const customerJSON = localStorage.getItem('customer');
+      if (customerJSON !== null) {
+        const customer = JSON.parse(customerJSON);
+        const { addresses, billingAddressIds, defaultBillingAddressId } = customer;
+        addresses.forEach((address: IAddress) => {
+          if (billingAddressIds.length !== EMPTY_ARR_LENGTH) {
+            billingAddressIds.forEach((billingAddressId: string) => {
+              if (address.id === billingAddressId) {
+                const addressCard = new AddressCard();
+                const countryName = Profile.fullCountryName(address.country);
+                addressCard.cardContainer.html.setAttribute('id', billingAddressId);
+                addressCard.country.html.textContent = `country: ${countryName}`;
+                addressCard.post.html.textContent = `postal code: ${address.postalCode}`;
+                addressCard.city.html.textContent = `city: ${address.city}`;
+                addressCard.street.html.textContent = `street: ${address.streetName}`;
+                if (address.id === defaultBillingAddressId) {
+                  addressCard.label.html.classList.add('show');
+                }
+                this.addresses.billingAddresses.html.append(addressCard.cardContainer.html);
+              }
+            });
+          }
+        });
+      }
+    }
+  }
+
+  private addAddressBtnHandle(): void {
+    this.addresses.btnAddAddress.view.html.addEventListener('click', () => {
       const modal = new Modal();
       this.profilePageContent.html.append(modal.view.html);
-      const editForm = new EditForm();
-      modal.container.html.append(editForm.view.html);
-      editForm.dataForm.html.addEventListener('submit', (event) => {
+      const editAddressForm = new EditAddressForm();
+      modal.container.html.append(editAddressForm.view.html);
+      editAddressForm.dataForm.html.addEventListener('submit', (event) => {
         event.preventDefault();
-        if (editForm.dataForm.html instanceof HTMLFormElement) {
-          const data = new FormData(editForm.dataForm.html);
+        if (editAddressForm.dataForm.html instanceof HTMLFormElement) {
+          const data = new FormData(editAddressForm.dataForm.html);
+          const typeShipping = data.get('shipping');
+          const typeBilling = data.get('billing');
           const res = {
             country: data.get('country') as string,
             postalCode: data.get('postal-code') as string,
             city: data.get('city') as string,
             street: data.get('street-name') as string,
           };
-          this.sendUpdateDataCustomer(res);
+          if (typeShipping !== null) {
+            this.updateShippingAddresses(res);
+          }
+          if (typeBilling !== null) {
+            this.updateBillingAddresses(res);
+          }
           modal.destroy();
         }
       });
     });
   }
 
-  sendUpdateDataCustomer(data: { country: string; postalCode: string; city: string; street: string }): void {
+  updateShippingAddresses(data: { country: string; postalCode: string; city: string; street: string }): void {
     if (localStorage.getItem('tokenPassword') !== null) {
       const tokenPsw = localStorage.getItem('tokenPassword');
       if (localStorage.getItem('customer') !== null && tokenPsw !== null) {
@@ -384,14 +236,56 @@ class Profile {
             },
           }).then((response) => {
             const { version } = response;
-            const address = response.addresses[response.addresses.length - SINGLE];
             const addressId = response.addresses[response.addresses.length - SINGLE].id;
-            customer.shippingAddressIds.push(addressId);
-            customer.billingAddressIds.push(addressId);
-            customer.addresses.push(address);
-            customer.version = version;
-            localStorage.setItem('customer', JSON.stringify(customer));
-            this.displayAllAddresses();
+            if (addressId !== undefined) {
+              ECommerceApi.addShippingAddressID(currentClient, {
+                id: customer.id,
+                token: tokenPsw,
+                version,
+                addressId,
+              }).then((shippingRes) => {
+                localStorage.setItem('customer', JSON.stringify(shippingRes));
+                this.rerenderAllAddresses();
+              });
+            }
+          });
+        }
+      }
+    }
+  }
+
+  updateBillingAddresses(data: { country: string; postalCode: string; city: string; street: string }): void {
+    if (localStorage.getItem('tokenPassword') !== null) {
+      const tokenPsw = localStorage.getItem('tokenPassword');
+      if (localStorage.getItem('customer') !== null && tokenPsw !== null) {
+        const customerJSON = localStorage.getItem('customer');
+        if (customerJSON !== null) {
+          const customer = JSON.parse(customerJSON);
+          ECommerceApi.updateCustomer(currentClient, {
+            id: customer.id,
+            token: tokenPsw,
+            version: customer.version,
+            address: {
+              streetName: data.street,
+              streetNumber: '',
+              postalCode: data.postalCode,
+              city: data.city,
+              country: data.country,
+            },
+          }).then((response) => {
+            const { version } = response;
+            const addressId = response.addresses[response.addresses.length - SINGLE].id;
+            if (addressId !== undefined) {
+              ECommerceApi.addBillingAddressID(currentClient, {
+                id: customer.id,
+                token: tokenPsw,
+                version,
+                addressId,
+              }).then((billingRes) => {
+                localStorage.setItem('customer', JSON.stringify(billingRes));
+                this.rerenderAllAddresses();
+              });
+            }
           });
         }
       }

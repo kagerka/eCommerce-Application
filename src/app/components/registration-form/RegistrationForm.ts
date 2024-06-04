@@ -27,6 +27,8 @@ const SAME_EMAIL_ERROR =
 
 const DEF_ADDRESS_MSG = 'Add address as billing and shipping by default';
 const DIF_ADDRESSES_MSG = 'Set different addresses';
+const EMPTY_ARR_LENGTH = 0;
+const SINGLE = 1;
 
 class RegistrationForm extends SecondAddress {
   private streetInputStatus: boolean;
@@ -536,12 +538,15 @@ class RegistrationForm extends SecondAddress {
     this.regButton.view.html.setAttribute('disabled', '');
   }
 
-  private signupCustomer(customer: IRegForm): void {
+  private static checkTokens(): void {
     if (localStorage.getItem('tokenAnonymous') || localStorage.getItem('tokenPassword')) {
       localStorage.removeItem('tokenAnonymous');
       localStorage.removeItem('tokenPassword');
     }
+  }
 
+  private signupCustomer(customer: IRegForm): void {
+    RegistrationForm.checkTokens();
     ECommerceApi.getAccessToken(currentClient).then((res) => {
       ECommerceApi.createCustomer(currentClient, res.access_token, customer)
         .then(() => {
@@ -550,7 +555,31 @@ class RegistrationForm extends SecondAddress {
           localStorage.setItem('isAuth', JSON.stringify(true));
           RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
           ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
-            localStorage.setItem('customer', JSON.stringify(data.customer));
+            if (
+              data.customer.billingAddressIds.length === EMPTY_ARR_LENGTH &&
+              data.customer.shippingAddressIds.length === EMPTY_ARR_LENGTH &&
+              data.customer.addresses[0].id !== undefined
+            ) {
+              ECommerceApi.addBillingAddressID(currentClient, {
+                id: data.customer.id,
+                token: res.access_token,
+                version: data.customer.version,
+                addressId: data.customer.addresses[0].id,
+              }).then(() => {
+                if (data.customer.addresses[0].id !== undefined) {
+                  ECommerceApi.addShippingAddressID(currentClient, {
+                    id: data.customer.id,
+                    token: res.access_token,
+                    version: data.customer.version + SINGLE,
+                    addressId: data.customer.addresses[0].id,
+                  }).then((result) => {
+                    localStorage.setItem('customer', JSON.stringify(result));
+                  });
+                }
+              });
+            } else {
+              localStorage.setItem('customer', JSON.stringify(data.customer));
+            }
             window.history.pushState({}, '', '/');
             this.regButton.view.html.setAttribute('login-success', 'true');
           });
