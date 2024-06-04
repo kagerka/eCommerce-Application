@@ -6,7 +6,7 @@ import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface'
 import ICustomerUpdateRequest from '../interfaces/CustomerUpdateRequest.interface';
 import { ICategories, IProducts, IQueryProducts } from '../interfaces/Product.interface';
 import ITokenPassword from '../interfaces/TokenPassword.interface';
-import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
+import { TActions, TCustomerData, TCustomerPassword } from '../interfaces/UpdateCustomerInfo.interface';
 
 class ECommerceApi {
   static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
@@ -350,6 +350,93 @@ class ECommerceApi {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  private static getActionsVariant(customerData: TCustomerData): TActions[] {
+    const result = [];
+    let actions: TActions = { action: '' };
+    const resetActions = (): void => {
+      actions = { action: '' };
+    };
+    if (customerData.newUserInfo.newEmailAddress) {
+      actions.action = 'changeEmail';
+      actions.email = customerData.newUserInfo.newEmailAddress;
+      result.push(actions);
+      resetActions();
+    }
+    if (customerData.newUserInfo.newFirstName) {
+      actions.action = 'setFirstName';
+      actions.firstName = customerData.newUserInfo.newFirstName;
+      result.push(actions);
+      resetActions();
+    }
+    if (customerData.newUserInfo.newLastName) {
+      actions.action = 'setLastName';
+      actions.lastName = customerData.newUserInfo.newLastName;
+      result.push(actions);
+      resetActions();
+    }
+    if (customerData.newUserInfo.newDateOfBirth) {
+      actions.action = 'setDateOfBirth';
+      actions.dateOfBirth = customerData.newUserInfo.newDateOfBirth;
+      result.push(actions);
+      resetActions();
+    }
+    return result;
+  }
+
+  static async updateCustomerData(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    customerData: TCustomerData,
+  ): Promise<ICustomerProfile> {
+    const actions = ECommerceApi.getActionsVariant(customerData);
+    const response = await fetch(
+      `${clientDetails.APIURL}/${clientDetails.projectKey}/customers/${customerData.customerID}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          version: customerData.version,
+          actions: actions.map((el) => el),
+        }),
+      },
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async updateCustomerPassword(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    customerData: TCustomerPassword,
+  ): Promise<ICustomerProfile> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        id: customerData.customerID,
+        version: customerData.version,
+        currentPassword: customerData.newPassword.currentPassword,
+        newPassword: customerData.newPassword.newPassword,
+      }),
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

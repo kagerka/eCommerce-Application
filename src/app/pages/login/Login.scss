@@ -1,6 +1,8 @@
 @import './../../../styles/colors.scss';
+@import './../../../styles/variables';
 
 .login {
+  min-height: calc(100vh - $headerHeight - $footerHeight - 27px - 2 * $pageGap);
   width: 100%;
   max-width: 1440px;
   padding: 0 120px;
