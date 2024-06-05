@@ -55,7 +55,7 @@ class EditAddressForm {
 
   private submitBtn: Button;
 
-  constructor() {
+  constructor(title: string) {
     this.postInputStatus = false;
     this.countryInputStatus = false;
     this.cityInputStatus = false;
@@ -88,19 +88,19 @@ class EditAddressForm {
     this.countryInput = SecondAddress.createSelectElement();
     this.countryInput.html.setAttribute('name', 'country');
     this.submitBtn = new Button({ type: 'submit', class: ['edit-form-submit'], text: 'Edit', disabled: true });
-    this.handlers();
+    this.handlers(title);
   }
 
-  private handlers(): void {
-    this.composeView();
+  private handlers(title: string): void {
+    this.composeView(title);
     this.handleCountryInput();
     this.handlePostInput();
     this.handleStreetInput();
     this.handleCityInput();
   }
 
-  private composeView(): void {
-    const title = new BaseComponent({ tag: 'h3', class: ['edit-form-title'], text: 'Add Address' });
+  private composeView(mainTitle: string): void {
+    const title = new BaseComponent({ tag: 'h3', class: ['edit-form-title'], text: mainTitle });
     const billingLabel = new BaseComponent({
       tag: 'label',
       class: ['billing-label'],
@@ -274,7 +274,7 @@ class EditAddressForm {
     element.classList.add('success');
   }
 
-  private checkStatuses(): void {
+  public checkStatuses(): void {
     if (this.streetInputStatus && this.cityInputStatus && this.postInputStatus && this.countryInputStatus) {
       this.submitBtn.view.html.removeAttribute('disabled');
     } else {
@@ -282,8 +282,36 @@ class EditAddressForm {
     }
   }
 
+  public setAllTrueStatuses(): void {
+    this.countryInputStatus = true;
+    this.postInputStatus = true;
+    this.cityInputStatus = true;
+    this.streetInputStatus = true;
+    this.checkStatuses();
+  }
+
+  public deleteCheckboxContainer(): void {
+    this.checkboxContainer.html.remove();
+  }
+
   get dataForm(): BaseComponent {
     return this.form;
+  }
+
+  get country(): BaseComponent {
+    return this.countryInput;
+  }
+
+  get post(): Input {
+    return this.postalCodeInput;
+  }
+
+  get city(): Input {
+    return this.cityInput;
+  }
+
+  get street(): Input {
+    return this.streetNameInput;
   }
 
   get submit(): Button {

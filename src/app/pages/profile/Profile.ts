@@ -252,10 +252,13 @@ class Profile {
                 addressCard.post.html.textContent = `postal code: ${address.postalCode}`;
                 addressCard.city.html.textContent = `city: ${address.city}`;
                 addressCard.street.html.textContent = `street: ${address.streetName}`;
+                addressCard.updateBtn.view.html.setAttribute('data-id', shippingAddressId);
+                addressCard.updateBtn.view.html.setAttribute('data-type', 'shipping');
                 addressCard.deleteBtn.view.html.setAttribute('data-id', shippingAddressId);
                 addressCard.deleteBtn.view.html.setAttribute('data-type', 'shipping');
                 addressCard.defaultBtn.view.html.setAttribute('data-id', shippingAddressId);
                 addressCard.defaultBtn.view.html.setAttribute('data-type', 'shipping');
+                this.updateAddress(addressCard.updateBtn);
                 this.setDefaultAddress(addressCard.defaultBtn, { id, version });
                 this.removeAddressCard(addressCard.deleteBtn, { id, version });
                 if (address.id === defaultShippingAddressId) {
@@ -287,10 +290,13 @@ class Profile {
                 addressCard.post.html.textContent = `postal code: ${address.postalCode}`;
                 addressCard.city.html.textContent = `city: ${address.city}`;
                 addressCard.street.html.textContent = `street: ${address.streetName}`;
+                addressCard.updateBtn.view.html.setAttribute('data-id', billingAddressId);
+                addressCard.updateBtn.view.html.setAttribute('data-type', 'billing');
                 addressCard.deleteBtn.view.html.setAttribute('data-id', billingAddressId);
                 addressCard.deleteBtn.view.html.setAttribute('data-type', 'billing');
                 addressCard.defaultBtn.view.html.setAttribute('data-id', billingAddressId);
                 addressCard.defaultBtn.view.html.setAttribute('data-type', 'billing');
+                this.updateAddress(addressCard.updateBtn);
                 this.setDefaultAddress(addressCard.defaultBtn, { id, version });
                 this.removeAddressCard(addressCard.deleteBtn, { id, version });
                 if (address.id === defaultBillingAddressId) {
@@ -309,7 +315,7 @@ class Profile {
     this.addresses.btnAddAddress.view.html.addEventListener('click', () => {
       const modal = new Modal();
       this.profilePageContent.html.append(modal.view.html);
-      const editAddressForm = new EditAddressForm();
+      const editAddressForm = new EditAddressForm('Add Address');
       modal.container.html.append(editAddressForm.view.html);
       editAddressForm.dataForm.html.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -323,16 +329,215 @@ class Profile {
             city: data.get('city') as string,
             street: data.get('street-name') as string,
           };
-          if (typeShipping !== null) {
+          if (typeShipping !== null && typeBilling === null) {
             this.updateShippingAddresses(res);
           }
-          if (typeBilling !== null) {
+          if (typeBilling !== null && typeShipping === null) {
             this.updateBillingAddresses(res);
+          }
+
+          if (typeBilling !== null && typeShipping !== null) {
+            this.updateShippingAndBillingAddresses(res);
           }
           modal.destroy();
         }
       });
     });
+  }
+
+  private static searchAddress(id: string): IAddress | null {
+    if (localStorage.getItem('customer') !== null) {
+      const customerJSON = localStorage.getItem('customer');
+      let foundAddress: IAddress | null = null;
+      if (customerJSON !== null) {
+        const customer = JSON.parse(customerJSON);
+        const { addresses } = customer;
+        addresses.forEach((address: IAddress) => {
+          if (address.id !== null && address.id === id) {
+            foundAddress = address;
+          }
+        });
+      }
+      return foundAddress;
+    }
+    return null;
+  }
+
+  private static fillForm(btn: Button, form: EditAddressForm): void {
+    if (btn.view.html.dataset.id && typeof btn.view.html.dataset.id === 'string') {
+      const address = Profile.searchAddress(btn.view.html.dataset.id);
+      if (form.country.html instanceof HTMLSelectElement && address !== null) {
+        form.country.html.value = address.country;
+      }
+      if (form.post.view.html instanceof HTMLInputElement && address !== null) {
+        form.post.view.html.value = address.postalCode;
+      }
+      if (form.city.view.html instanceof HTMLInputElement && address !== null) {
+        form.city.view.html.value = address.city;
+      }
+      if (form.street.view.html instanceof HTMLInputElement && address !== null) {
+        form.street.view.html.value = address.streetName;
+      }
+    }
+  }
+
+  private updateAddress(btn: Button): void {
+    btn.view.html.addEventListener('click', () => {
+      const modal = new Modal();
+      this.profilePageContent.html.append(modal.view.html);
+      const editAddressForm = new EditAddressForm('Edit Address');
+      editAddressForm.deleteCheckboxContainer();
+      Profile.fillForm(btn, editAddressForm);
+      editAddressForm.setAllTrueStatuses();
+      modal.container.html.append(editAddressForm.view.html);
+      editAddressForm.dataForm.html.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (editAddressForm.dataForm.html instanceof HTMLFormElement) {
+          const data = new FormData(editAddressForm.dataForm.html);
+          if (
+            btn.view.html.dataset.type &&
+            typeof btn.view.html.dataset.type === 'string' &&
+            btn.view.html.dataset.id &&
+            typeof btn.view.html.dataset.id === 'string'
+          ) {
+            const newAddress = {
+              id: btn.view.html.dataset.id,
+              country: data.get('country') as string,
+              postalCode: data.get('postal-code') as string,
+              city: data.get('city') as string,
+              streetName: data.get('street-name') as string,
+            };
+            this.sendUpdateAddress(newAddress, btn.view.html.dataset.type);
+          }
+          modal.destroy();
+        }
+      });
+    });
+  }
+
+  private static getTokenPassword(): string | null {
+    if (localStorage.getItem('tokenPassword') !== null) {
+      const tokenPsw = localStorage.getItem('tokenPassword');
+      return tokenPsw;
+    }
+    return null;
+  }
+
+  private static getCustomerIDFromStorage(): string | null {
+    if (localStorage.getItem('customer') !== null) {
+      const customerJSON = localStorage.getItem('customer');
+      if (customerJSON !== null) {
+        const customer = JSON.parse(customerJSON);
+        if (typeof customer.id === 'string') {
+          return customer.id;
+        }
+      }
+    }
+    return null;
+  }
+
+  private static getVersionFromStorage(): number | null {
+    if (localStorage.getItem('customer') !== null) {
+      const customerJSON = localStorage.getItem('customer');
+      if (customerJSON !== null) {
+        const customer = JSON.parse(customerJSON);
+        if (typeof customer.version === 'number') {
+          return customer.version;
+        }
+      }
+    }
+    return null;
+  }
+
+  private updateShippingAddress(address: IAddress): void {
+    const customerID = Profile.getCustomerIDFromStorage();
+    const version = Profile.getVersionFromStorage();
+    const token = Profile.getTokenPassword();
+    if (customerID && version && token && address.id) {
+      ECommerceApi.removeShippingAddressID(currentClient, {
+        id: customerID,
+        token,
+        version,
+        addressId: address.id,
+      }).then((shippingRes) => {
+        ECommerceApi.updateCustomer(currentClient, {
+          id: customerID,
+          token,
+          version: shippingRes.version,
+          address: {
+            streetName: address.streetName,
+            streetNumber: '',
+            postalCode: address.postalCode,
+            city: address.city,
+            country: address.country,
+          },
+        }).then((data) => {
+          if (data.addresses.length > EMPTY_ARR_LENGTH) {
+            const addressId = data.addresses[data.addresses.length - SINGLE].id;
+            if (addressId)
+              ECommerceApi.addShippingAddressID(currentClient, {
+                id: customerID,
+                token,
+                version: data.version,
+                addressId,
+              }).then((res) => {
+                localStorage.setItem('customer', JSON.stringify(res));
+                this.rerenderAllAddresses();
+              });
+          }
+        });
+      });
+    }
+  }
+
+  private updateBillingAddress(address: IAddress): void {
+    const customerID = Profile.getCustomerIDFromStorage();
+    const version = Profile.getVersionFromStorage();
+    const token = Profile.getTokenPassword();
+    if (customerID && version && token && address.id) {
+      ECommerceApi.removeBillingAddressID(currentClient, {
+        id: customerID,
+        token,
+        version,
+        addressId: address.id,
+      }).then((billingRes) => {
+        ECommerceApi.updateCustomer(currentClient, {
+          id: customerID,
+          token,
+          version: billingRes.version,
+          address: {
+            streetName: address.streetName,
+            streetNumber: '',
+            postalCode: address.postalCode,
+            city: address.city,
+            country: address.country,
+          },
+        }).then((data) => {
+          if (data.addresses.length > EMPTY_ARR_LENGTH) {
+            const addressId = data.addresses[data.addresses.length - SINGLE].id;
+            if (addressId)
+              ECommerceApi.addBillingAddressID(currentClient, {
+                id: customerID,
+                token,
+                version: data.version,
+                addressId,
+              }).then((res) => {
+                localStorage.setItem('customer', JSON.stringify(res));
+                this.rerenderAllAddresses();
+              });
+          }
+        });
+      });
+    }
+  }
+
+  private sendUpdateAddress(address: IAddress, type: string): void {
+    if (type === 'shipping') {
+      this.updateShippingAddress(address);
+    }
+    if (type === 'billing') {
+      this.updateBillingAddress(address);
+    }
   }
 
   updateShippingAddresses(data: { country: string; postalCode: string; city: string; street: string }): void {
@@ -403,6 +608,55 @@ class Profile {
               }).then((billingRes) => {
                 localStorage.setItem('customer', JSON.stringify(billingRes));
                 this.rerenderAllAddresses();
+              });
+            }
+          });
+        }
+      }
+    }
+  }
+
+  updateShippingAndBillingAddresses(data: { country: string; postalCode: string; city: string; street: string }): void {
+    if (localStorage.getItem('tokenPassword') !== null) {
+      const tokenPsw = localStorage.getItem('tokenPassword');
+      if (localStorage.getItem('customer') !== null && tokenPsw !== null) {
+        const customerJSON = localStorage.getItem('customer');
+        if (customerJSON !== null) {
+          const customer = JSON.parse(customerJSON);
+          ECommerceApi.updateCustomer(currentClient, {
+            id: customer.id,
+            token: tokenPsw,
+            version: customer.version,
+            address: {
+              streetName: data.street,
+              streetNumber: '',
+              postalCode: data.postalCode,
+              city: data.city,
+              country: data.country,
+            },
+          }).then((response) => {
+            const { version } = response;
+            const addressId = response.addresses[response.addresses.length - SINGLE].id;
+            if (addressId !== undefined) {
+              ECommerceApi.addShippingAddressID(currentClient, {
+                id: customer.id,
+                token: tokenPsw,
+                version,
+                addressId,
+              }).then((shippingRes) => {
+                const newVersion = shippingRes.version;
+                const newAddressId = response.addresses[response.addresses.length - SINGLE].id;
+                if (newAddressId !== undefined) {
+                  ECommerceApi.addBillingAddressID(currentClient, {
+                    id: customer.id,
+                    token: tokenPsw,
+                    version: newVersion,
+                    addressId: newAddressId,
+                  }).then((customerData) => {
+                    localStorage.setItem('customer', JSON.stringify(customerData));
+                    this.rerenderAllAddresses();
+                  });
+                }
               });
             }
           });

@@ -20,6 +20,8 @@ class AddressCard {
 
   private btnsContainer: BaseComponent;
 
+  private editButton: Button;
+
   private defaultButton: Button;
 
   private deleteButton: Button;
@@ -33,13 +35,18 @@ class AddressCard {
     this.cityName = AddressCard.createCityElement();
     this.streetName = AddressCard.createStreetElement();
     this.btnsContainer = AddressCard.createBtnsContainerElement();
+    this.editButton = AddressCard.createEditBtnElement();
     this.defaultButton = AddressCard.createDefaultBtnElement();
     this.deleteButton = AddressCard.createDeleteBtnElement();
     this.composeView();
   }
 
   private composeView(): void {
-    this.btnsContainer.html.append(this.defaultButton.view.html, this.deleteButton.view.html);
+    this.btnsContainer.html.append(
+      this.editButton.view.html,
+      this.defaultButton.view.html,
+      this.deleteButton.view.html,
+    );
     this.countryContainer.html.append(this.countryName.html, this.labelBlock.html);
     this.address.html.append(
       this.countryContainer.html,
@@ -82,6 +89,10 @@ class AddressCard {
     return new BaseComponent({ tag: 'div', class: ['btns-container'] });
   }
 
+  private static createEditBtnElement(): Button {
+    return new Button({ type: 'button', class: ['update-address-btn'] });
+  }
+
   private static createDefaultBtnElement(): Button {
     return new Button({ type: 'button', class: ['default-btn'], text: 'default' });
   }
@@ -108,6 +119,10 @@ class AddressCard {
 
   public get label(): BaseComponent {
     return this.labelBlock;
+  }
+
+  public get updateBtn(): Button {
+    return this.editButton;
   }
 
   public get defaultBtn(): Button {
