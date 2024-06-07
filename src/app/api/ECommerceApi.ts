@@ -1,5 +1,5 @@
 import IAPIClientDetails from '../interfaces/APIClientDetails.interface';
-import IAccessToken from '../interfaces/AccessToken.interface';
+// import IAccessToken from '../interfaces/AccessToken.interface';
 import ICustomerData from '../interfaces/CustomerData.interface';
 import ICustomerProfile from '../interfaces/CustomerProfile.interface';
 import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface';
@@ -8,17 +8,37 @@ import { ICategories, IProducts, IQueryProducts } from '../interfaces/Product.in
 import ITokenPassword from '../interfaces/TokenPassword.interface';
 import { TActions, TCustomerData, TCustomerPassword } from '../interfaces/UpdateCustomerInfo.interface';
 import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
+import ICart from '../interfaces/Cart.interface';
 
 class ECommerceApi {
-  static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
+  // static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
+  //   const basicAuthData = btoa(`${clientDetails.clientId}:${clientDetails.secret}`);
+  //   const response = await fetch(`${clientDetails.AuthURL}/oauth/token`, {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/x-www-form-urlencoded',
+  //       Authorization: `Basic ${basicAuthData}`,
+  //     },
+  //     body: `grant_type=client_credentials&scope=${clientDetails.scope}`,
+  //   });
+  //   if (!response.ok) {
+  //     throw new Error(`HTTP error! status: ${response.status}`);
+  //   } else {
+  //     const json = await response.json();
+  //     return json;
+  //   }
+  // }
+
+  static async getAnonymousToken(clientDetails: IAPIClientDetails): Promise<ITokenPassword> {
+    const uniqueId = self.crypto.randomUUID();
     const basicAuthData = btoa(`${clientDetails.clientId}:${clientDetails.secret}`);
-    const response = await fetch(`${clientDetails.AuthURL}/oauth/token`, {
+    const response = await fetch(`${clientDetails.AuthURL}/oauth/${clientDetails.projectKey}/anonymous/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         Authorization: `Basic ${basicAuthData}`,
       },
-      body: `grant_type=client_credentials&scope=${clientDetails.scope}`,
+      body: `grant_type=client_credentials&scope=${clientDetails.scope}&anonymous_id=${uniqueId}`,
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -33,13 +53,15 @@ class ECommerceApi {
     data: { email: string; password: string },
   ): Promise<ITokenPassword> {
     const basicAuthData = btoa(`${clientDetails.clientId}:${clientDetails.secret}`);
+    const scope = `view_products:${clientDetails.projectKey} manage_my_orders:
+		${clientDetails.projectKey} manage_my_profile:${clientDetails.projectKey}`;
     const response = await fetch(`${clientDetails.AuthURL}/oauth/${clientDetails.projectKey}/customers/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         Authorization: `Basic ${basicAuthData}`,
       },
-      body: `grant_type=password&username=${data.email}&password=${data.password}&scope=${clientDetails.scope}`,
+      body: `grant_type=password&username=${data.email}&password=${data.password}&scope=${scope}`,
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -551,6 +573,22 @@ class ECommerceApi {
         newPassword: customerData.newPassword.newPassword,
       }),
     });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getCart(clientDetails: IAPIClientDetails, token: string, customerId: string): Promise<ICart> {
+    const response = await fetch(
+      `${clientDetails.APIURL}/${clientDetails.projectKey}/carts/customer-id=${customerId}`,
+      {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     } else {

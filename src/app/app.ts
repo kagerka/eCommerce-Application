@@ -234,7 +234,7 @@ class App {
     if (localStorage.getItem('isAuth')) {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
-      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}:5173`);
       // for correct operation locally you need to add a port number
       // For example: ${window.location.protocol}//${window.location.hostname}:5173
 
@@ -252,7 +252,7 @@ class App {
     if (localStorage.getItem('isAuth')) {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
-      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}:5173`);
       // for correct operation locally you need to add a port number
       // For example: ${window.location.protocol}//${window.location.hostname}:5173
 
@@ -289,7 +289,7 @@ class App {
         this.setLoginBtnHref();
       }
     } else {
-      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}:5173`);
       // for correct operation locally you need to add a port number
       // For example: ${window.location.protocol}//${window.location.hostname}:5173
       this.checkBtns();
@@ -333,7 +333,7 @@ class App {
   run(): void {
     App.container.append(this.content.html);
     if (!localStorage.getItem('tokenAnonymous') && !localStorage.getItem('tokenPassword')) {
-      ECommerceApi.getAccessToken(currentClient).then((res) => {
+      ECommerceApi.getAnonymousToken(currentClient).then((res) => {
         localStorage.setItem('tokenAnonymous', res.access_token);
         Catalog.displayProducts();
         Catalog.displayCategories();

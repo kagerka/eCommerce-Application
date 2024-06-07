@@ -547,7 +547,7 @@ class RegistrationForm extends SecondAddress {
 
   private signupCustomer(customer: IRegForm): void {
     RegistrationForm.checkTokens();
-    ECommerceApi.getAccessToken(currentClient).then((res) => {
+    ECommerceApi.getAnonymousToken(currentClient).then((res) => {
       ECommerceApi.createCustomer(currentClient, res.access_token, customer)
         .then(() => {
           this.clearFields();

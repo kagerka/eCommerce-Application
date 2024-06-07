@@ -299,6 +299,14 @@ class Profile {
                 this.updateAddress(addressCard.updateBtn);
                 this.setDefaultAddress(addressCard.defaultBtn, { id, version });
                 this.removeAddressCard(addressCard.deleteBtn, { id, version });
+                addressCard.getCartBtn.view.html.addEventListener('click', () => {
+                  // const token = Profile.getTokenPassword();
+                  // if(token !== null) {
+                  // 	ECommerceApi.getCart(currentClient, token,id);
+                  // }
+                  // ECommerceApi.getTokenAnonymous(currentClient);
+                });
+
                 if (address.id === defaultBillingAddressId) {
                   addressCard.label.html.classList.add('show');
                 }
