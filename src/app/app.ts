@@ -333,7 +333,7 @@ class App {
   run(): void {
     App.container.append(this.content.html);
     if (!localStorage.getItem('tokenAnonymous') && !localStorage.getItem('tokenPassword')) {
-      ECommerceApi.getAccessToken(currentClient).then((res) => {
+      ECommerceApi.getAnonymousToken(currentClient).then((res) => {
         localStorage.setItem('tokenAnonymous', res.access_token);
         Catalog.displayProducts();
         Catalog.displayCategories();

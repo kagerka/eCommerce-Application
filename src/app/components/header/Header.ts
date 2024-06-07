@@ -250,7 +250,7 @@ class Header {
     this.logoutButton.html.addEventListener('click', (event: Event) => {
       event.preventDefault();
       if (localStorage.getItem('tokenPassword')) {
-        ECommerceApi.getAccessToken(currentClient).then((res) => {
+        ECommerceApi.getAnonymousToken(currentClient).then((res) => {
           localStorage.setItem('tokenAnonymous', res.access_token);
           localStorage.removeItem('tokenPassword');
           localStorage.removeItem('isAuth');
