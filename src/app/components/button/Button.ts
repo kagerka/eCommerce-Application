@@ -30,6 +30,10 @@ class Button {
     });
   }
 
+  addValueAttribute(style: string): void {
+    this.button.html.setAttribute('style', style);
+  }
+
   get view(): BaseComponent {
     return this.button;
   }

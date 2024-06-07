@@ -1,93 +1,67 @@
 import BaseComponent from '../../components/BaseComponent';
 import Banner from '../../components/banner/Banner';
 import './MainPage.scss';
+import image from './catalog-banner.jpg';
 
 class MainPage {
   private main: BaseComponent;
 
   private banner: Banner;
 
-  private linkContainer: BaseComponent;
+  private catalogBannerContainer: BaseComponent;
 
-  private aboutLink: BaseComponent;
+  private catalogBanner: BaseComponent;
 
-  private loginLink: BaseComponent;
+  private catalogBannerText: BaseComponent;
 
-  private registrationLink: BaseComponent;
+  private catalogBannerImage: BaseComponent;
 
   constructor() {
     this.main = MainPage.createMainContentElement();
     this.banner = new Banner();
-    this.linkContainer = MainPage.createLinksContainerElement();
-    this.aboutLink = MainPage.createLinkToAboutPageElement();
-    this.loginLink = MainPage.createLinkToLoginPageElement();
-    this.registrationLink = MainPage.createLinkToRegistrationPageElement();
+    this.catalogBannerContainer = MainPage.createCatalogBannerContainerElement();
+    this.catalogBanner = MainPage.createCatalogBannerContentElement();
+    this.catalogBannerText = MainPage.createBannerTextContentElement();
+    this.catalogBannerImage = MainPage.createBannerImageContentElement();
+
     this.composeView();
   }
 
   private composeView(): void {
-    this.main.html.append(this.banner.view.html, this.linkContainer.html);
-    this.linkContainer.html.append(this.aboutLink.html, this.loginLink.html, this.registrationLink.html);
+    this.main.html.append(this.banner.view.html, this.catalogBannerContainer.html);
+    this.catalogBannerContainer.html.append(this.catalogBanner.html);
+    this.catalogBanner.html.append(this.catalogBannerText.html, this.catalogBannerImage.html);
   }
 
   private static createMainContentElement(): BaseComponent {
     return new BaseComponent({ tag: 'main', class: ['main-content'] });
   }
 
-  private static createLinksContainerElement(): BaseComponent {
-    return new BaseComponent({ tag: 'div', class: ['links-container'] });
+  private static createCatalogBannerContainerElement(): BaseComponent {
+    return new BaseComponent({ tag: 'main', class: ['catalog-banner-container'] });
   }
 
-  private static createLinkToAboutPageElement(): BaseComponent {
+  private static createCatalogBannerContentElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
-      class: ['page-links', 'about-link'],
+      class: ['catalog-banner-content'],
       attribute: [
-        ['href', '/about'],
+        ['href', '/catalog'],
         ['data-navigo', ''],
       ],
-      text: 'About',
     });
   }
 
-  private static createLinkToLoginPageElement(): BaseComponent {
-    return new BaseComponent({
-      tag: 'a',
-      class: ['page-links', 'login-link'],
-      attribute: [
-        ['href', '/login'],
-        ['data-navigo', ''],
-      ],
-      text: 'Login',
-    });
+  private static createBannerTextContentElement(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['catalog-banner-text'], text: 'Visit our catalog' });
   }
 
-  private static createLinkToRegistrationPageElement(): BaseComponent {
-    return new BaseComponent({
-      tag: 'a',
-      class: ['page-links', 'registration-link'],
-      attribute: [
-        ['href', '/registration'],
-        ['data-navigo', ''],
-      ],
-      text: 'Registration',
-    });
+  private static createBannerImageContentElement(): BaseComponent {
+    return new BaseComponent({ tag: 'img', class: ['catalog-banner-image'], src: image });
   }
 
   get view(): BaseComponent {
     return this.main;
-  }
-
-  get loginBtn(): BaseComponent {
-    return this.loginLink;
-  }
-
-  get regBtn(): BaseComponent {
-    return this.registrationLink;
-  }
-
-  get aboutBtn(): BaseComponent {
-    return this.aboutLink;
   }
 }
 

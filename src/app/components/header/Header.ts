@@ -26,11 +26,17 @@ class Header {
 
   private homeNavListLink: BaseComponent;
 
+  private catalogNavListItem: BaseComponent;
+
+  private catalogNavListLink: BaseComponent;
+
   private aboutNavListItem: BaseComponent;
 
   public aboutNavListLink: BaseComponent;
 
   private headerButtonsContainer: BaseComponent;
+
+  private profileButton: BaseComponent;
 
   private loginButton: BaseComponent;
 
@@ -51,14 +57,18 @@ class Header {
     this.navList = Header.createNavListElement();
     this.homeNavListItem = Header.createHomeNavListItemElement();
     this.homeNavListLink = Header.createHomeNavListLinkElement();
+    this.catalogNavListItem = Header.createCatalogNavListItemElement();
+    this.catalogNavListLink = Header.createCatalogNavListLinkElement();
     this.aboutNavListItem = Header.createAboutNavListItemElement();
     this.aboutNavListLink = Header.createAboutNavListLinkElement();
 
     this.headerButtonsContainer = Header.createHeaderButtonsContainerElement();
+    this.profileButton = Header.createProfileButtonElement();
     this.loginButton = Header.createLoginButtonElement();
     this.logoutButton = Header.createLogoutButtonElement();
     this.regButton = Header.createRegistrationButtonElement();
     this.composeView();
+    this.submitProfileButton();
     this.submitLogoutButton();
   }
 
@@ -73,10 +83,16 @@ class Header {
 
     this.headerNavContainer.html.append(this.headerNav.html);
     this.headerNav.html.append(this.navList.html);
-    this.navList.html.append(this.homeNavListItem.html, this.aboutNavListItem.html);
+    this.navList.html.append(this.homeNavListItem.html, this.catalogNavListItem.html, this.aboutNavListItem.html);
     this.homeNavListItem.html.append(this.homeNavListLink.html);
+    this.catalogNavListItem.html.append(this.catalogNavListLink.html);
     this.aboutNavListItem.html.append(this.aboutNavListLink.html);
-    this.headerButtonsContainer.html.append(this.loginButton.html, this.logoutButton.html, this.regButton.html);
+    this.headerButtonsContainer.html.append(
+      this.profileButton.html,
+      this.loginButton.html,
+      this.logoutButton.html,
+      this.regButton.html,
+    );
   }
 
   private static createHeaderContainerElement(): BaseComponent {
@@ -146,6 +162,22 @@ class Header {
     });
   }
 
+  private static createCatalogNavListItemElement(): BaseComponent {
+    return new BaseComponent({ tag: 'li', class: ['nav-list-item'] });
+  }
+
+  private static createCatalogNavListLinkElement(): BaseComponent {
+    return new BaseComponent({
+      tag: 'a',
+      class: ['nav-list-link'],
+      attribute: [
+        ['href', '/catalog'],
+        ['data-navigo', ''],
+      ],
+      text: 'Catalog',
+    });
+  }
+
   private static createAboutNavListItemElement(): BaseComponent {
     return new BaseComponent({ tag: 'li', class: ['nav-list-item'] });
   }
@@ -164,6 +196,18 @@ class Header {
 
   private static createHeaderButtonsContainerElement(): BaseComponent {
     return new BaseComponent({ tag: 'div', class: ['buttons-container'] });
+  }
+
+  private static createProfileButtonElement(): BaseComponent {
+    return new BaseComponent({
+      tag: 'a',
+      class: ['profile-button', 'hide'],
+      attribute: [
+        ['href', '/profile'],
+        ['data-navigo', ''],
+      ],
+      text: 'Profile',
+    });
   }
 
   private static createLoginButtonElement(): BaseComponent {
@@ -210,13 +254,25 @@ class Header {
           localStorage.setItem('tokenAnonymous', res.access_token);
           localStorage.removeItem('tokenPassword');
           localStorage.removeItem('isAuth');
+          localStorage.removeItem('customer');
           this.loginButton.html.classList.remove('hide');
           this.loginButton.html.setAttribute('href', '/login');
           this.logoutButton.html.classList.add('hide');
+          this.profileButton.html.classList.add('hide');
           this.regButton.html.classList.remove('hide');
         });
       }
     });
+  }
+
+  private submitProfileButton(): void {
+    this.profileButton.html.addEventListener('click', (event: Event) => {
+      event.preventDefault();
+    });
+  }
+
+  get profileBtn(): BaseComponent {
+    return this.profileButton;
   }
 
   get loginBtn(): BaseComponent {

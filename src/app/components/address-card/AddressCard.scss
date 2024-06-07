@@ -1,0 +1,60 @@
+@import './../../../styles/colors.scss';
+
+.address {
+  width: 300px;
+  height: 150px;
+  border: 2px solid $green;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.btns-container {
+  margin: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.update-address-btn {
+  width: 25px;
+  height: 25px;
+  border: 0;
+  background-color: $white;
+  background-image: url('./../../../assets/images/edit.png');
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+
+.default-btn {
+  display: flex;
+  width: 50px;
+  height: 20px;
+  background: $green;
+  color: $white;
+  font-size: 12px;
+  border-radius: 5px;
+  border: 0;
+  transition: all 0.3s;
+}
+
+.default-btn:hover {
+  background: $darkGreen;
+}
+
+.delete-btn {
+  width: 25px;
+  height: 25px;
+  border: 0;
+  background-color: $white;
+  background-image: url('./../../../assets/images/delete.svg');
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
