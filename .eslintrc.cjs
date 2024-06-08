@@ -29,6 +29,7 @@ module.exports = {
     'max-len': ['error', { code: 120, ignoreStrings: true, ignoreRegExpLiterals: true }],
     'import/no-extraneous-dependencies': 0,
     'object-curly-newline': ['error', { multiline: true }],
+    'no-restricted-globals': [0, 'self'],
   },
   overrides: [
     {

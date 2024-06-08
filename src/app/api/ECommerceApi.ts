@@ -28,6 +28,26 @@ class ECommerceApi {
     }
   }
 
+  static async getAnonymousToken(clientDetails: IAPIClientDetails): Promise<ITokenPassword> {
+    const uniqueId = self.crypto.randomUUID();
+    const basicAuthData = btoa(`${clientDetails.clientId}:${clientDetails.secret}`);
+    const scope = 'view_products:tea-team-app manage_my_orders:tea-team-app manage_my_profile:tea-team-app';
+    const response = await fetch(`${clientDetails.AuthURL}/oauth/${clientDetails.projectKey}/anonymous/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${basicAuthData}`,
+      },
+      body: `grant_type=client_credentials&scope=${scope}&anonymous_id=${uniqueId}`,
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
   static async getTokenPassword(
     clientDetails: IAPIClientDetails,
     data: { email: string; password: string },
