@@ -497,6 +497,8 @@ class Products {
     productDiscount: number,
     formattedDiscount: string,
   ): void {
+    const cartBtn = new BaseComponent({ tag: 'button', class: ['product-cart-button'] });
+
     const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });
     const infoContainer = new BaseComponent({ tag: 'div', class: ['info-container'] });
     const img = new BaseComponent({ tag: 'img', class: ['product-img'], src: productImage });
@@ -506,7 +508,7 @@ class Products {
     const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: priceText });
     const description = new BaseComponent({ tag: 'p', class: ['product-description'], text: productDescription });
     const productLink = this.createProductListener(id, link);
-    productCard.html.append(productLink.html);
+    productCard.html.append(cartBtn.html, productLink.html);
     productLink.html.append(imgContainer.html, infoContainer.html);
     imgContainer.html.append(img.html);
     infoContainer.html.append(title.html, priceContainer.html, description.html);
