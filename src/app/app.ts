@@ -14,6 +14,7 @@ import NotFound from './pages/notFound/NotFound';
 import Product from './pages/product/Product';
 import Profile from './pages/profile/Profile';
 import Registration from './pages/registation/Registration';
+// import getTokenAnonymousFromStorage from './utils/localStorage/getTokenAnonymousFromStorage';
 
 const EMPTY_ARR_LENGTH = 0;
 const SINGLE = 1;
@@ -234,7 +235,7 @@ class App {
     if (localStorage.getItem('isAuth')) {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
-      window.location.assign(`${window.location.protocol}//${window.location.hostname}:5173`);
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
       // for correct operation locally you need to add a port number
       // For example: ${window.location.protocol}//${window.location.hostname}:5173
 
@@ -252,7 +253,7 @@ class App {
     if (localStorage.getItem('isAuth')) {
       this.pageContent.html.innerHTML = '';
       this.pageContent.html.append(this.mainPage.view.html);
-      window.location.assign(`${window.location.protocol}//${window.location.hostname}:5173`);
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
       // for correct operation locally you need to add a port number
       // For example: ${window.location.protocol}//${window.location.hostname}:5173
 
@@ -289,7 +290,7 @@ class App {
         this.setLoginBtnHref();
       }
     } else {
-      window.location.assign(`${window.location.protocol}//${window.location.hostname}:5173`);
+      window.location.assign(`${window.location.protocol}//${window.location.hostname}`);
       // for correct operation locally you need to add a port number
       // For example: ${window.location.protocol}//${window.location.hostname}:5173
       this.checkBtns();
@@ -337,6 +338,7 @@ class App {
         localStorage.setItem('tokenAnonymous', res.access_token);
         Catalog.displayProducts();
         Catalog.displayCategories();
+        ECommerceApi.createCart(currentClient, res.access_token);
       });
     }
     Catalog.displayProducts();

@@ -26,8 +26,6 @@ class AddressCard {
 
   private deleteButton: Button;
 
-  private getCartButton: Button;
-
   constructor() {
     this.address = AddressCard.createAddressElement();
     this.countryContainer = AddressCard.createCountryContainerElement();
@@ -40,7 +38,6 @@ class AddressCard {
     this.editButton = AddressCard.createEditBtnElement();
     this.defaultButton = AddressCard.createDefaultBtnElement();
     this.deleteButton = AddressCard.createDeleteBtnElement();
-    this.getCartButton = AddressCard.createGetCartBtnElement();
     this.composeView();
   }
 
@@ -49,7 +46,6 @@ class AddressCard {
       this.editButton.view.html,
       this.defaultButton.view.html,
       this.deleteButton.view.html,
-      this.getCartButton.view.html,
     );
     this.countryContainer.html.append(this.countryName.html, this.labelBlock.html);
     this.address.html.append(
@@ -105,10 +101,6 @@ class AddressCard {
     return new Button({ type: 'button', class: ['delete-btn'] });
   }
 
-  private static createGetCartBtnElement(): Button {
-    return new Button({ type: 'button', class: ['get-cart-btn'] });
-  }
-
   public get country(): BaseComponent {
     return this.countryName;
   }
@@ -139,10 +131,6 @@ class AddressCard {
 
   public get deleteBtn(): Button {
     return this.deleteButton;
-  }
-
-  public get getCartBtn(): Button {
-    return this.getCartButton;
   }
 
   public get cardContainer(): BaseComponent {

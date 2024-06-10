@@ -1,6 +1,6 @@
-import { sportStore } from './api-clients';
-// import { ecommerceApi } from './api-clients';
+// import { sportStore } from './api-clients';
+import { sportShop } from './api-clients';
 
-const currentClient = sportStore;
+const currentClient = sportShop;
 
 export default currentClient;
