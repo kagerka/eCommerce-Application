@@ -17,6 +17,8 @@ class BaseComponent {
     this.addText();
     this.addLink();
     this.addAltName();
+    this.addTarget();
+    this.addHref();
   }
 
   protected addClass(): void {
@@ -56,6 +58,18 @@ class BaseComponent {
   protected addAltName(): void {
     if ('alt' in this.element) {
       this.element.alt = this.options.alt;
+    }
+  }
+
+  protected addTarget(): void {
+    if ('target' in this.element && this.options.target) {
+      this.element.target = this.options.target;
+    }
+  }
+
+  protected addHref(): void {
+    if ('href' in this.element && this.options.href) {
+      this.element.href = this.options.href;
     }
   }
 

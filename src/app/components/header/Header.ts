@@ -190,7 +190,7 @@ class Header {
         ['href', '/about'],
         ['data-navigo', ''],
       ],
-      text: 'About',
+      text: 'About Us',
     });
   }
 

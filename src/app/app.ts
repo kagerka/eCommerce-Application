@@ -135,7 +135,7 @@ class App {
     this.router
       .on('/about', () => {
         this.onAbout();
-        this.checkBreadcrumbs(['Home', 'About']);
+        this.checkBreadcrumbs(['Home', 'About Us']);
       })
       .on('/login', () => {
         this.onLogin();
