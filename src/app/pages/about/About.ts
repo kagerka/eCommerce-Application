@@ -39,8 +39,6 @@ class About {
 
   private rsLink: BaseComponent;
 
-  private rsLogo: BaseComponent;
-
   private collabInfo: BaseComponent;
 
   constructor() {
@@ -48,7 +46,6 @@ class About {
     this.headingMembers = About.createHeadingMembers();
     this.headingCollab = About.createHeadingCollab();
     this.rsLink = About.createRSLink();
-    this.rsLogo = About.createRSLogo();
     this.collabInfo = About.createCollabInfo();
 
     this.composeView();
@@ -61,7 +58,6 @@ class About {
       this.aboutContent.html.append(member.html);
     }
     this.aboutContent.html.append(this.headingCollab.html, this.collabInfo.html, this.rsLink.html);
-    this.rsLink.html.append(this.rsLogo.html);
   }
 
   private static createAboutContentElement(): BaseComponent {
@@ -88,10 +84,6 @@ class About {
     return new BaseComponent({ tag: 'a', target: '_blank', class: ['rs-link'], href: 'https://rs.school/' });
   }
 
-  private static createRSLogo(): BaseComponent {
-    return new BaseComponent({ tag: 'img', class: ['rs-logo'], src: '/src/assets/images/rs-logo.svg', alt: 'rs-logo' });
-  }
-
   private static createMemberCard(i: number): BaseComponent {
     const cardConteiner = new BaseComponent({ tag: 'div', class: ['member-card-conteiner'] });
     const imgConteiner = new BaseComponent({ tag: 'div', class: ['member-img-conteiner'] });
@@ -108,12 +100,7 @@ class About {
       class: ['git-link'],
       href: teamMembers[i].gitLink,
     });
-    const gitIcon = new BaseComponent({
-      tag: 'img',
-      class: ['git-icon'],
-      src: '/src/assets/images/git-icon.svg',
-      alt: 'rs-logo',
-    });
+
     const name = new BaseComponent({ tag: 'h4', class: ['member-name'], text: teamMembers[i].name });
     const position = new BaseComponent({ tag: 'p', class: ['member-info'], text: teamMembers[i].position });
     const bioTitle = new BaseComponent({ tag: 'h5', class: ['member-title'], text: 'Bio' });
@@ -132,7 +119,7 @@ class About {
       contributionTitle.html,
       contributionInfo.html,
     );
-    gitLink.html.append(gitIcon.html);
+
     return cardConteiner;
   }
 
