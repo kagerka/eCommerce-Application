@@ -5,7 +5,6 @@ const teamMembers = [
   {
     name: 'Ekaterina Kotliarenko',
     position: 'Frontend Developer | Team Lead',
-    photo: '',
     gitLink: 'https://github.com/kagerka',
     bio: 'Here should be short bio',
     contribution: 'Here should be written about your contribution to the project',
@@ -13,7 +12,6 @@ const teamMembers = [
   {
     name: 'Aleksandr Krivoshein',
     position: 'Frontend Developer',
-    photo: '',
     gitLink: 'https://github.com/Wood85',
     bio: 'Here should be short bio',
     contribution: 'Here should be written about your contribution to the project',
@@ -21,7 +19,6 @@ const teamMembers = [
   {
     name: 'Tatiana Buinitskaya',
     position: 'Frontend Developer',
-    photo: '/src/assets/images/tanya.jpg',
     gitLink: 'https://github.com/Tanesha001',
     bio: 'Here should be short bio',
     contribution: 'Here should be written about your contribution to the project',
@@ -86,13 +83,7 @@ class About {
 
   private static createMemberCard(i: number): BaseComponent {
     const cardConteiner = new BaseComponent({ tag: 'div', class: ['member-card-conteiner'] });
-    const imgConteiner = new BaseComponent({ tag: 'div', class: ['member-img-conteiner'] });
-    const memberImg = new BaseComponent({
-      tag: 'img',
-      class: ['member-img'],
-      src: teamMembers[i].photo,
-      alt: 'member',
-    });
+    const imgConteiner = new BaseComponent({ tag: 'div', class: ['member-img-conteiner', `member-img-${i}`] });
     const infoConteiner = new BaseComponent({ tag: 'div', class: ['member-info-conteiner'] });
     const gitLink = new BaseComponent({
       tag: 'a',
@@ -109,7 +100,6 @@ class About {
     const contributionInfo = new BaseComponent({ tag: 'p', class: ['member-info'], text: teamMembers[i].contribution });
 
     cardConteiner.html.append(imgConteiner.html, infoConteiner.html);
-    imgConteiner.html.append(memberImg.html);
     infoConteiner.html.append(
       gitLink.html,
       name.html,
