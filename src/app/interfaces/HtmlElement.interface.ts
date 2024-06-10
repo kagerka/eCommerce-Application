@@ -6,6 +6,8 @@ export interface IHtmlElement {
   src?: string;
   alt?: string;
   id?: string;
+  target?: string;
+  href?: string;
   class?: string[];
   style?: string;
   attribute?: AttributeType[];

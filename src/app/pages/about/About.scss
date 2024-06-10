@@ -12,3 +12,122 @@
 .heading {
   text-align: center;
 }
+
+.member-img {
+  width: 30%;
+}
+
+.rs-link {
+  width: 20%;
+  align-self: center;
+  margin: 8% 0 3%;
+}
+
+.member-title {
+  font-size: 1rem;
+}
+
+.member-name {
+  font-size: 1.2rem;
+  line-height: 0;
+}
+
+.member-info {
+  font-weight: 500;
+  color: #8d8686;
+}
+
+.member-card-conteiner {
+  display: flex;
+  border: 2px solid $lightGray;
+  border-radius: 10px;
+  padding: 2%;
+}
+
+.member-img-conteiner {
+  width: 25%;
+  margin-right: 5%;
+  height: 95%;
+  overflow: hidden;
+  justify-self: center;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+}
+
+.member-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.member-info-conteiner {
+  width: 70%;
+  position: relative;
+}
+
+.git-link {
+  position: absolute;
+  width: 6%;
+  top: 2%;
+  right: 2%;
+  transition-duration: 0.5s;
+}
+
+.git-link:hover {
+  width: 7%;
+}
+
+.git-icon {
+  width: 100%;
+}
+
+.heading {
+  font-size: 2rem;
+  color: $green;
+  margin-bottom: 0;
+}
+
+.collab-info {
+  font-weight: 500;
+  color: #8d8686;
+  font-size: 1.3rem;
+}
+
+@media screen and (max-width: 830px) {
+  .member-img-conteiner {
+    width: 40%;
+  }
+
+  .member-info-conteiner {
+    width: 60%;
+  }
+
+  .git-link {
+    width: 9%;
+  }
+
+  .git-link:hover {
+    width: 10%;
+  }
+}
+
+@media screen and (max-width: 660px) {
+  .member-card-conteiner {
+    flex-direction: column;
+    height: min-content;
+  }
+
+  .member-img-conteiner {
+    width: 100%;
+    height: 80vw;
+    margin-right: 0;
+  }
+
+  .member-info-conteiner {
+    width: 100%;
+    margin: 3% 0;
+  }
+}
