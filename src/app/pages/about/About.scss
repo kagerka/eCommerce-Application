@@ -12,3 +12,140 @@
 .heading {
   text-align: center;
 }
+
+.member-img {
+  width: 30%;
+}
+
+.rs-link {
+  width: 14vw;
+  height: 8vw;
+  align-self: center;
+  margin: 8% 0 3%;
+  background-image: url('/src/assets/images/rs-logo.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.member-title {
+  font-size: 1rem;
+}
+
+.member-name {
+  font-size: 1.2rem;
+  line-height: 0;
+}
+
+.member-info {
+  font-weight: 500;
+  color: #8d8686;
+}
+
+.member-card-conteiner {
+  display: flex;
+  border: 2px solid $lightGray;
+  border-radius: 10px;
+  padding: 2%;
+  min-height: 21vw;
+}
+
+.member-img-conteiner {
+  width: 25%;
+  margin-right: 5%;
+  height: 100%;
+  overflow: hidden;
+  justify-self: center;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.member-img-2 {
+  background-image: url('/src/assets/images/tanya.jpg');
+}
+
+.member-info-conteiner {
+  width: 70%;
+  position: relative;
+}
+
+.git-link {
+  position: absolute;
+  width: 3vw;
+  height: 3vw;
+  top: 2%;
+  right: 2%;
+  transition-duration: 0.5s;
+  background-image: url('/src/assets/images/git-icon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.git-link:hover {
+  width: 4vw;
+  height: 4vw;
+}
+
+.heading {
+  font-size: 2rem;
+  color: $green;
+  margin-bottom: 0;
+}
+
+.collab-info {
+  font-weight: 500;
+  color: #8d8686;
+  font-size: 1.3rem;
+}
+
+@media screen and (max-width: 830px) {
+  .member-img-conteiner {
+    width: 40%;
+  }
+
+  .member-info-conteiner {
+    width: 60%;
+  }
+
+  .git-link {
+    width: 5vw;
+    height: 5vw;
+  }
+
+  .git-link:hover {
+    width: 6vw;
+    height: 6vw;
+  }
+}
+
+@media screen and (max-width: 660px) {
+  .member-card-conteiner {
+    flex-direction: column;
+    height: min-content;
+  }
+
+  .member-img-conteiner {
+    width: 100%;
+    height: 80vw;
+    margin-right: 0;
+  }
+
+  .member-info-conteiner {
+    width: 100%;
+    margin: 3% 0;
+  }
+
+  .git-link {
+    width: 10vw;
+    height: 10vw;
+  }
+
+  .git-link:hover {
+    width: 11vw;
+    height: 11vw;
+  }
+}
