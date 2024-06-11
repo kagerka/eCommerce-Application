@@ -7,7 +7,7 @@ import Button from '../button/Button';
 import Input from '../input/Input';
 import './Products.scss';
 
-const iteratorStep = 1;
+const step = 1;
 const cents = 100;
 const minValue = 0;
 const toHundredths = 2;
@@ -137,7 +137,7 @@ class Products {
 
       (Products.searchInput.view.html as HTMLInputElement).value = '';
 
-      for (let i = 0; i < subcategory.length; i += iteratorStep) {
+      for (let i = 0; i < subcategory.length; i += step) {
         ECommerceApi.getSelectedProducts(currentClient, token, subcategory[i].id).then((resp) => {
           Products.resetCategoriesClass();
           Products.resetPriceRange();
@@ -159,7 +159,7 @@ class Products {
     const maxPrice = document.getElementsByClassName('max-price')[0];
     const filterBar = document.getElementsByClassName('filter-range-bar')[0] as HTMLElement;
 
-    for (let i = 0; i < subcategory.length; i += iteratorStep) {
+    for (let i = 0; i < subcategory.length; i += step) {
       filterMin.style.left = '0%';
       filterMax.style.left = '95%';
       minPrice.textContent = `${minValue}$`;
@@ -172,7 +172,7 @@ class Products {
   static resetCategoriesClass(): void {
     const subcategory = document.getElementsByClassName('subcategory');
     const category = document.getElementsByClassName('category');
-    for (let i = 0; i < subcategory.length; i += iteratorStep) {
+    for (let i = 0; i < subcategory.length; i += step) {
       category[i]?.classList.remove('active');
       subcategory[i].classList.remove('active');
     }
@@ -184,7 +184,7 @@ class Products {
       const productsJSON = localStorage.getItem('products');
       const products = JSON.parse(productsJSON!);
 
-      for (let i = 0; i <= products.length - iteratorStep; i += iteratorStep) {
+      for (let i = 0; i <= products.length - step; i += step) {
         productCards.push(Products.createProductCard(i, fullData));
       }
     }
@@ -197,7 +197,7 @@ class Products {
       const categoriesJSON = localStorage.getItem('categories');
       const categories = JSON.parse(categoriesJSON!).results;
 
-      for (let i = 0; i < categories.length - iteratorStep; i += iteratorStep) {
+      for (let i = 0; i < categories.length - step; i += step) {
         const categoryComponent = Products.createCategory(i);
         if (categoryComponent !== null) {
           categoryCards.push(categoryComponent);
@@ -497,7 +497,9 @@ class Products {
     productDiscount: number,
     formattedDiscount: string,
   ): void {
-    const cartBtn = new BaseComponent({ tag: 'button', class: ['product-cart-button'] });
+    const cartBtn = new BaseComponent({ tag: 'button', class: ['product-cart-button'], id: `${id}` });
+
+    Products.handleCartButton(cartBtn);
 
     const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });
     const infoContainer = new BaseComponent({ tag: 'div', class: ['info-container'] });
@@ -519,6 +521,25 @@ class Products {
       priceContainer.html.append(discount.html);
       price.html.classList.add('crossed');
     }
+  }
+
+  private static handleCartButton(cartBtn: BaseComponent): void {
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+
+    cartBtn.html.addEventListener('click', () => {
+      ECommerceApi.getHasCart(currentClient, token!).then((data) => {
+        if (!data) {
+          ECommerceApi.createCart(currentClient, token!).then((response) => {
+            localStorage.setItem('cart', response.id);
+            ECommerceApi.addItemToCart(currentClient, token!, response.id, cartBtn.html.id);
+          });
+        }
+      });
+      const cartId = localStorage.getItem('cart');
+      if (cartId) {
+        ECommerceApi.addItemToCart(currentClient, token!, cartId, cartBtn.html.id);
+      }
+    });
   }
 
   private static createProductCard(cardNumber: number, fullData: boolean): BaseComponent {
@@ -744,7 +765,7 @@ class Products {
       const target = e.target as HTMLElement;
       localStorage.setItem('currentCategoryID', target.id);
 
-      for (let i = 0; i < els.length; i += iteratorStep) {
+      for (let i = 0; i < els.length; i += step) {
         if (
           els[i].className === `subcategory ${pathPart.id}` ||
           els[i].className === `subcategory ${pathPart.id} active`
@@ -762,10 +783,10 @@ class Products {
 
   public static addPrice(): boolean {
     let country;
-    if (localStorage.getItem('customer') !== null) {
+    if (!localStorage.getItem('customer')) {
       const customerJSON = localStorage.getItem('customer');
       const customer = JSON.parse(customerJSON!);
-      if (customer.addresses[0].country === 'RU') {
+      if (customer && customer.addresses[0].country === 'RU') {
         country = true;
       } else {
         country = false;

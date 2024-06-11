@@ -18,6 +18,7 @@ import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
 import Input from '../input/Input';
 import Products from '../products/Products';
+
 import './LoginForm.scss';
 
 class LoginForm {
@@ -404,6 +405,7 @@ class LoginForm {
               }
               this.clearFields();
               localStorage.setItem('tokenPassword', res.access_token);
+
               ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
                 window.history.pushState({}, '', '/');
                 this.loginButton.view.html.setAttribute('login-success', 'true');

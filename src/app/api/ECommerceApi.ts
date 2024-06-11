@@ -589,7 +589,6 @@ class ECommerceApi {
       },
     );
     if (!response.ok) {
-      // throw new Error(`HTTP error! status: ${response.status}`);
       return 'cart for this customer does not exist';
     }
     return response.json();
@@ -612,6 +611,26 @@ class ECommerceApi {
     }
   }
 
+  static async getHasCart(clientDetails: IAPIClientDetails, token: string): Promise<boolean> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const data = await response.json();
+
+    if (!data.results[0]) {
+      return false;
+    }
+    return true;
+  }
+
   static async checkCartExistsByCustomerID(
     clientDetails: IAPIClientDetails,
     token: string,
@@ -627,6 +646,37 @@ class ECommerceApi {
       const json = await response.json();
       return json;
     }
+  }
+
+  static async addItemToCart(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    cartId: string,
+    itemId: string,
+  ): Promise<void> {
+    fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        version: 1,
+        actions: [
+          {
+            action: 'addLineItem',
+            productId: itemId,
+            variantId: 1,
+            quantity: 1,
+          },
+        ],
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    });
   }
 }
 

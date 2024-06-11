@@ -254,6 +254,7 @@ class Header {
           localStorage.setItem('tokenAnonymous', res.access_token);
           localStorage.removeItem('tokenPassword');
           localStorage.removeItem('isAuth');
+          localStorage.removeItem('cart');
           localStorage.removeItem('customer');
           this.loginButton.html.classList.remove('hide');
           this.loginButton.html.setAttribute('href', '/login');

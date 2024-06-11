@@ -39,9 +39,7 @@ class Catalog {
   }
 
   static async displayProducts(): Promise<void> {
-    const token = localStorage.getItem('tokenPassword')
-      ? localStorage.getItem('tokenPassword')
-      : localStorage.getItem('tokenAnonymous');
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
     if (token) {
       try {
         const res = await ECommerceApi.getProducts(currentClient, token);

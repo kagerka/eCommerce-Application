@@ -279,10 +279,10 @@ class App {
         this.profilePage.dateOfBirth.html.textContent = customer.dateOfBirth;
         this.profilePage.email.html.textContent = customer.email;
         if (customer.shippingAddressIds.length === EMPTY_ARR_LENGTH) {
-          customer.shippingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE].id);
+          customer.shippingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE]?.id);
         }
         if (customer.billingAddressIds.length === EMPTY_ARR_LENGTH) {
-          customer.billingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE].id);
+          customer.billingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE]?.id);
         }
         localStorage.setItem('customer', JSON.stringify(customer));
         this.profilePage.rerenderAllAddresses();
@@ -338,7 +338,6 @@ class App {
         localStorage.setItem('tokenAnonymous', res.access_token);
         Catalog.displayProducts();
         Catalog.displayCategories();
-        ECommerceApi.createCart(currentClient, res.access_token);
       });
     }
     Catalog.displayProducts();
