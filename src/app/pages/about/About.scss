@@ -64,6 +64,10 @@
   background-repeat: no-repeat;
 }
 
+.member-img-0 {
+  background-image: url('/src/assets/images/katya.jpg');
+}
+
 .member-img-2 {
   background-image: url('/src/assets/images/tanya.jpg');
 }
@@ -100,6 +104,11 @@
   font-weight: 500;
   color: #8d8686;
   font-size: 1.3rem;
+}
+
+.task-board-image {
+  margin-top: 10px;
+  width: 100%;
 }
 
 @media screen and (max-width: 830px) {
