@@ -65,11 +65,13 @@
 }
 
 .member-img-0 {
-  background-image: url('/src/assets/images/katya.jpg');
+  background: url('/src/assets/images/katya.jpg') no-repeat center 0% / 100%;
+  background-size: cover;
 }
 
 .member-img-2 {
   background-image: url('/src/assets/images/tanya.jpg');
+  background-size: cover;
 }
 
 .member-info-conteiner {
