@@ -38,6 +38,7 @@
 }
 
 .products-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 75%;
@@ -263,7 +264,8 @@
   padding: 0;
 }
 
-.reset-button {
+.reset-button,
+.load-more-button {
   width: 120px;
   border-radius: 5px;
   background-color: #46a358;
@@ -285,6 +287,10 @@
   &:hover {
     background-color: $darkGreen;
   }
+}
+
+.load-more-button {
+  width: 100%;
 }
 
 .prices-conteiner {
