@@ -186,13 +186,6 @@ class App {
     this.setLoginBtnHref();
   }
 
-  private onCart(): void {
-    this.pageContent.html.innerHTML = '';
-    this.pageContent.html.append(this.cartPage.view.html);
-    this.checkBtns();
-    this.setLoginBtnHref();
-  }
-
   private onAbout(): void {
     this.pageContent.html.innerHTML = '';
     this.pageContent.html.append(this.aboutPage.view.html);
@@ -217,6 +210,13 @@ class App {
   private onCatalog(): void {
     this.pageContent.html.innerHTML = '';
     this.pageContent.html.append(this.catalogPage.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
+  }
+
+  private onCart(): void {
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(this.cartPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
   }
@@ -350,12 +350,14 @@ class App {
     if (!localStorage.getItem('tokenAnonymous') && !localStorage.getItem('tokenPassword')) {
       ECommerceApi.getAnonymousToken(currentClient).then((res) => {
         localStorage.setItem('tokenAnonymous', res.access_token);
-        Catalog.displayProducts();
+        Catalog.displayBrands();
         Catalog.displayCategories();
+        Catalog.displayCatalog();
       });
     }
-    Catalog.displayProducts();
+    Catalog.displayBrands();
     Catalog.displayCategories();
+    Catalog.displayCatalog();
     this.createRouter();
   }
 }
