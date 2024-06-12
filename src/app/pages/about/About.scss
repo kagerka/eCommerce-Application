@@ -39,6 +39,7 @@
 .member-info {
   font-weight: 500;
   color: #8d8686;
+  line-height: 1.4rem;
 }
 
 .member-card-conteiner {
@@ -46,7 +47,7 @@
   border: 2px solid $lightGray;
   border-radius: 10px;
   padding: 2%;
-  min-height: 21vw;
+  min-height: 28vw;
 }
 
 .member-img-conteiner {
@@ -92,8 +93,8 @@
 }
 
 .git-link:hover {
-  width: 4vw;
-  height: 4vw;
+  width: 3.3vw;
+  height: 3.3vw;
 }
 
 .heading {
@@ -113,7 +114,7 @@
   width: 100%;
 }
 
-@media screen and (max-width: 830px) {
+@media screen and (max-width: 1180px) {
   .member-img-conteiner {
     width: 40%;
   }
@@ -133,7 +134,7 @@
   }
 }
 
-@media screen and (max-width: 660px) {
+@media screen and (max-width: 830px) {
   .member-card-conteiner {
     flex-direction: column;
     height: min-content;

@@ -25,8 +25,9 @@ const teamMembers = [
     name: 'Tatiana Buinitskaya',
     position: 'Frontend Developer',
     gitLink: 'https://github.com/Tanesha001',
-    bio: 'Here should be short bio',
-    contribution: 'Here should be written about your contribution to the project',
+    bio: "I'm from Belarus, Minsk. Graduated Economic University in 2022 and started looking for myself, this path led me to RS School. I'm impressed by the school's approach and interesting tasks and hope to change my job in the hotel in the nearest future.",
+    contribution:
+      "I was working with API, website design (especially on the catalog page), implementing features, maintaining the project's vision.",
   },
 ];
 
