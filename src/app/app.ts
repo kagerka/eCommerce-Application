@@ -335,12 +335,14 @@ class App {
     if (!localStorage.getItem('tokenAnonymous') && !localStorage.getItem('tokenPassword')) {
       ECommerceApi.getAnonymousToken(currentClient).then((res) => {
         localStorage.setItem('tokenAnonymous', res.access_token);
-        Catalog.displayProducts();
+        Catalog.displayBrands();
         Catalog.displayCategories();
+        Catalog.displayCatalog();
       });
     }
-    Catalog.displayProducts();
+    Catalog.displayBrands();
     Catalog.displayCategories();
+    Catalog.displayCatalog();
     this.createRouter();
   }
 }
