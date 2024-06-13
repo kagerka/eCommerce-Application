@@ -29,7 +29,6 @@ type TProductDetails = {
   images: IProductImages[];
   formattedPrice: string;
   formattedDiscount: string;
-  currencySymbol: string;
   productDiscount: number;
   brand: string;
   sizes: string[];
@@ -74,7 +73,6 @@ class Product {
     images: IProductImages[],
     formattedPrice: string,
     formattedDiscount: string,
-    currencySymbol: string,
     productDiscount: number,
     brand: string,
     sizes: string[],
@@ -89,12 +87,7 @@ class Product {
     Product.productImagesSelectedContent = Product.createProductImagesSelectedContentElement();
     this.productInfoContent = Product.createProductInfoContentElement();
     this.productName = Product.createProductNameContainerElement(name);
-    this.productPrice = Product.createProductPriceContainerElement(
-      formattedPrice,
-      formattedDiscount,
-      currencySymbol,
-      productDiscount,
-    );
+    this.productPrice = Product.createProductPriceContainerElement(formattedPrice, formattedDiscount, productDiscount);
     this.productDescription = Product.createProductDescriptionContainerElement(description);
     this.productBrand = Product.createProductBrandContainerElement(brand);
     this.productSizes = Product.createProductSizeContainerElement(sizes);
@@ -373,15 +366,14 @@ class Product {
   private static createProductPriceContainerElement(
     formattedPrice: string,
     formattedDiscount: string,
-    currencySymbol: string,
     productDiscount: number,
   ): BaseComponent {
     const priceContainer = new BaseComponent({ tag: 'div', class: ['product-page-price-container'] });
-    const priceText = `${formattedPrice} ${currencySymbol}`;
+    const priceText = `${formattedPrice} $`;
     const price = new BaseComponent({ tag: 'h4', class: ['product-page-price'], text: priceText });
     priceContainer.html.append(price.html);
     if (productDiscount) {
-      const discountText = `${formattedDiscount} ${currencySymbol}`;
+      const discountText = `${formattedDiscount} $`;
       const discount = new BaseComponent({ tag: 'h4', class: ['product-page-discount'], text: discountText });
       priceContainer.html.append(discount.html);
       price.html.classList.add('crossed');
@@ -497,7 +489,6 @@ class Product {
     const prices = getPrices(product);
     const { formattedPrice } = prices;
     const { formattedDiscount } = prices;
-    const { currencySymbol } = prices;
     const { productDiscount } = prices;
     const bedrooms = getBedrooms(variants, attributes);
     const persons = getPersons(variants, attributes);
@@ -508,7 +499,6 @@ class Product {
       images,
       formattedPrice,
       formattedDiscount,
-      currencySymbol,
       productDiscount,
       brand,
       sizes,

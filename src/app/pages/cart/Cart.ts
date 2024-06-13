@@ -1,24 +1,142 @@
 import BaseComponent from '../../components/BaseComponent';
+import Input from '../../components/input/Input';
 import './Cart.scss';
 
-class Cart {
-  private cartContent: BaseComponent;
+const step = 1;
+const cartItemsNum = 2;
 
-  private emptyCart: BaseComponent;
+class Cart {
+  private cart: BaseComponent;
+
+  static cartContent: BaseComponent;
+
+  static emptyCart: BaseComponent;
+
+  static fullCart: BaseComponent;
 
   constructor() {
-    this.cartContent = Cart.createCartContentElement();
-    this.emptyCart = Cart.createEmptyCart();
-
-    this.composeView();
+    Cart.cartContent = Cart.createCartContentElement();
+    Cart.fullCart = Cart.createFullCart();
+    Cart.emptyCart = Cart.createEmptyCart();
+    this.cart = Cart.createCart();
+    this.cart.append(Cart.composeView().html);
   }
 
-  private composeView(): void {
-    this.cartContent.html.append(this.emptyCart.html);
+  private static composeView(): BaseComponent {
+    // this.cartContent.html.append(Cart.emptyCart.html);
+    Cart.cartContent.html.append(Cart.fullCart.html);
+    return Cart.cartContent;
+  }
+
+  private static createCart(): BaseComponent {
+    return new BaseComponent({ tag: 'div', class: ['cart'] });
   }
 
   private static createCartContentElement(): BaseComponent {
     return new BaseComponent({ tag: 'div', class: ['cart-content'] });
+  }
+
+  private static createFullCart(): BaseComponent {
+    const fullCart = new BaseComponent({ tag: 'div', class: ['full-cart'] });
+    const cartTop = new BaseComponent({ tag: 'div', class: ['cart-top'] });
+    const cartProductsConteiner = new BaseComponent({ tag: 'ul', class: ['cart-itms-conteiner'] });
+    const priceConteiner = new BaseComponent({ tag: 'div', class: ['price-conteiner'] });
+    const emptyButton = new BaseComponent({ tag: 'button', class: ['empty-button'], text: 'Empty Cart' });
+    const proceedButton = new BaseComponent({ tag: 'button', class: ['proceed-button'], text: 'Proceed To Checkout' });
+    const promoConteiner = new BaseComponent({ tag: 'div', class: ['promo-conteiner'] });
+    const promoInput = new Input({ type: 'text', class: ['promo-input'], placeholder: 'Promo Code...' });
+    const promoBtn = new BaseComponent({ tag: 'button', class: ['promo-button'], text: 'Apply' });
+    const totalConteiner = new BaseComponent({ tag: 'div', class: ['total-conteiner'] });
+    const totalTitle = new BaseComponent({ tag: 'h4', class: ['total-title'], text: 'Total:' });
+    const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: '300,00 $' });
+
+    Cart.handleEmptyCartBtnClick(emptyButton);
+
+    fullCart.html.append(cartTop.html, emptyButton.html);
+    cartTop.html.append(cartProductsConteiner.html, priceConteiner.html);
+    priceConteiner.html.append(promoConteiner.html, totalConteiner.html, proceedButton.html);
+    promoConteiner.html.append(promoInput.view.html, promoBtn.html);
+    totalConteiner.html.append(totalTitle.html, totalPrice.html);
+
+    for (let i = 0; i < cartItemsNum; i += step) {
+      const cartProduct = this.createCartItem();
+      cartProductsConteiner.html.append(cartProduct.html);
+    }
+    return fullCart;
+  }
+
+  private static createCartItem(): BaseComponent {
+    const productDiscount = true;
+
+    const cartProduct = new BaseComponent({ tag: 'li', class: ['cart-itm'] });
+    const imgContainer = new BaseComponent({ tag: 'div', class: ['cart-itm-img-container'] });
+    const infoContainer = new BaseComponent({ tag: 'div', class: ['cart-itm-info-container'] });
+    const img = new BaseComponent({
+      tag: 'img',
+      class: ['cart-itm-img'],
+      src: 'https://i5.walmartimages.com/seo/2-Person-Dome-Tent-with-Rain-Fly-Carry-Bag-by-Wakeman-Outdoors_652db343-fb36-48ed-a9e6-bcd845268fd7_1.fdcf52e470534e424578bb10a0e7c66f.jpeg',
+    });
+    const titleConteiner = new BaseComponent({ tag: 'div', class: ['title-conteiner'] });
+    const title = new BaseComponent({
+      tag: 'h3',
+      class: ['product-title'],
+      text: 'Camping tent - 2 SECONDS XL - 3 Person - Fresh & Black',
+    });
+    const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: '150.00 $' });
+    if (productDiscount) {
+      price.html.textContent = '110.00 $';
+    }
+    const qConteiner = new BaseComponent({ tag: 'div', class: ['quantity-container'] });
+    const qMinus = new BaseComponent({ tag: 'button', class: ['quantity-minus'], text: '-' });
+    const qValue = new BaseComponent({ tag: 'p', class: ['quantity-value'], text: '1' });
+    const qPlus = new BaseComponent({ tag: 'button', class: ['quantity-plus'], text: '+' });
+    const deleteItmBtn = new BaseComponent({ tag: 'div', class: ['delete-btn'] });
+    const totalConteiner = new BaseComponent({ tag: 'div', class: ['total-itm-conteiner'] });
+    const totalTitle = new BaseComponent({ tag: 'div', class: ['total-itm-title'], text: `Total: ` });
+    const totalPrice = new BaseComponent({ tag: 'div', class: ['total-itm-price'], text: `${price.html.textContent}` });
+
+    Cart.handleMinus(qMinus, qValue);
+    Cart.handlePlus(qPlus, qValue);
+    Cart.handleDeleteItmBtnClick(deleteItmBtn, cartProduct);
+
+    cartProduct.html.append(imgContainer.html, infoContainer.html);
+    imgContainer.html.append(img.html);
+
+    infoContainer.html.append(titleConteiner.html, price.html, qConteiner.html, totalConteiner.html);
+    titleConteiner.html.append(title.html, deleteItmBtn.html);
+    totalConteiner.html.append(totalTitle.html, totalPrice.html);
+    qConteiner.html.append(qMinus.html, qValue.html, qPlus.html);
+
+    return cartProduct;
+  }
+
+  private static handleMinus(qMinus: BaseComponent, qValue: BaseComponent): void {
+    qMinus.html.addEventListener('click', () => {
+      const value = qValue.html.textContent;
+      if (+value! > step) {
+        qValue.html.textContent! = `${+value! - step}`;
+      }
+    });
+  }
+
+  private static handlePlus(qPlus: BaseComponent, qValue: BaseComponent): void {
+    qPlus.html.addEventListener('click', () => {
+      const value = qValue.html.textContent;
+      qValue.html.textContent! = `${+value! + step}`;
+    });
+  }
+
+  private static handleDeleteItmBtnClick(deleteItmBtn: BaseComponent, cartProduct: BaseComponent): void {
+    deleteItmBtn.html.addEventListener('click', () => {
+      cartProduct.html.remove();
+    });
+  }
+
+  private static handleEmptyCartBtnClick(emptyButton: BaseComponent): void {
+    emptyButton.html.addEventListener('click', () => {
+      Cart.fullCart.html.remove();
+      this.cartContent.html.append(Cart.emptyCart.html);
+    });
   }
 
   private static createEmptyCart(): BaseComponent {
@@ -49,7 +167,7 @@ class Cart {
   }
 
   get view(): BaseComponent {
-    return this.cartContent;
+    return this.cart;
   }
 }
 

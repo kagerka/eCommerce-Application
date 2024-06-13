@@ -229,7 +229,6 @@ class App {
       product.images,
       product.formattedPrice,
       product.formattedDiscount,
-      product.currencySymbol,
       product.productDiscount,
       product.brand,
       product.sizes,

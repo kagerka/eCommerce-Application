@@ -524,7 +524,6 @@ class Products {
     productImage: string,
     productTitle: string,
     formattedPrice: string,
-    currencySymbol: string,
     productDescription: string,
     productCard: BaseComponent,
     productDiscount: number,
@@ -537,7 +536,7 @@ class Products {
     const img = new BaseComponent({ tag: 'img', class: ['product-img'], src: productImage });
     const title = new BaseComponent({ tag: 'h3', class: ['product-title'], text: productTitle });
     const priceContainer = new BaseComponent({ tag: 'div', class: ['price-container'] });
-    const priceText = `${formattedPrice} ${currencySymbol}`;
+    const priceText = `${formattedPrice} $`;
     const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: priceText });
     const description = new BaseComponent({ tag: 'p', class: ['product-description'], text: productDescription });
     const productLink = this.createProductListener(id, link);
@@ -547,7 +546,7 @@ class Products {
     infoContainer.html.append(title.html, priceContainer.html, description.html);
     priceContainer.html.append(price.html);
     if (productDiscount) {
-      const discountText = `${formattedDiscount} ${currencySymbol}`;
+      const discountText = `${formattedDiscount} $`;
       const discount = new BaseComponent({ tag: 'h4', class: ['product-discount'], text: discountText });
       priceContainer.html.append(discount.html);
       price.html.classList.add('crossed');
@@ -564,11 +563,10 @@ class Products {
       path = JSON.parse(productsJSON!)[cardNumber];
     }
 
-    const variant = Products.addPrice() ? path?.masterVariant?.prices[1] : path?.masterVariant?.prices[0];
+    const variant = path?.masterVariant?.prices[0];
 
     const productPrice = variant?.value.centAmount;
     const productDiscount = variant?.discounted?.value.centAmount;
-    const currencySymbol = Products.addPrice() ? 'RUB' : '$';
     const hundredthsRound = 2;
 
     const formattedPrice = (productPrice / cents).toFixed(hundredthsRound);
@@ -588,7 +586,6 @@ class Products {
       productImage,
       productTitle,
       formattedPrice,
-      currencySymbol,
       productDescription,
       productCard,
       productDiscount,
@@ -972,22 +969,6 @@ class Products {
     Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
       Products.productsList.html.append(productCard.html);
     });
-  }
-
-  public static addPrice(): boolean {
-    let country;
-    if (localStorage.getItem('customer') !== null) {
-      const customerJSON = localStorage.getItem('customer');
-      const customer = JSON.parse(customerJSON!);
-      if (customer.addresses[0].country === 'RU') {
-        country = true;
-      } else {
-        country = false;
-      }
-    } else {
-      country = false;
-    }
-    return country;
   }
 
   get view(): BaseComponent {
