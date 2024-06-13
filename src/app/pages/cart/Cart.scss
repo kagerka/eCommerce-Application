@@ -1,7 +1,8 @@
 @import './../../../styles/colors.scss';
 @import './../../../styles/variables';
 
-.cart-content {
+.cart-content,
+.cart {
   min-height: calc(100vh - $headerHeight - $footerHeight - 27px - 2 * $pageGap);
   display: flex;
   flex-direction: column;
