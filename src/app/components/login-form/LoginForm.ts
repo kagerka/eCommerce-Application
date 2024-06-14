@@ -1,5 +1,6 @@
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
+import ICustomerData from '../../interfaces/CustomerData.interface';
 import {
   INCORRECTLY_ENTER,
   MIN_PASSWORD_LENGTH,
@@ -386,6 +387,31 @@ class LoginForm {
     });
   }
 
+  private authRequest(customer: ICustomerData): void {
+    ECommerceApi.getTokenPassword(currentClient, customer)
+      .then((res) => {
+        const tokenAnonymous = localStorage.getItem('tokenAnonymous');
+        if (tokenAnonymous) {
+          const cartId = localStorage.getItem('cartId');
+          if (cartId) {
+            localStorage.removeItem('tokenAnonymous');
+            ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
+              window.history.pushState({}, '', '/');
+              this.loginButton.view.html.setAttribute('login-success', 'true');
+              localStorage.setItem('isAuth', JSON.stringify(true));
+              localStorage.setItem('customer', JSON.stringify(data.customer));
+              ECommerceApi.checkCartExistsByCustomerID(currentClient, res.access_token, data.customer.id);
+            });
+          }
+        }
+        this.clearFields();
+        localStorage.setItem('tokenPassword', res.access_token);
+      })
+      .catch(() => {
+        this.displayErrorEnter();
+      });
+  }
+
   private submitLoginForm(): void {
     this.loginFormContainer.html.addEventListener('submit', (event: Event) => {
       event.preventDefault();
@@ -393,29 +419,31 @@ class LoginForm {
         this.emailInput.view.html instanceof HTMLInputElement &&
         this.passwordInput.view.html instanceof HTMLInputElement
       ) {
-        const customer: { email: string; password: string } = {
-          email: this.emailInput.view.html.value,
-          password: this.passwordInput.view.html.value,
-        };
+        const cartId = localStorage.getItem('cartId');
+        if (cartId) {
+          const customer: ICustomerData = {
+            email: this.emailInput.view.html.value,
+            password: this.passwordInput.view.html.value,
+            anonymousCart: {
+              id: cartId,
+              typeId: 'cart',
+            },
+          };
+          if (!localStorage.getItem('tokenPassword')) {
+            this.authRequest(customer);
+          } else {
+            const token = localStorage.getItem('tokenPassword');
+            if (token) {
+              ECommerceApi.getCustomer(currentClient, token);
+              Products.resetCatalog();
+            }
+          }
+        }
         if (!localStorage.getItem('tokenPassword')) {
-          ECommerceApi.getTokenPassword(currentClient, customer)
-            .then((res) => {
-              if (localStorage.getItem('tokenAnonymous')) {
-                localStorage.removeItem('tokenAnonymous');
-              }
-              this.clearFields();
-              localStorage.setItem('tokenPassword', res.access_token);
-
-              ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
-                window.history.pushState({}, '', '/');
-                this.loginButton.view.html.setAttribute('login-success', 'true');
-                localStorage.setItem('isAuth', JSON.stringify(true));
-                localStorage.setItem('customer', JSON.stringify(data.customer));
-              });
-            })
-            .catch(() => {
-              this.displayErrorEnter();
-            });
+          this.authRequest({
+            email: this.emailInput.view.html.value,
+            password: this.passwordInput.view.html.value,
+          });
         } else {
           const token = localStorage.getItem('tokenPassword');
           if (token) {

@@ -523,22 +523,69 @@ class Products {
     }
   }
 
+  private static addItemToAnonymousCart(itemID: string): void {
+    const tokenPassword = localStorage.getItem('tokenPassword');
+    const tokenAnonymous = localStorage.getItem('tokenAnonymous');
+    if (tokenAnonymous && !tokenPassword) {
+      const cartId = localStorage.getItem('cartId');
+      if (cartId) {
+        ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
+          if (typeof res !== 'string') {
+            ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID);
+          }
+        });
+      }
+      if (cartId === null) {
+        ECommerceApi.createCart(currentClient, tokenAnonymous).then((res) => {
+          localStorage.setItem('cartId', res.id);
+          ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID);
+        });
+      }
+    }
+  }
+
   private static handleCartButton(cartBtn: BaseComponent): void {
-    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    const tokenPassword = localStorage.getItem('tokenPassword');
+    const tokenAnonymous = localStorage.getItem('tokenAnonymous');
 
     cartBtn.html.addEventListener('click', () => {
-      ECommerceApi.getHasCart(currentClient, token!).then((data) => {
-        if (!data) {
-          ECommerceApi.createCart(currentClient, token!).then((response) => {
-            localStorage.setItem('cart', response.id);
-            ECommerceApi.addItemToCart(currentClient, token!, response.id, cartBtn.html.id);
-          });
+      Products.addItemToAnonymousCart(cartBtn.html.id);
+
+      if (tokenPassword && !tokenAnonymous) {
+        const cartId = localStorage.getItem('cartId');
+        if (cartId) {
+          ECommerceApi.getCart(currentClient, tokenPassword, cartId);
         }
-      });
-      const cartId = localStorage.getItem('cart');
-      if (cartId) {
-        ECommerceApi.addItemToCart(currentClient, token!, cartId, cartBtn.html.id);
       }
+      // ECommerceApi.getHasCart(currentClient, token!).then((data) => {
+      //   if (!data) {
+      //     ECommerceApi.createCart(currentClient, token!).then((response) => {
+      //       localStorage.setItem('cart', response.id);
+      //       ECommerceApi.addItemToCart(currentClient, token!, response.id, response.version, cartBtn.html.id);
+      //     });
+      //   }
+      // 	if(data) {
+      // 		const cartId = localStorage.getItem('cart');
+      // 		if (cartId) {
+      // 			const customerJSON = localStorage.getItem('customer');
+      // 		if(customerJSON) {
+      // 			const customer = JSON.parse(customerJSON);
+      // 			if(customer) {
+      // 				ECommerceApi.checkCartExistsByCustomerID(currentClient, token!, customer.id!)
+      // 				.then((res) => {
+      // 					ECommerceApi.addItemToCart(currentClient, token!, cartId, res.version, cartBtn.html.id);
+      // 				})
+      // 			}
+      // 		}
+      // 		}
+
+      // const cartId = localStorage.getItem('cart');
+      // if (cartId) {
+      // console.log('cart exists');
+      // ECommerceApi.addItemToCart(currentClient, token!, cartId, cartBtn.html.id);
+      // }
+      // 		}
+      //   });
     });
   }
 

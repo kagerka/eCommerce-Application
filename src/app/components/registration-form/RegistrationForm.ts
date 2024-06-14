@@ -592,11 +592,22 @@ class RegistrationForm extends SecondAddress {
               version: data.customer.version + SINGLE,
               addressId: data.customer.addresses[0].id,
             }).then((result) => {
+              const body = {
+                streetName: data.customer.addresses[0].streetName,
+                streetNumber: '',
+                postalCode: data.customer.addresses[0].postalCode,
+                city: data.customer.addresses[0].city,
+                country: data.customer.addresses[0].country,
+              };
+              ECommerceApi.createCart(currentClient, token).then((res) => {
+                ECommerceApi.setShippingAddressToCart(currentClient, token, res.id, res.version, body);
+              });
               localStorage.setItem('customer', JSON.stringify(result));
             });
           }
         });
       } else {
+        ECommerceApi.createCart(currentClient, token);
         localStorage.setItem('customer', JSON.stringify(data.customer));
       }
       window.history.pushState({}, '', '/');
