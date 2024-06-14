@@ -557,35 +557,6 @@ class Products {
           ECommerceApi.getCart(currentClient, tokenPassword, cartId);
         }
       }
-      // ECommerceApi.getHasCart(currentClient, token!).then((data) => {
-      //   if (!data) {
-      //     ECommerceApi.createCart(currentClient, token!).then((response) => {
-      //       localStorage.setItem('cart', response.id);
-      //       ECommerceApi.addItemToCart(currentClient, token!, response.id, response.version, cartBtn.html.id);
-      //     });
-      //   }
-      // 	if(data) {
-      // 		const cartId = localStorage.getItem('cart');
-      // 		if (cartId) {
-      // 			const customerJSON = localStorage.getItem('customer');
-      // 		if(customerJSON) {
-      // 			const customer = JSON.parse(customerJSON);
-      // 			if(customer) {
-      // 				ECommerceApi.checkCartExistsByCustomerID(currentClient, token!, customer.id!)
-      // 				.then((res) => {
-      // 					ECommerceApi.addItemToCart(currentClient, token!, cartId, res.version, cartBtn.html.id);
-      // 				})
-      // 			}
-      // 		}
-      // 		}
-
-      // const cartId = localStorage.getItem('cart');
-      // if (cartId) {
-      // console.log('cart exists');
-      // ECommerceApi.addItemToCart(currentClient, token!, cartId, cartBtn.html.id);
-      // }
-      // 		}
-      //   });
     });
   }
 
@@ -642,16 +613,16 @@ class Products {
     const filterMin = new BaseComponent({ tag: 'button', class: ['filter-range-handle', 'min'] });
     const filterMax = new BaseComponent({ tag: 'button', class: ['filter-range-handle', 'max'], style: 'left: 70%' });
     const filterInterval = new BaseComponent({ tag: 'div', class: ['filter-interval'] });
-    const priceConteiner = new BaseComponent({ tag: 'div', class: ['prices-conteiner'] });
+    const priceContainer = new BaseComponent({ tag: 'div', class: ['prices-conteiner'] });
     const minPrice = new BaseComponent({ tag: 'div', text: `${minValue}$`, class: ['min-price'] });
     const maxPrice = new BaseComponent({ tag: 'div', text: `${maxValue}$`, class: ['max-price'] });
 
     filter.html.append(filterWrapper.html, filterInterval.html);
-    filterInterval.html.append(priceConteiner.html);
+    filterInterval.html.append(priceContainer.html);
     filterWrapper.html.append(filterRange.html);
     filterRange.html.append(filterScale.html, filterMin.html, filterMax.html);
     filterScale.html.append(filterBar.html);
-    priceConteiner.html.append(minPrice.html, maxPrice.html);
+    priceContainer.html.append(minPrice.html, maxPrice.html);
 
     filterMin.html.style.left = '0%';
     filterMax.html.style.left = '95%';

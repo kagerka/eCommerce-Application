@@ -410,10 +410,10 @@ class RegistrationForm extends SecondAddress {
       this.cityInput.view.html.classList.remove('success');
       this.streetInput.view.html.classList.remove('success');
     }
-    this.clearSecAddresFields();
+    this.clearSecAddressFields();
   }
 
-  private clearSecAddresFields(): void {
+  private clearSecAddressFields(): void {
     if (
       this.secPostInput.view.html instanceof HTMLInputElement &&
       this.secCityInput.view.html instanceof HTMLInputElement &&
@@ -579,17 +579,14 @@ class RegistrationForm extends SecondAddress {
         data.customer.shippingAddressIds.length === EMPTY_ARR_LENGTH &&
         data.customer.addresses[0].id !== undefined
       ) {
-        ECommerceApi.addBillingAddressID(currentClient, {
-          id: data.customer.id,
-          token,
-          version: data.customer.version,
-          addressId: data.customer.addresses[0].id,
-        }).then(() => {
+        const { id, version } = data.customer;
+        const objRequest = { id, token, version, addressId: data.customer.addresses[0].id };
+        ECommerceApi.addBillingAddressID(currentClient, objRequest).then(() => {
           if (data.customer.addresses[0].id !== undefined) {
             ECommerceApi.addShippingAddressID(currentClient, {
               id: data.customer.id,
               token,
-              version: data.customer.version + SINGLE,
+              version: version + SINGLE,
               addressId: data.customer.addresses[0].id,
             }).then((result) => {
               const body = {

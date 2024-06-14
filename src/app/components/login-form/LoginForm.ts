@@ -293,14 +293,14 @@ class LoginForm {
     }
   }
 
-  private static addClassError(elemen: HTMLElement): void {
-    elemen.classList.remove('success');
-    elemen.classList.add('error');
+  private static addClassError(element: HTMLElement): void {
+    element.classList.remove('success');
+    element.classList.add('error');
   }
 
-  private static addClassSuccess(elemen: HTMLElement): void {
-    elemen.classList.remove('error');
-    elemen.classList.add('success');
+  private static addClassSuccess(element: HTMLElement): void {
+    element.classList.remove('error');
+    element.classList.add('success');
   }
 
   private validateEmailInput(): void {
@@ -424,10 +424,7 @@ class LoginForm {
           const customer: ICustomerData = {
             email: this.emailInput.view.html.value,
             password: this.passwordInput.view.html.value,
-            anonymousCart: {
-              id: cartId,
-              typeId: 'cart',
-            },
+            anonymousCart: { id: cartId, typeId: 'cart' },
           };
           if (!localStorage.getItem('tokenPassword')) {
             this.authRequest(customer);
