@@ -39,6 +39,7 @@
 .member-info {
   font-weight: 500;
   color: #8d8686;
+  line-height: 1.4rem;
 }
 
 .member-card-conteiner {
@@ -46,7 +47,7 @@
   border: 2px solid $lightGray;
   border-radius: 10px;
   padding: 2%;
-  min-height: 21vw;
+  min-height: 28vw;
 }
 
 .member-img-conteiner {
@@ -64,8 +65,19 @@
   background-repeat: no-repeat;
 }
 
+.member-img-0 {
+  background: url('/src/assets/images/katya.jpg') no-repeat center 0% / 100%;
+  background-size: cover;
+}
+
+.member-img-1 {
+  background: url('/src/assets/images/aleksandr.jpg') no-repeat center 0% / 100%;
+  background-size: cover;
+}
+
 .member-img-2 {
   background-image: url('/src/assets/images/tanya.jpg');
+  background-size: cover;
 }
 
 .member-info-conteiner {
@@ -86,8 +98,8 @@
 }
 
 .git-link:hover {
-  width: 4vw;
-  height: 4vw;
+  width: 3.3vw;
+  height: 3.3vw;
 }
 
 .heading {
@@ -102,7 +114,12 @@
   font-size: 1.3rem;
 }
 
-@media screen and (max-width: 830px) {
+.task-board-image {
+  margin-top: 10px;
+  width: 100%;
+}
+
+@media screen and (max-width: 1180px) {
   .member-img-conteiner {
     width: 40%;
   }
@@ -122,7 +139,7 @@
   }
 }
 
-@media screen and (max-width: 660px) {
+@media screen and (max-width: 830px) {
   .member-card-conteiner {
     flex-direction: column;
     height: min-content;
