@@ -25,11 +25,11 @@ module.exports = {
     ],
     'no-magic-numbers': ['error', { ignoreArrayIndexes: true }],
     '@typescript-eslint/explicit-function-return-type': 'error',
-    'max-lines-per-function': ['error', { max: 140, skipBlankLines: true }],
+    'max-lines-per-function': ['error', { max: 40, skipBlankLines: true }],
     'max-len': ['error', { code: 120, ignoreStrings: true, ignoreRegExpLiterals: true }],
     'import/no-extraneous-dependencies': 0,
     'object-curly-newline': ['error', { multiline: true }],
-    'no-restricted-globals': [0, 'self'],
+    'no-restricted-globals': [0, 'self'], 
   },
   overrides: [
     {
