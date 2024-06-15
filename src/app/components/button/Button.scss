@@ -1,3 +1,5 @@
+@import './../../../styles/colors';
+
 .btn {
   display: flex;
   justify-content: center;
@@ -7,4 +9,9 @@
 
 .btn:disabled {
   cursor: default;
+  background: $lightGreen;
+
+  &:hover {
+    background: $lightGreen;
+  }
 }

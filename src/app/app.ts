@@ -14,7 +14,7 @@ import NotFound from './pages/notFound/NotFound';
 import Product from './pages/product/Product';
 import Profile from './pages/profile/Profile';
 import Registration from './pages/registation/Registration';
-// import getTokenAnonymousFromStorage from './utils/localStorage/getTokenAnonymousFromStorage';
+import Cart from './pages/cart/Cart';
 
 const EMPTY_ARR_LENGTH = 0;
 const SINGLE = 1;
@@ -40,6 +40,8 @@ class App {
 
   private notFound: NotFound;
 
+  private cartPage: Cart;
+
   private profilePage: Profile;
 
   private catalogPage: Catalog;
@@ -59,6 +61,7 @@ class App {
     this.aboutPage = new About();
     this.notFound = new NotFound();
     this.regPage = new Registration();
+    this.cartPage = new Cart();
     this.profilePage = new Profile();
     this.catalogPage = new Catalog();
     this.router = new Navigo('/');
@@ -136,19 +139,19 @@ class App {
     this.router
       .on('/about', () => {
         this.onAbout();
-        this.checkBreadcrumbs(['Home', 'About Us']);
       })
       .on('/login', () => {
         this.onLogin();
-        this.checkBreadcrumbs(['Home', 'Login']);
       })
       .on('/logout', () => {
         this.onLogout();
-        this.checkBreadcrumbs(['Home', 'Logout']);
       })
       .on('/registration', () => {
         this.onReg();
-        this.checkBreadcrumbs(['Home', 'Registration']);
+      })
+      .on('/cart', () => {
+        this.onCart();
+        this.checkBreadcrumbs(['Home', 'Your Cart']);
       })
       .on('/', () => {
         this.onMain();
@@ -184,6 +187,7 @@ class App {
     this.pageContent.html.append(this.aboutPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    this.checkBreadcrumbs(['Home', 'About Us']);
   }
 
   private onMain(): void {
@@ -198,11 +202,19 @@ class App {
     this.pageContent.html.append(this.mainPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    this.checkBreadcrumbs(['Home', 'Logout']);
   }
 
   private onCatalog(): void {
     this.pageContent.html.innerHTML = '';
     this.pageContent.html.append(this.catalogPage.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
+  }
+
+  private onCart(): void {
+    this.pageContent.html.innerHTML = '';
+    this.pageContent.html.append(this.cartPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
   }
@@ -215,7 +227,6 @@ class App {
       product.images,
       product.formattedPrice,
       product.formattedDiscount,
-      product.currencySymbol,
       product.productDiscount,
       product.brand,
       product.sizes,
@@ -247,6 +258,7 @@ class App {
       this.checkBtns();
       this.setLoginBtnHref();
     }
+    this.checkBreadcrumbs(['Home', 'Login']);
   }
 
   private onReg(): void {
@@ -265,6 +277,7 @@ class App {
       this.checkBtns();
       this.setLoginBtnHref();
     }
+    this.checkBreadcrumbs(['Home', 'Registration']);
   }
 
   private onProfile(): void {
@@ -336,12 +349,14 @@ class App {
     if (!localStorage.getItem('tokenAnonymous') && !localStorage.getItem('tokenPassword')) {
       ECommerceApi.getAnonymousToken(currentClient).then((res) => {
         localStorage.setItem('tokenAnonymous', res.access_token);
-        Catalog.displayProducts();
+        Catalog.displayBrands();
         Catalog.displayCategories();
+        Catalog.displayCatalog();
       });
     }
-    Catalog.displayProducts();
+    Catalog.displayBrands();
     Catalog.displayCategories();
+    Catalog.displayCatalog();
     this.createRouter();
   }
 }

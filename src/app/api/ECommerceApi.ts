@@ -10,6 +10,7 @@ import { TActions, TCustomerData, TCustomerPassword } from '../interfaces/Update
 import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
 import ICart from '../interfaces/Cart.interface';
 import IUpdateAddress from '../interfaces/UpdateAddress.interface';
+import { CARDS_PER_PAGE, DEFAULT_PAGE_NUMBER } from '../utils/constants';
 
 class ECommerceApi {
   static async getAccessToken(clientDetails: IAPIClientDetails): Promise<IAccessToken> {
@@ -339,14 +340,40 @@ class ECommerceApi {
     }
   }
 
-  static async getProducts(clientDetails: IAPIClientDetails, token: string): Promise<IQueryProducts> {
-    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/products?limit=70`, {
+  static async getAllProducts(clientDetails: IAPIClientDetails, token: string): Promise<IQueryProducts> {
+    const path = 'products?limit=100';
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/${path}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getProducts(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    pageNumber: number = DEFAULT_PAGE_NUMBER,
+  ): Promise<IQueryProducts> {
+    const ONE = 1;
+    const path = 'products?limit=12&offset=';
+    const response = await fetch(
+      `${clientDetails.APIURL}/${clientDetails.projectKey}/${path}${CARDS_PER_PAGE * (pageNumber - ONE)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     } else {
@@ -391,15 +418,20 @@ class ECommerceApi {
     clientDetails: IAPIClientDetails,
     token: string,
     categoryId: string,
-  ): Promise<ICategories> {
-    const path = '/product-projections/search?filter=categories.id:';
-    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}"${categoryId}"`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+    pageNumber: number = DEFAULT_PAGE_NUMBER,
+  ): Promise<IQueryProducts> {
+    const ONE = 1;
+    const path = `/product-projections/search?filter=categories.id:subtree("${categoryId}")&limit=12&offset=`;
+    const response = await fetch(
+      `${clientDetails.APIURL}/${clientDetails.projectKey}${path}${CARDS_PER_PAGE * (pageNumber - ONE)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     } else {
@@ -440,7 +472,7 @@ class ECommerceApi {
     const path = categoryID
       ? `/product-projections/search?filter=categories.id:"${categoryID}"&sort=${sortBy} ${sortRule}`
       : `/product-projections/search?sort=${sortBy} ${sortRule}`;
-    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}&limit=70`, {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}&limit=12&offset=12`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -456,7 +488,7 @@ class ECommerceApi {
   }
 
   static async getSearching(clientDetails: IAPIClientDetails, token: string, inputRes: string): Promise<ICategories> {
-    const path = `/product-projections/search?limit=70&text.en=${inputRes}`;
+    const path = `/product-projections/search?limit=12&offset=12&text.en=${inputRes}`;
 
     const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
       method: 'GET',
@@ -477,9 +509,12 @@ class ECommerceApi {
     clientDetails: IAPIClientDetails,
     token: string,
     brandName: string,
-    brandKey: string,
-  ): Promise<ICategories> {
-    const path = `/product-projections/search?filter=variants.attributes.${brandKey}:"${brandName}"`;
+    pageNumber: number = DEFAULT_PAGE_NUMBER,
+  ): Promise<IQueryProducts> {
+    const ONE = 1;
+    const searchByBrand = `text.en="${brandName}`;
+    const productsLimitPerPage = `limit=12&offset=${CARDS_PER_PAGE * (pageNumber - ONE)}`;
+    const path = `/product-projections/search?${searchByBrand}&${productsLimitPerPage}`;
 
     const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
       method: 'GET',
