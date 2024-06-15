@@ -529,7 +529,9 @@ class Products {
     productDiscount: number,
     formattedDiscount: string,
   ): void {
-    const cartBtn = new BaseComponent({ tag: 'button', class: ['product-cart-button'] });
+    const cartBtn = new BaseComponent({ tag: 'button', class: ['product-cart-button'], id: `${id}` });
+
+    Products.handleCartButton(cartBtn);
 
     const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });
     const infoContainer = new BaseComponent({ tag: 'div', class: ['info-container'] });
@@ -551,6 +553,51 @@ class Products {
       priceContainer.html.append(discount.html);
       price.html.classList.add('crossed');
     }
+  }
+
+  private static addItemToAnonymousCart(itemID: string): void {
+    const tokenPassword = localStorage.getItem('tokenPassword');
+    const tokenAnonymous = localStorage.getItem('tokenAnonymous');
+    if (tokenAnonymous && !tokenPassword) {
+      const cartId = localStorage.getItem('cartId');
+      if (cartId) {
+        ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
+          if (typeof res !== 'string') {
+            ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
+              localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+            });
+          }
+        });
+      }
+      if (cartId === null) {
+        ECommerceApi.createCart(currentClient, tokenAnonymous).then((res) => {
+          localStorage.setItem('cartId', res.id);
+          ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
+            localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+          });
+        });
+      }
+    }
+  }
+
+  private static handleCartButton(cartBtn: BaseComponent): void {
+    const tokenPassword = localStorage.getItem('tokenPassword');
+    const tokenAnonymous = localStorage.getItem('tokenAnonymous');
+
+    cartBtn.html.addEventListener('click', () => {
+      Products.addItemToAnonymousCart(cartBtn.html.id);
+
+      if (tokenPassword && !tokenAnonymous) {
+        const cartId = localStorage.getItem('cartId');
+        if (cartId) {
+          ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
+            if (typeof res !== 'string') {
+              ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
+            }
+          });
+        }
+      }
+    });
   }
 
   private static createProductCard(cardNumber: number, fullData: boolean, storage: string = 'products'): BaseComponent {
@@ -604,16 +651,16 @@ class Products {
     const filterMin = new BaseComponent({ tag: 'button', class: ['filter-range-handle', 'min'] });
     const filterMax = new BaseComponent({ tag: 'button', class: ['filter-range-handle', 'max'], style: 'left: 70%' });
     const filterInterval = new BaseComponent({ tag: 'div', class: ['filter-interval'] });
-    const priceConteiner = new BaseComponent({ tag: 'div', class: ['prices-conteiner'] });
+    const priceContainer = new BaseComponent({ tag: 'div', class: ['prices-conteiner'] });
     const minPrice = new BaseComponent({ tag: 'div', text: `${minValue}$`, class: ['min-price'] });
     const maxPrice = new BaseComponent({ tag: 'div', text: `${maxValue}$`, class: ['max-price'] });
 
     filter.html.append(filterWrapper.html, filterInterval.html);
-    filterInterval.html.append(priceConteiner.html);
+    filterInterval.html.append(priceContainer.html);
     filterWrapper.html.append(filterRange.html);
     filterRange.html.append(filterScale.html, filterMin.html, filterMax.html);
     filterScale.html.append(filterBar.html);
-    priceConteiner.html.append(minPrice.html, maxPrice.html);
+    priceContainer.html.append(minPrice.html, maxPrice.html);
 
     filterMin.html.style.left = '0%';
     filterMax.html.style.left = '95%';
@@ -753,6 +800,55 @@ class Products {
     });
     return categoryNameEl;
   }
+
+  // private static handleCategoryClick(
+  //   categoryNameEl: BaseComponent,
+  //   pathPart: { name: { en: string }; parent: { id: string }; id: string },
+  //   token: string,
+  // ): void {
+  //   localStorage.removeItem('currentCategoryID');
+  //   categoryNameEl.html.addEventListener('click', async (e) => {
+  //     const form = Products.sortForm.html as HTMLFormElement;
+  //     form.reset();
+  //     categoryNameEl.html.classList.add('active');
+  //     const els = document.getElementsByClassName('subcategory');
+  //     Products.productsList.html.innerHTML = '';
+  //     Products.resetPriceRange();
+
+  //     const target = e.target as HTMLElement;
+  //     localStorage.setItem('currentCategoryID', target.id);
+
+  //     for (let i = 0; i < els.length; i += step) {
+  //       if (
+  //         els[i].className === `subcategory ${pathPart.id}` ||
+  //         els[i].className === `subcategory ${pathPart.id} active`
+  //       ) {
+  //         ECommerceApi.getSelectedProducts(currentClient, token, els[i].id).then((resp) => {
+  //           localStorage.setItem('products', JSON.stringify(resp.results));
+  //           Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
+  //             Products.productsList.html.append(productCard.html);
+  //           });
+  //         });
+  //       }
+  //     }
+  //   });
+  // }
+
+  // public static addPrice(): boolean {
+  //   let country;
+  //   if (!localStorage.getItem('customer')) {
+  //     const customerJSON = localStorage.getItem('customer');
+  //     const customer = JSON.parse(customerJSON!);
+  //     if (customer && customer.addresses[0].country === 'RU') {
+  //       country = true;
+  //     } else {
+  //       country = false;
+  //     }
+  //   } else {
+  //     country = false;
+  //   }
+  //   return country;
+  // }
 
   private static createCategory(categoryNumber: number): BaseComponent | null {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');

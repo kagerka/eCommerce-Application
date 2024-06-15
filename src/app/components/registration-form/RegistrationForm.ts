@@ -21,6 +21,7 @@ import Products from '../products/Products';
 import LoginInfo from './LoginInfo';
 import './RegistrationForm.scss';
 import SecondAddress from './SecondAddress';
+import addItemsToCart from '../../utils/addLineItems/addLineItems';
 
 const SAME_EMAIL_ERROR =
   'There is already an existing customer with the provided email. Go to the Login Page, or use a different email address.';
@@ -410,10 +411,10 @@ class RegistrationForm extends SecondAddress {
       this.cityInput.view.html.classList.remove('success');
       this.streetInput.view.html.classList.remove('success');
     }
-    this.clearSecAddresFields();
+    this.clearSecAddressFields();
   }
 
-  private clearSecAddresFields(): void {
+  private clearSecAddressFields(): void {
     if (
       this.secPostInput.view.html instanceof HTMLInputElement &&
       this.secCityInput.view.html instanceof HTMLInputElement &&
@@ -545,43 +546,38 @@ class RegistrationForm extends SecondAddress {
     }
   }
 
+  private static createCart(
+    token: string,
+    body: {
+      streetName: string;
+      streetNumber: string;
+      postalCode: string;
+      city: string;
+      country: string;
+    },
+  ): void {
+    ECommerceApi.createCart(currentClient, token).then((res) => {
+      ECommerceApi.setShippingAddressToCart(currentClient, token, res.id, res.version, body).then((data) => {
+        addItemsToCart(currentClient, token, data.id, data.version).then((resp) => {
+          localStorage.removeItem('lineItems');
+          localStorage.setItem('cartId', resp.id);
+        });
+      });
+    });
+  }
+
   private signupCustomer(customer: IRegForm): void {
     RegistrationForm.checkTokens();
     ECommerceApi.getAnonymousToken(currentClient).then((res) => {
       ECommerceApi.createCustomer(currentClient, res.access_token, customer)
         .then(() => {
           this.clearFields();
-          localStorage.setItem('tokenPassword', res.access_token);
-          localStorage.setItem('isAuth', JSON.stringify(true));
           RegistrationForm.addNotification('Your account has been created successfully!', ['notification']);
-          ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
-            if (
-              data.customer.billingAddressIds.length === EMPTY_ARR_LENGTH &&
-              data.customer.shippingAddressIds.length === EMPTY_ARR_LENGTH &&
-              data.customer.addresses[0].id !== undefined
-            ) {
-              ECommerceApi.addBillingAddressID(currentClient, {
-                id: data.customer.id,
-                token: res.access_token,
-                version: data.customer.version,
-                addressId: data.customer.addresses[0].id,
-              }).then(() => {
-                if (data.customer.addresses[0].id !== undefined) {
-                  ECommerceApi.addShippingAddressID(currentClient, {
-                    id: data.customer.id,
-                    token: res.access_token,
-                    version: data.customer.version + SINGLE,
-                    addressId: data.customer.addresses[0].id,
-                  }).then((result) => {
-                    localStorage.setItem('customer', JSON.stringify(result));
-                  });
-                }
-              });
-            } else {
-              localStorage.setItem('customer', JSON.stringify(data.customer));
-            }
-            window.history.pushState({}, '', '/');
-            this.regButton.view.html.setAttribute('login-success', 'true');
+          const emailAndPsw = { email: customer.email, password: customer.password };
+          ECommerceApi.getTokenPassword(currentClient, emailAndPsw).then((response) => {
+            localStorage.removeItem('tokenAnonymous');
+            localStorage.setItem('tokenPassword', response.access_token);
+            this.signup(emailAndPsw, response.access_token);
           });
         })
         .catch((error) => {
@@ -593,6 +589,45 @@ class RegistrationForm extends SecondAddress {
             this.displayErrorEnter(error.message);
           }
         });
+    });
+  }
+
+  private signup(dataCustomer: { email: string; password: string }, token: string): void {
+    ECommerceApi.authCustomer(currentClient, dataCustomer, token).then((data) => {
+      localStorage.setItem('isAuth', JSON.stringify(true));
+      if (
+        data.customer.billingAddressIds.length === EMPTY_ARR_LENGTH &&
+        data.customer.shippingAddressIds.length === EMPTY_ARR_LENGTH &&
+        data.customer.addresses[0].id !== undefined
+      ) {
+        const { id, version } = data.customer;
+        const objRequest = { id, token, version, addressId: data.customer.addresses[0].id };
+        ECommerceApi.addBillingAddressID(currentClient, objRequest).then(() => {
+          if (data.customer.addresses[0].id !== undefined) {
+            ECommerceApi.addShippingAddressID(currentClient, {
+              id: data.customer.id,
+              token,
+              version: version + SINGLE,
+              addressId: data.customer.addresses[0].id,
+            }).then((result) => {
+              const body = {
+                streetName: data.customer.addresses[0].streetName,
+                streetNumber: '',
+                postalCode: data.customer.addresses[0].postalCode,
+                city: data.customer.addresses[0].city,
+                country: data.customer.addresses[0].country,
+              };
+              RegistrationForm.createCart(token, body);
+              localStorage.setItem('customer', JSON.stringify(result));
+            });
+          }
+        });
+      } else {
+        ECommerceApi.createCart(currentClient, token);
+        localStorage.setItem('customer', JSON.stringify(data.customer));
+      }
+      window.history.pushState({}, '', '/');
+      this.regButton.view.html.setAttribute('login-success', 'true');
     });
   }
 }

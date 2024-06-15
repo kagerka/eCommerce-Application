@@ -1,6 +1,5 @@
 import IAPIClientDetails from '../interfaces/APIClientDetails.interface';
 import IAccessToken from '../interfaces/AccessToken.interface';
-import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
 import ICustomerData from '../interfaces/CustomerData.interface';
 import ICustomerProfile from '../interfaces/CustomerProfile.interface';
 import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface';
@@ -8,6 +7,9 @@ import ICustomerUpdateRequest from '../interfaces/CustomerUpdateRequest.interfac
 import { ICategories, IProducts, IQueryProducts } from '../interfaces/Product.interface';
 import ITokenPassword from '../interfaces/TokenPassword.interface';
 import { TActions, TCustomerData, TCustomerPassword } from '../interfaces/UpdateCustomerInfo.interface';
+import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
+import ICart from '../interfaces/Cart.interface';
+import IUpdateAddress from '../interfaces/UpdateAddress.interface';
 import { CARDS_PER_PAGE, DEFAULT_PAGE_NUMBER } from '../utils/constants';
 
 class ECommerceApi {
@@ -32,7 +34,8 @@ class ECommerceApi {
   static async getAnonymousToken(clientDetails: IAPIClientDetails): Promise<ITokenPassword> {
     const uniqueId = self.crypto.randomUUID();
     const basicAuthData = btoa(`${clientDetails.clientId}:${clientDetails.secret}`);
-    const scope = 'view_products:tea-team-app manage_my_orders:tea-team-app manage_my_profile:tea-team-app';
+    const scope =
+      'view_orders:tea-team-app view_products:tea-team-app manage_my_orders:tea-team-app manage_my_profile:tea-team-app';
     const response = await fetch(`${clientDetails.AuthURL}/oauth/${clientDetails.projectKey}/anonymous/token`, {
       method: 'POST',
       headers: {
@@ -96,7 +99,7 @@ class ECommerceApi {
 
   static async authCustomer(
     clientDetails: IAPIClientDetails,
-    data: { email: string; password: string },
+    data: ICustomerData,
     token: string,
   ): Promise<ICustomerSignInResult> {
     const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/login`, {
@@ -108,6 +111,7 @@ class ECommerceApi {
       body: JSON.stringify({
         email: data.email,
         password: data.password,
+        anonymousCart: data.anonymousCart!,
       }),
     });
     if (!response.ok) {
@@ -612,6 +616,153 @@ class ECommerceApi {
       const json = await response.json();
       return json;
     }
+  }
+
+  static async getCart(clientDetails: IAPIClientDetails, token: string, cartId: string): Promise<string | ICart> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/carts/${cartId}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      return 'cart with this ID does not exist';
+    }
+    return response.json();
+  }
+
+  static async createCart(clientDetails: IAPIClientDetails, token: string, shipping?: IUpdateAddress): Promise<ICart> {
+    let bodyRequest;
+    if (!shipping) {
+      bodyRequest = { currency: 'USD' };
+    }
+    if (shipping) {
+      bodyRequest = {
+        currency: 'USD',
+        streetName: shipping.streetName,
+        streetNumber: shipping.streetNumber,
+        postalCode: shipping.postalCode,
+        city: shipping.city,
+        country: shipping.country,
+      };
+    }
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(bodyRequest),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async getHasCart(clientDetails: IAPIClientDetails, token: string): Promise<boolean> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const data = await response.json();
+
+    if (!data.results[0]) {
+      return false;
+    }
+    return true;
+  }
+
+  static async checkCartExistsByCustomerID(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    customer: string,
+  ): Promise<ICart> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/carts/customer-id=${customer}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const json = await response.json();
+      return json;
+    }
+  }
+
+  static async addItemToCart(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    cartId: string,
+    version: number,
+    itemId: string,
+  ): Promise<ICart> {
+    return fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        version,
+        actions: [
+          {
+            action: 'addLineItem',
+            productId: itemId,
+            variantId: 1,
+            quantity: 1,
+          },
+        ],
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    });
+  }
+
+  static async setShippingAddressToCart(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    cartId: string,
+    version: number,
+    address: IUpdateAddress,
+  ): Promise<ICart> {
+    return fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        version,
+        actions: [
+          {
+            action: 'setShippingAddress',
+            address: {
+              streetName: address.streetName,
+              streetNumber: address.streetNumber,
+              postalCode: address.postalCode,
+              city: address.city,
+              country: address.country,
+            },
+          },
+        ],
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    });
   }
 }
 

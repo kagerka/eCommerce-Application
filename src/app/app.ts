@@ -139,19 +139,15 @@ class App {
     this.router
       .on('/about', () => {
         this.onAbout();
-        this.checkBreadcrumbs(['Home', 'About Us']);
       })
       .on('/login', () => {
         this.onLogin();
-        this.checkBreadcrumbs(['Home', 'Login']);
       })
       .on('/logout', () => {
         this.onLogout();
-        this.checkBreadcrumbs(['Home', 'Logout']);
       })
       .on('/registration', () => {
         this.onReg();
-        this.checkBreadcrumbs(['Home', 'Registration']);
       })
       .on('/cart', () => {
         this.onCart();
@@ -191,6 +187,7 @@ class App {
     this.pageContent.html.append(this.aboutPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    this.checkBreadcrumbs(['Home', 'About Us']);
   }
 
   private onMain(): void {
@@ -205,6 +202,7 @@ class App {
     this.pageContent.html.append(this.mainPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    this.checkBreadcrumbs(['Home', 'Logout']);
   }
 
   private onCatalog(): void {
@@ -260,6 +258,7 @@ class App {
       this.checkBtns();
       this.setLoginBtnHref();
     }
+    this.checkBreadcrumbs(['Home', 'Login']);
   }
 
   private onReg(): void {
@@ -278,6 +277,7 @@ class App {
       this.checkBtns();
       this.setLoginBtnHref();
     }
+    this.checkBreadcrumbs(['Home', 'Registration']);
   }
 
   private onProfile(): void {
@@ -292,10 +292,10 @@ class App {
         this.profilePage.dateOfBirth.html.textContent = customer.dateOfBirth;
         this.profilePage.email.html.textContent = customer.email;
         if (customer.shippingAddressIds.length === EMPTY_ARR_LENGTH) {
-          customer.shippingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE].id);
+          customer.shippingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE]?.id);
         }
         if (customer.billingAddressIds.length === EMPTY_ARR_LENGTH) {
-          customer.billingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE].id);
+          customer.billingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE]?.id);
         }
         localStorage.setItem('customer', JSON.stringify(customer));
         this.profilePage.rerenderAllAddresses();
