@@ -44,6 +44,12 @@ class Header {
 
   private regButton: BaseComponent;
 
+  private cartBtn: BaseComponent;
+
+  private cartLink: BaseComponent;
+
+  private cartOrdersNum: BaseComponent;
+
   constructor() {
     this.headerContainer = Header.createHeaderContainerElement();
     this.headerLogoContainer = Header.createHeaderLogoContainerElement();
@@ -61,6 +67,9 @@ class Header {
     this.catalogNavListLink = Header.createCatalogNavListLinkElement();
     this.aboutNavListItem = Header.createAboutNavListItemElement();
     this.aboutNavListLink = Header.createAboutNavListLinkElement();
+    this.cartBtn = Header.createCartBtn();
+    this.cartLink = Header.createCartLink();
+    this.cartOrdersNum = Header.createCartOrdersNum();
 
     this.headerButtonsContainer = Header.createHeaderButtonsContainerElement();
     this.profileButton = Header.createProfileButtonElement();
@@ -83,10 +92,16 @@ class Header {
 
     this.headerNavContainer.html.append(this.headerNav.html);
     this.headerNav.html.append(this.navList.html);
-    this.navList.html.append(this.homeNavListItem.html, this.catalogNavListItem.html, this.aboutNavListItem.html);
+    this.navList.html.append(
+      this.homeNavListItem.html,
+      this.catalogNavListItem.html,
+      this.aboutNavListItem.html,
+      this.cartBtn.html,
+    );
     this.homeNavListItem.html.append(this.homeNavListLink.html);
     this.catalogNavListItem.html.append(this.catalogNavListLink.html);
     this.aboutNavListItem.html.append(this.aboutNavListLink.html);
+    this.cartBtn.html.append(this.cartLink.html, this.cartOrdersNum.html);
     this.headerButtonsContainer.html.append(
       this.profileButton.html,
       this.loginButton.html,
@@ -219,6 +234,30 @@ class Header {
         ['data-navigo', ''],
       ],
       text: 'Login',
+    });
+  }
+
+  private static createCartBtn(): BaseComponent {
+    return new BaseComponent({ tag: 'li', class: ['nav-list-item'] });
+  }
+
+  private static createCartLink(): BaseComponent {
+    return new BaseComponent({
+      tag: 'div',
+      class: ['cart-button'],
+      attribute: [
+        ['href', '/cart'],
+        ['data-navigo', ''],
+      ],
+      text: '',
+    });
+  }
+
+  private static createCartOrdersNum(): BaseComponent {
+    return new BaseComponent({
+      tag: 'div',
+      class: ['cart-orders-num'],
+      text: '0',
     });
   }
 
