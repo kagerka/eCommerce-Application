@@ -558,7 +558,11 @@ class Products {
       if (tokenPassword && !tokenAnonymous) {
         const cartId = localStorage.getItem('cartId');
         if (cartId) {
-          ECommerceApi.getCart(currentClient, tokenPassword, cartId);
+          ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
+            if (typeof res !== 'string') {
+              ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
+            }
+          });
         }
       }
     });
