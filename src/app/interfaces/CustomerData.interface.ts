@@ -5,6 +5,7 @@ interface ICustomerData {
     id: string;
     typeId: 'cart';
   };
+  anonymousCartSignInMode?: 'MergeWithExistingCustomerCart';
 }
 
 export default ICustomerData;

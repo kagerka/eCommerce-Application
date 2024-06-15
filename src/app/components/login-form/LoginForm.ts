@@ -1,6 +1,7 @@
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import ICustomerData from '../../interfaces/CustomerData.interface';
+import addItemsToCart from '../../utils/addLineItems/addLineItems';
 import {
   INCORRECTLY_ENTER,
   MIN_PASSWORD_LENGTH,
@@ -400,7 +401,14 @@ class LoginForm {
               this.loginButton.view.html.setAttribute('login-success', 'true');
               localStorage.setItem('isAuth', JSON.stringify(true));
               localStorage.setItem('customer', JSON.stringify(data.customer));
-              ECommerceApi.checkCartExistsByCustomerID(currentClient, res.access_token, data.customer.id);
+              ECommerceApi.checkCartExistsByCustomerID(currentClient, res.access_token, data.customer.id).then(
+                (resp) => {
+                  addItemsToCart(currentClient, res.access_token, resp.id, resp.version).then((response) => {
+                    localStorage.setItem('cartId', response.id);
+                    localStorage.removeItem('lineItems');
+                  });
+                },
+              );
             });
           }
         }
@@ -419,23 +427,6 @@ class LoginForm {
         this.emailInput.view.html instanceof HTMLInputElement &&
         this.passwordInput.view.html instanceof HTMLInputElement
       ) {
-        const cartId = localStorage.getItem('cartId');
-        if (cartId) {
-          const customer: ICustomerData = {
-            email: this.emailInput.view.html.value,
-            password: this.passwordInput.view.html.value,
-            anonymousCart: { id: cartId, typeId: 'cart' },
-          };
-          if (!localStorage.getItem('tokenPassword')) {
-            this.authRequest(customer);
-          } else {
-            const token = localStorage.getItem('tokenPassword');
-            if (token) {
-              ECommerceApi.getCustomer(currentClient, token);
-              Products.resetCatalog();
-            }
-          }
-        }
         if (!localStorage.getItem('tokenPassword')) {
           this.authRequest({
             email: this.emailInput.view.html.value,

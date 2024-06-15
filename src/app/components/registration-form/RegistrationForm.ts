@@ -21,6 +21,7 @@ import Products from '../products/Products';
 import LoginInfo from './LoginInfo';
 import './RegistrationForm.scss';
 import SecondAddress from './SecondAddress';
+import addItemsToCart from '../../utils/addLineItems/addLineItems';
 
 const SAME_EMAIL_ERROR =
   'There is already an existing customer with the provided email. Go to the Login Page, or use a different email address.';
@@ -545,6 +546,26 @@ class RegistrationForm extends SecondAddress {
     }
   }
 
+  private static createCart(
+    token: string,
+    body: {
+      streetName: string;
+      streetNumber: string;
+      postalCode: string;
+      city: string;
+      country: string;
+    },
+  ): void {
+    ECommerceApi.createCart(currentClient, token).then((res) => {
+      ECommerceApi.setShippingAddressToCart(currentClient, token, res.id, res.version, body).then((data) => {
+        addItemsToCart(currentClient, token, data.id, data.version).then((resp) => {
+          localStorage.removeItem('lineItems');
+          localStorage.setItem('cartId', resp.id);
+        });
+      });
+    });
+  }
+
   private signupCustomer(customer: IRegForm): void {
     RegistrationForm.checkTokens();
     ECommerceApi.getAnonymousToken(currentClient).then((res) => {
@@ -596,9 +617,7 @@ class RegistrationForm extends SecondAddress {
                 city: data.customer.addresses[0].city,
                 country: data.customer.addresses[0].country,
               };
-              ECommerceApi.createCart(currentClient, token).then((res) => {
-                ECommerceApi.setShippingAddressToCart(currentClient, token, res.id, res.version, body);
-              });
+              RegistrationForm.createCart(token, body);
               localStorage.setItem('customer', JSON.stringify(result));
             });
           }

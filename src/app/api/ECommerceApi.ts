@@ -668,8 +668,8 @@ class ECommerceApi {
     cartId: string,
     version: number,
     itemId: string,
-  ): Promise<void> {
-    fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
+  ): Promise<ICart> {
+    return fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -700,8 +700,8 @@ class ECommerceApi {
     cartId: string,
     version: number,
     address: IUpdateAddress,
-  ): Promise<void> {
-    fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
+  ): Promise<ICart> {
+    return fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

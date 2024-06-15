@@ -531,14 +531,18 @@ class Products {
       if (cartId) {
         ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
           if (typeof res !== 'string') {
-            ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID);
+            ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
+              localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+            });
           }
         });
       }
       if (cartId === null) {
         ECommerceApi.createCart(currentClient, tokenAnonymous).then((res) => {
           localStorage.setItem('cartId', res.id);
-          ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID);
+          ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
+            localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+          });
         });
       }
     }
