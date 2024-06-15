@@ -18,8 +18,10 @@ const teamMembers = [
     name: 'Aleksandr Krivoshein',
     position: 'Frontend Developer',
     gitLink: 'https://github.com/Wood85',
-    bio: 'Here should be short bio',
-    contribution: 'Here should be written about your contribution to the project',
+    bio: `I live in Georgia, Batumi. At the present time I study at RS School and 
+		I'm looking for a job as a junior front-end developer`,
+    contribution: `I was working on the login page and profile page and
+		also took part in the implementation of the shopping cart`,
   },
   {
     name: 'Tatiana Buinitskaya',
