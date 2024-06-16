@@ -1,8 +1,8 @@
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
+import { ICart, ILineItem } from '../../interfaces/Cart.interface';
 import { ICategories, IProducts, IQueryProducts } from '../../interfaces/Product.interface';
 import { LOAD_PRODUCTS_TIMEOUT } from '../../utils/constants';
-
 import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
 import Input from '../input/Input';
@@ -518,7 +518,15 @@ class Products {
     });
   }
 
-  private static renderProductElements(
+  private static createProductCartBtn(id: string): BaseComponent {
+    return new BaseComponent({
+      tag: 'button',
+      class: ['product-cart-button'],
+      id: `${id}`,
+    });
+  }
+
+  private static async renderProductElements(
     id: string,
     link: string,
     productImage: string,
@@ -528,8 +536,16 @@ class Products {
     productCard: BaseComponent,
     productDiscount: number,
     formattedDiscount: string,
-  ): void {
-    const cartBtn = new BaseComponent({ tag: 'button', class: ['product-cart-button'], id: `${id}` });
+  ): Promise<void> {
+    const cartBtn = Products.createProductCartBtn(id);
+    const isProductInTheCart = await Products.checkIsProductInTheCart(cartBtn.html.id);
+    if (isProductInTheCart) {
+      cartBtn.html.setAttribute('disabled', '');
+      const timeout = 1000;
+      setTimeout(() => {
+        cartBtn.html.setAttribute('data-tooltip', 'This product is already in the cart.');
+      }, timeout);
+    }
 
     Products.handleCartButton(cartBtn);
 
@@ -558,6 +574,7 @@ class Products {
   private static addItemToAnonymousCart(itemID: string): void {
     const tokenPassword = localStorage.getItem('tokenPassword');
     const tokenAnonymous = localStorage.getItem('tokenAnonymous');
+
     if (tokenAnonymous && !tokenPassword) {
       const cartId = localStorage.getItem('cartId');
       if (cartId) {
@@ -584,17 +601,22 @@ class Products {
     const tokenPassword = localStorage.getItem('tokenPassword');
     const tokenAnonymous = localStorage.getItem('tokenAnonymous');
 
-    cartBtn.html.addEventListener('click', () => {
-      Products.addItemToAnonymousCart(cartBtn.html.id);
-
-      if (tokenPassword && !tokenAnonymous) {
-        const cartId = localStorage.getItem('cartId');
-        if (cartId) {
-          ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
-            if (typeof res !== 'string') {
-              ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
-            }
-          });
+    cartBtn.html.addEventListener('click', async () => {
+      const isProductInTheCart = await Products.checkIsProductInTheCart(cartBtn.html.id);
+      if (isProductInTheCart) {
+        cartBtn.html.setAttribute('disabled', '');
+        cartBtn.html.setAttribute('data-tooltip', 'This product is already in the cart.');
+      } else {
+        Products.addItemToAnonymousCart(cartBtn.html.id);
+        if (tokenPassword && !tokenAnonymous) {
+          const cartId = localStorage.getItem('cartId');
+          if (cartId) {
+            ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
+              if (typeof res !== 'string') {
+                ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
+              }
+            });
+          }
         }
       }
     });
@@ -1065,6 +1087,23 @@ class Products {
     Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
       Products.productsList.html.append(productCard.html);
     });
+  }
+
+  private static async checkIsProductInTheCart(id: string): Promise<boolean> {
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    const cardId = localStorage.getItem('cartId');
+    let result = false;
+    if (token && cardId) {
+      const res = (await ECommerceApi.getCart(currentClient, token, cardId)) as ICart;
+      if (res.lineItems) {
+        res.lineItems.forEach((product: ILineItem) => {
+          if (product.productId === id) {
+            result = true;
+          }
+        });
+      }
+    }
+    return result;
   }
 
   get view(): BaseComponent {
