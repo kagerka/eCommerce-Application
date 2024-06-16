@@ -1,5 +1,8 @@
+import ECommerceApi from '../../api/ECommerceApi';
+import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Input from '../../components/input/Input';
+import { ICart } from '../../interfaces/Cart.interface';
 import './Cart.scss';
 
 const step = 1;
@@ -24,9 +27,18 @@ class Cart {
   }
 
   static composeView(): BaseComponent {
-    const lineItems = JSON.parse(localStorage.getItem('lineItems')!) || '';
-    if (lineItems) {
-      Cart.cartContent.html.append(Cart.fullCart.html);
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    if (cartId) {
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        if ((res as ICart).lineItems) {
+          Cart.cartContent.html.append(Cart.fullCart.html);
+        } else {
+          this.cartContent.html.append(Cart.emptyCart.html);
+        }
+      });
     } else {
       this.cartContent.html.append(Cart.emptyCart.html);
     }
@@ -42,35 +54,49 @@ class Cart {
   }
 
   static createFullCart(): BaseComponent {
-    const lineItems = JSON.parse(localStorage.getItem('lineItems')!) || '';
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+
     const fullCart = new BaseComponent({ tag: 'div', class: ['full-cart'] });
     const cartTop = new BaseComponent({ tag: 'div', class: ['cart-top'] });
     const cartProductsConteiner = new BaseComponent({ tag: 'ul', class: ['cart-itms-conteiner'] });
     const priceConteiner = new BaseComponent({ tag: 'div', class: ['price-conteiner'] });
     const emptyButton = new BaseComponent({ tag: 'button', class: ['empty-button'], text: 'Empty Cart' });
-    const proceedButton = new BaseComponent({ tag: 'button', class: ['proceed-button'], text: 'Proceed To Checkout' });
+    const proceedButton = new BaseComponent({
+      tag: 'button',
+      class: ['proceed-button'],
+      text: 'Proceed To Checkout',
+    });
     const promoConteiner = new BaseComponent({ tag: 'div', class: ['promo-conteiner'] });
     const promoInput = new Input({ type: 'text', class: ['promo-input'], placeholder: 'Promo Code...' });
     const promoBtn = new BaseComponent({ tag: 'button', class: ['promo-button'], text: 'Apply' });
     const totalConteiner = new BaseComponent({ tag: 'div', class: ['total-conteiner'] });
     const totalTitle = new BaseComponent({ tag: 'h4', class: ['total-title'], text: 'Total:' });
     const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: '300,00 $' });
-    Cart.handleEmptyCartBtnClick(emptyButton);
 
-    fullCart.html.append(cartTop.html, emptyButton.html);
-    cartTop.html.append(cartProductsConteiner.html, priceConteiner.html);
-    priceConteiner.html.append(promoConteiner.html, totalConteiner.html, proceedButton.html);
-    promoConteiner.html.append(promoInput.view.html, promoBtn.html);
-    totalConteiner.html.append(totalTitle.html, totalPrice.html);
+    if (cartId) {
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        Cart.handleEmptyCartBtnClick(emptyButton);
 
-    for (let i = 0; i < lineItems.length; i += step) {
-      const cartProduct = this.createCartItem(
-        lineItems[i].name.en,
-        lineItems[i].totalPrice.centAmount / cents,
-        lineItems[i].variant.images[0].url,
-      );
-      cartProductsConteiner.html.append(cartProduct.html);
+        fullCart.html.append(cartTop.html, emptyButton.html);
+        cartTop.html.append(cartProductsConteiner.html, priceConteiner.html);
+        priceConteiner.html.append(promoConteiner.html, totalConteiner.html, proceedButton.html);
+        promoConteiner.html.append(promoInput.view.html, promoBtn.html);
+        totalConteiner.html.append(totalTitle.html, totalPrice.html);
+
+        for (let i = 0; i < (res as ICart).lineItems?.length; i += step) {
+          const cartProduct = this.createCartItem(
+            (res as ICart).lineItems[i].name.en,
+            (res as ICart).lineItems[i].totalPrice.centAmount / cents,
+            (res as ICart).lineItems[i].variant.images[0].url,
+          );
+          cartProductsConteiner.html.append(cartProduct.html);
+        }
+      });
     }
+
     return fullCart;
   }
 
