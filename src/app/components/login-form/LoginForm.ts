@@ -393,24 +393,19 @@ class LoginForm {
       .then((res) => {
         const tokenAnonymous = localStorage.getItem('tokenAnonymous');
         if (tokenAnonymous) {
-          const cartId = localStorage.getItem('cartId');
-          if (cartId) {
-            localStorage.removeItem('tokenAnonymous');
-            ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
-              window.history.pushState({}, '', '/');
-              this.loginButton.view.html.setAttribute('login-success', 'true');
-              localStorage.setItem('isAuth', JSON.stringify(true));
-              localStorage.setItem('customer', JSON.stringify(data.customer));
-              ECommerceApi.checkCartExistsByCustomerID(currentClient, res.access_token, data.customer.id).then(
-                (resp) => {
-                  addItemsToCart(currentClient, res.access_token, resp.id, resp.version).then((response) => {
-                    localStorage.setItem('cartId', response.id);
-                    localStorage.removeItem('lineItems');
-                  });
-                },
-              );
+          localStorage.removeItem('tokenAnonymous');
+          ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
+            window.history.pushState({}, '', '/');
+            this.loginButton.view.html.setAttribute('login-success', 'true');
+            localStorage.setItem('isAuth', JSON.stringify(true));
+            localStorage.setItem('customer', JSON.stringify(data.customer));
+            ECommerceApi.checkCartExistsByCustomerID(currentClient, res.access_token, data.customer.id).then((resp) => {
+              addItemsToCart(currentClient, res.access_token, resp.id, resp.version).then((response) => {
+                localStorage.setItem('cartId', response.id);
+                localStorage.removeItem('lineItems');
+              });
             });
-          }
+          });
         }
         this.clearFields();
         localStorage.setItem('tokenPassword', res.access_token);
