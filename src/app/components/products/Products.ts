@@ -543,6 +543,12 @@ class Products {
       cartBtn.html.setAttribute('disabled', '');
       cartBtn.html.setAttribute('data-tooltip', 'This product is already in the cart.');
     }
+    const logout = document.querySelector('.logout-button');
+    logout?.addEventListener('click', (e) => {
+      e.preventDefault();
+      cartBtn.html.removeAttribute('disabled');
+      cartBtn.html.removeAttribute('data-tooltip');
+    });
 
     Products.handleCartButton(cartBtn);
 
