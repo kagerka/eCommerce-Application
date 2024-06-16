@@ -541,10 +541,7 @@ class Products {
     const isProductInTheCart = await Products.checkIsProductInTheCart(cartBtn.html.id);
     if (isProductInTheCart) {
       cartBtn.html.setAttribute('disabled', '');
-      const timeout = 1000;
-      setTimeout(() => {
-        cartBtn.html.setAttribute('data-tooltip', 'This product is already in the cart.');
-      }, timeout);
+      cartBtn.html.setAttribute('data-tooltip', 'This product is already in the cart.');
     }
 
     Products.handleCartButton(cartBtn);
