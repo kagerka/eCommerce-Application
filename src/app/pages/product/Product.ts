@@ -67,6 +67,8 @@ class Product {
 
   private modalContainer: BaseComponent;
 
+  private addToCartBtn: BaseComponent;
+
   constructor(
     name: string,
     description: string,
@@ -94,6 +96,7 @@ class Product {
     this.productBedrooms = Product.createProductBedroomsContainerElement(bedrooms);
     this.productPersons = Product.createProductPersonsContainerElement(persons);
     this.modalContainer = Product.createModalContainerElement();
+    this.addToCartBtn = Product.createAddToCartBtn();
     this.addImages(images, this.productImagesPreviewContainer.html);
 
     this.composeView();
@@ -114,6 +117,7 @@ class Product {
     this.productInfoContent.html.append(
       this.productName.html,
       this.productPrice.html,
+      this.addToCartBtn.html,
       this.productDescription.html,
       this.productBrand.html,
       this.productSizes.html,
@@ -157,6 +161,10 @@ class Product {
 
   private static createModalContainerElement(): BaseComponent {
     return new BaseComponent({ tag: 'div', class: ['modal-container', 'hidden'] });
+  }
+
+  private static createAddToCartBtn(): BaseComponent {
+    return new BaseComponent({ tag: 'button', class: ['add-to-cart-btn'], text: 'Add to cart' });
   }
 
   private createImageModalContentElement(images: IProductImages[], imageEl: HTMLElement): BaseComponent {

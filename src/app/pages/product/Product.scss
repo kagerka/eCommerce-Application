@@ -90,6 +90,30 @@
   color: $red;
 }
 
+.add-to-cart-btn {
+  width: 100%;
+  border-radius: 5px;
+  background-color: #46a358;
+  padding: 8px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: #ffffff;
+  text-align: center;
+  transition: 0.5s all;
+  outline: none;
+  border: none;
+  margin-top: 15px;
+  align-self: center;
+  cursor: pointer;
+  transition-duration: 0.5s;
+
+  &:hover {
+    background-color: $darkGreen;
+  }
+}
+
 .product-page-description-container {
   display: flex;
   flex-direction: column;
