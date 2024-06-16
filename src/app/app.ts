@@ -40,8 +40,6 @@ class App {
 
   private notFound: NotFound;
 
-  private cartPage: Cart;
-
   private profilePage: Profile;
 
   private catalogPage: Catalog;
@@ -61,7 +59,6 @@ class App {
     this.aboutPage = new About();
     this.notFound = new NotFound();
     this.regPage = new Registration();
-    this.cartPage = new Cart();
     this.profilePage = new Profile();
     this.catalogPage = new Catalog();
     this.router = new Navigo('/');
@@ -214,9 +211,11 @@ class App {
 
   private onCart(): void {
     this.pageContent.html.innerHTML = '';
-    this.pageContent.html.append(this.cartPage.view.html);
+    const cartPage = new Cart();
+    this.pageContent.html.append(cartPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    Cart.composeView();
   }
 
   private async onProduct(): Promise<void> {
