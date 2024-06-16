@@ -764,6 +764,38 @@ class ECommerceApi {
       return response.json();
     });
   }
+
+  static async changeLineItemQuantity(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    cartId: string,
+    version: number,
+    lineItemId: string,
+    quantity: number,
+  ): Promise<ICart> {
+    return fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        version,
+        actions: [
+          {
+            action: 'changeLineItemQuantity',
+            lineItemId,
+            quantity,
+          },
+        ],
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    });
+  }
 }
 
 export default ECommerceApi;
