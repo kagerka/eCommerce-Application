@@ -5,8 +5,8 @@ import Header from '../../components/header/Header';
 import Input from '../../components/input/Input';
 import Modal from '../../components/modal/modal';
 import { ICart, ILineItem, IRemoveItemBodyRequest } from '../../interfaces/Cart.interface';
-import './Cart.scss';
 import { LOAD_PRODUCTS_TIMEOUT } from '../../utils/constants';
+import './Cart.scss';
 
 const step = 1;
 const cents = 100;
@@ -268,7 +268,13 @@ class Cart {
           if (typeof res !== 'string') {
             const itemId = deleteItmBtn.html.getAttribute('id');
             if (itemId !== null) {
-              ECommerceApi.removeItemFromCart(currentClient, token!, res.id, res.version, itemId);
+              ECommerceApi.removeItemFromCart(currentClient, token!, res.id, res.version, itemId).then((resp) => {
+                if (!(resp as ICart).lineItems.length) {
+                  this.cartContent.html.innerHTML = '';
+                  this.cartContent.html.append(Cart.emptyCart.html);
+                  Header.updateOrdersNum();
+                }
+              });
             }
           }
         });
