@@ -786,7 +786,6 @@ class ECommerceApi {
           {
             action: 'removeLineItem',
             lineItemId,
-            quantity: 1,
           },
         ],
       }),
