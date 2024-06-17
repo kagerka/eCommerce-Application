@@ -626,7 +626,9 @@ class ECommerceApi {
     if (!response.ok) {
       return 'cart with this ID does not exist';
     }
-    return response.json();
+
+    const json = await response.json();
+    return json;
   }
 
   static async createCart(clientDetails: IAPIClientDetails, token: string, shipping?: IUpdateAddress): Promise<ICart> {
