@@ -530,24 +530,6 @@ class Products {
     });
   }
 
-  private static handleHeaderLinks(cartBtn: BaseComponent): void {
-    const removeDisableAttributes = (e: Event): void => {
-      e.preventDefault();
-      cartBtn.html.removeAttribute('disabled');
-      cartBtn.html.removeAttribute('data-tooltip');
-      Header.updateOrdersNum();
-    };
-
-    const logout = document.querySelector('.logout-button');
-    logout?.addEventListener('click', (e) => removeDisableAttributes(e));
-
-    const catalogLink = document.querySelector('.header-catalog-link');
-    catalogLink?.addEventListener('click', (e) => removeDisableAttributes(e));
-
-    const homeLink = document.querySelector('.header-home-link');
-    homeLink?.addEventListener('click', (e) => removeDisableAttributes(e));
-  }
-
   private static async renderProductElements(
     id: string,
     link: string,
@@ -565,8 +547,14 @@ class Products {
       cartBtn.html.setAttribute('disabled', '');
       cartBtn.html.setAttribute('data-tooltip', 'This product is already in the cart.');
     }
+    const logout = document.querySelector('.logout-button');
+    logout?.addEventListener('click', (e) => {
+      e.preventDefault();
+      cartBtn.html.removeAttribute('disabled');
+      cartBtn.html.removeAttribute('data-tooltip');
+      Header.updateOrdersNum();
+    });
 
-    Products.handleHeaderLinks(cartBtn);
     Products.handleCartButton(cartBtn);
 
     const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });

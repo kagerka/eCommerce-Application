@@ -7,6 +7,7 @@ import Breadcrumb from './components/breadcrumb/Breadcrumb';
 import Footer from './components/footer/Footer';
 import Header from './components/header/Header';
 import About from './pages/about/About';
+import Cart from './pages/cart/Cart';
 import Catalog from './pages/catalog/Catalog';
 import Login from './pages/login/Login';
 import MainPage from './pages/main/MainPage';
@@ -14,7 +15,6 @@ import NotFound from './pages/notFound/NotFound';
 import Product from './pages/product/Product';
 import Profile from './pages/profile/Profile';
 import Registration from './pages/registation/Registration';
-import Cart from './pages/cart/Cart';
 
 const EMPTY_ARR_LENGTH = 0;
 const SINGLE = 1;
@@ -177,6 +177,7 @@ class App {
     this.pageContent.html.append(this.notFound.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    localStorage.removeItem('isProductPage');
   }
 
   private onAbout(): void {
@@ -185,6 +186,7 @@ class App {
     this.checkBtns();
     this.setLoginBtnHref();
     this.checkBreadcrumbs(['Home', 'About Us']);
+    localStorage.removeItem('isProductPage');
   }
 
   private onMain(): void {
@@ -192,6 +194,7 @@ class App {
     this.pageContent.html.append(this.mainPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    localStorage.removeItem('isProductPage');
   }
 
   private onLogout(): void {
@@ -207,6 +210,7 @@ class App {
     this.pageContent.html.append(this.catalogPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    localStorage.removeItem('isProductPage');
   }
 
   private onCart(): void {
@@ -216,6 +220,7 @@ class App {
     this.checkBtns();
     this.setLoginBtnHref();
     Cart.composeView();
+    localStorage.removeItem('isProductPage');
   }
 
   private async onProduct(): Promise<void> {
@@ -258,6 +263,7 @@ class App {
       this.setLoginBtnHref();
     }
     this.checkBreadcrumbs(['Home', 'Login']);
+    localStorage.removeItem('isProductPage');
   }
 
   private onReg(): void {
@@ -277,6 +283,7 @@ class App {
       this.setLoginBtnHref();
     }
     this.checkBreadcrumbs(['Home', 'Registration']);
+    localStorage.removeItem('isProductPage');
   }
 
   private onProfile(): void {
@@ -308,6 +315,7 @@ class App {
       this.checkBtns();
       this.setLoginBtnHref();
     }
+    localStorage.removeItem('isProductPage');
   }
 
   private setLoginBtnHref(): void {
