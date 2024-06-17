@@ -22,6 +22,7 @@ import LoginInfo from './LoginInfo';
 import './RegistrationForm.scss';
 import SecondAddress from './SecondAddress';
 import addItemsToCart from '../../utils/addLineItems/addLineItems';
+import Header from '../header/Header';
 
 const SAME_EMAIL_ERROR =
   'There is already an existing customer with the provided email. Go to the Login Page, or use a different email address.';
@@ -529,6 +530,7 @@ class RegistrationForm extends SecondAddress {
       this.createTwoAddressesForm();
       this.checkStatuses();
       Products.resetCatalog();
+      Header.updateOrdersNum();
     });
   }
 
