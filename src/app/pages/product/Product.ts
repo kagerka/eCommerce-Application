@@ -2,6 +2,7 @@ import Toastify from 'toastify-js';
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
+import Header from '../../components/header/Header';
 import { ICart, ILineItem } from '../../interfaces/Cart.interface';
 import { IProductImages } from '../../interfaces/Product.interface';
 import getBedrooms from '../../utils/productAttributes/getBedrooms';
@@ -12,10 +13,7 @@ import getSizes from '../../utils/productAttributes/getSizes';
 import closeButton from '../../utils/svg/closeButton';
 import leftArrowBtn from '../../utils/svg/leftArrow';
 import rightArrowBtn from '../../utils/svg/rightArrow';
-
-import Header from '../../components/header/Header';
 import './Product.scss';
-import Header from '../../components/header/Header';
 
 const gap = 16;
 const startPos = 0;
