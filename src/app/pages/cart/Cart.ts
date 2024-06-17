@@ -88,16 +88,19 @@ class Cart {
         Cart.handleEmptyCartBtnClick(emptyButton);
 
         if (typeof res !== 'string') {
-        for (let i = 0; i < (res).lineItems?.length; i += step) {
-          const cartProduct = this.createCartItem(
-            res.lineItems[i].name.en,
-            res.lineItems[i].totalPrice.centAmount / cents,
-            res.lineItems[i].variant.images[0].url,
-          );
-          cartProductsConteiner.html.append(cartProduct.html);
-        }
-        const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: `0.00 $` });
-        totalConteiner.html.append(totalTitle.html, totalPrice.html);
+          for (let i = 0; i < res.lineItems?.length; i += step) {
+            const cartProduct = this.createCartItem(
+              res.lineItems[i].name.en,
+              res.lineItems[i].totalPrice.centAmount / res.lineItems[i].quantity / cents,
+              res.lineItems[i].totalPrice.centAmount / cents,
+              res.lineItems[i].variant.images[0].url,
+              res.lineItems[i].id,
+              `${res.lineItems[i].quantity}`,
+            );
+            cartProductsConteiner.html.append(cartProduct.html);
+          }
+          const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: `0.00 $` });
+          totalConteiner.html.append(totalTitle.html, totalPrice.html);
         }
       });
       Cart.updateTotalPrice();
@@ -106,27 +109,34 @@ class Cart {
     return fullCart;
   }
 
-  static updateTotalPrice():void {
-  setTimeout(() => {
-     let totalPriceValue = 0.00;
-    const token = localStorage.getItem('tokenPassword')
-      ? localStorage.getItem('tokenPassword')
-      : localStorage.getItem('tokenAnonymous');
-    const cartId = localStorage.getItem('cartId');
-    if (cartId) {
-      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-        if (typeof res !== 'string') {
-          for (let i = 0; i < (res).lineItems?.length; i += step) {
-            totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
+  static updateTotalPrice(): void {
+    setTimeout(() => {
+      let totalPriceValue = 0.0;
+      const token = localStorage.getItem('tokenPassword')
+        ? localStorage.getItem('tokenPassword')
+        : localStorage.getItem('tokenAnonymous');
+      const cartId = localStorage.getItem('cartId');
+      if (cartId) {
+        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+          if (typeof res !== 'string') {
+            for (let i = 0; i < res.lineItems?.length; i += step) {
+              totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
+            }
+            document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`;
           }
-          document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`
-          }
-        })
+        });
       }
     }, timeout);
   }
 
-  private static createCartItem(nameItm: string, priceItm: number, linkItm: string): BaseComponent {
+  private static createCartItem(
+    nameItm: string,
+    priceItm: number,
+    totalPriceItm: number,
+    linkItm: string,
+    itemId: string,
+    quantity: string,
+  ): BaseComponent {
     const cartProduct = new BaseComponent({ tag: 'li', class: ['cart-itm'] });
     const imgContainer = new BaseComponent({ tag: 'div', class: ['cart-itm-img-container'] });
     const infoContainer = new BaseComponent({ tag: 'div', class: ['cart-itm-info-container'] });
@@ -144,16 +154,16 @@ class Cart {
     const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: `${priceItm} $` });
 
     const qConteiner = new BaseComponent({ tag: 'div', class: ['quantity-container'] });
-    const qMinus = new BaseComponent({ tag: 'button', class: ['quantity-minus'], text: '-' });
-    const qValue = new BaseComponent({ tag: 'p', class: ['quantity-value'], text: '1' });
-    const qPlus = new BaseComponent({ tag: 'button', class: ['quantity-plus'], text: '+' });
+    const qMinus = new BaseComponent({ tag: 'button', class: ['quantity-minus'], text: '-', id: itemId });
+    const qValue = new BaseComponent({ tag: 'p', class: ['quantity-value'], text: quantity });
+    const qPlus = new BaseComponent({ tag: 'button', class: ['quantity-plus'], text: '+', id: itemId });
     const deleteItmBtn = new BaseComponent({ tag: 'div', class: ['delete-btn'] });
     const totalConteiner = new BaseComponent({ tag: 'div', class: ['total-itm-conteiner'] });
     const totalTitle = new BaseComponent({ tag: 'div', class: ['total-itm-title'], text: `Total: ` });
     const totalPrice = new BaseComponent({
       tag: 'div',
       class: ['total-itm-price'],
-      text: `${priceItm * +qValue.html.textContent!} $`,
+      text: `${totalPriceItm} $`,
     });
 
     Cart.handleMinus(qMinus, qValue, totalPrice, priceItm);
@@ -171,6 +181,20 @@ class Cart {
     return cartProduct;
   }
 
+  private static changeQuantityItem(itemId: string, quantity: number): void {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    if (cartId) {
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        if (typeof res !== 'string') {
+          ECommerceApi.changeLineItemQuantity(currentClient, token!, res.id, res.version, itemId, quantity);
+        }
+      });
+    }
+  }
+
   private static handleMinus(
     qMinus: BaseComponent,
     qValue: BaseComponent,
@@ -182,6 +206,7 @@ class Cart {
       if (+value! > step) {
         qValue.html.textContent! = `${+value! - step}`;
         totalPrice.html.textContent! = `${(priceItm * +qValue.html.textContent!).toFixed(TWO)} $`;
+        Cart.changeQuantityItem(qMinus.html.getAttribute('id')!, +qValue.html.textContent!);
         Header.updateOrdersNum();
         Cart.updateTotalPrice();
       }
@@ -198,6 +223,7 @@ class Cart {
       const value = qValue.html.textContent;
       qValue.html.textContent! = `${+value! + step}`;
       totalPrice.html.textContent! = `${(priceItm * +qValue.html.textContent!).toFixed(TWO)} $`;
+      Cart.changeQuantityItem(qPlus.html.getAttribute('id')!, +qValue.html.textContent!);
       Header.updateOrdersNum();
       Cart.updateTotalPrice();
     });
