@@ -1,15 +1,15 @@
 import IAPIClientDetails from '../interfaces/APIClientDetails.interface';
 import IAccessToken from '../interfaces/AccessToken.interface';
+import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
+import { ICart } from '../interfaces/Cart.interface';
 import ICustomerData from '../interfaces/CustomerData.interface';
 import ICustomerProfile from '../interfaces/CustomerProfile.interface';
 import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface';
 import ICustomerUpdateRequest from '../interfaces/CustomerUpdateRequest.interface';
 import { ICategories, IProducts, IQueryProducts } from '../interfaces/Product.interface';
 import ITokenPassword from '../interfaces/TokenPassword.interface';
-import { TActions, TCustomerData, TCustomerPassword } from '../interfaces/UpdateCustomerInfo.interface';
-import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
-import ICart from '../interfaces/Cart.interface';
 import IUpdateAddress from '../interfaces/UpdateAddress.interface';
+import { TActions, TCustomerData, TCustomerPassword } from '../interfaces/UpdateCustomerInfo.interface';
 import { CARDS_PER_PAGE, DEFAULT_PAGE_NUMBER } from '../utils/constants';
 
 class ECommerceApi {
@@ -626,7 +626,9 @@ class ECommerceApi {
     if (!response.ok) {
       return 'cart with this ID does not exist';
     }
-    return response.json();
+
+    const json = await response.json();
+    return json;
   }
 
   static async createCart(clientDetails: IAPIClientDetails, token: string, shipping?: IUpdateAddress): Promise<ICart> {
@@ -723,7 +725,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        console.error(`HTTP error! Status: ${response.status}`);
       }
       return response.json();
     });

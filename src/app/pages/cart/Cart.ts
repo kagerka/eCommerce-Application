@@ -1,9 +1,13 @@
+import ECommerceApi from '../../api/ECommerceApi';
+import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Input from '../../components/input/Input';
+import { ICart } from '../../interfaces/Cart.interface';
 import './Cart.scss';
 
 const step = 1;
-const cartItemsNum = 2;
+const cents = 100;
+const TWO = 2;
 
 class Cart {
   private cart: BaseComponent;
@@ -22,9 +26,22 @@ class Cart {
     this.cart.append(Cart.composeView().html);
   }
 
-  private static composeView(): BaseComponent {
-    // this.cartContent.html.append(Cart.emptyCart.html);
-    Cart.cartContent.html.append(Cart.fullCart.html);
+  static composeView(): BaseComponent {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    if (cartId) {
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        if ((res as ICart).lineItems) {
+          Cart.cartContent.html.append(Cart.fullCart.html);
+        } else {
+          this.cartContent.html.append(Cart.emptyCart.html);
+        }
+      });
+    } else {
+      this.cartContent.html.append(Cart.emptyCart.html);
+    }
     return Cart.cartContent;
   }
 
@@ -36,13 +53,22 @@ class Cart {
     return new BaseComponent({ tag: 'div', class: ['cart-content'] });
   }
 
-  private static createFullCart(): BaseComponent {
+  static createFullCart(): BaseComponent {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+
     const fullCart = new BaseComponent({ tag: 'div', class: ['full-cart'] });
     const cartTop = new BaseComponent({ tag: 'div', class: ['cart-top'] });
     const cartProductsConteiner = new BaseComponent({ tag: 'ul', class: ['cart-itms-conteiner'] });
     const priceConteiner = new BaseComponent({ tag: 'div', class: ['price-conteiner'] });
     const emptyButton = new BaseComponent({ tag: 'button', class: ['empty-button'], text: 'Empty Cart' });
-    const proceedButton = new BaseComponent({ tag: 'button', class: ['proceed-button'], text: 'Proceed To Checkout' });
+    const proceedButton = new BaseComponent({
+      tag: 'button',
+      class: ['proceed-button'],
+      text: 'Proceed To Checkout',
+    });
     const promoConteiner = new BaseComponent({ tag: 'div', class: ['promo-conteiner'] });
     const promoInput = new Input({ type: 'text', class: ['promo-input'], placeholder: 'Promo Code...' });
     const promoBtn = new BaseComponent({ tag: 'button', class: ['promo-button'], text: 'Apply' });
@@ -50,42 +76,47 @@ class Cart {
     const totalTitle = new BaseComponent({ tag: 'h4', class: ['total-title'], text: 'Total:' });
     const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: '300,00 $' });
 
-    Cart.handleEmptyCartBtnClick(emptyButton);
+    if (cartId) {
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        Cart.handleEmptyCartBtnClick(emptyButton);
 
-    fullCart.html.append(cartTop.html, emptyButton.html);
-    cartTop.html.append(cartProductsConteiner.html, priceConteiner.html);
-    priceConteiner.html.append(promoConteiner.html, totalConteiner.html, proceedButton.html);
-    promoConteiner.html.append(promoInput.view.html, promoBtn.html);
-    totalConteiner.html.append(totalTitle.html, totalPrice.html);
+        fullCart.html.append(cartTop.html, emptyButton.html);
+        cartTop.html.append(cartProductsConteiner.html, priceConteiner.html);
+        priceConteiner.html.append(promoConteiner.html, totalConteiner.html, proceedButton.html);
+        promoConteiner.html.append(promoInput.view.html, promoBtn.html);
+        totalConteiner.html.append(totalTitle.html, totalPrice.html);
 
-    for (let i = 0; i < cartItemsNum; i += step) {
-      const cartProduct = this.createCartItem();
-      cartProductsConteiner.html.append(cartProduct.html);
+        for (let i = 0; i < (res as ICart).lineItems?.length; i += step) {
+          const cartProduct = this.createCartItem(
+            (res as ICart).lineItems[i].name.en,
+            (res as ICart).lineItems[i].totalPrice.centAmount / cents,
+            (res as ICart).lineItems[i].variant.images[0].url,
+          );
+          cartProductsConteiner.html.append(cartProduct.html);
+        }
+      });
     }
+
     return fullCart;
   }
 
-  private static createCartItem(): BaseComponent {
-    const productDiscount = true;
-
+  private static createCartItem(nameItm: string, priceItm: number, linkItm: string): BaseComponent {
     const cartProduct = new BaseComponent({ tag: 'li', class: ['cart-itm'] });
     const imgContainer = new BaseComponent({ tag: 'div', class: ['cart-itm-img-container'] });
     const infoContainer = new BaseComponent({ tag: 'div', class: ['cart-itm-info-container'] });
     const img = new BaseComponent({
       tag: 'img',
       class: ['cart-itm-img'],
-      src: 'https://i5.walmartimages.com/seo/2-Person-Dome-Tent-with-Rain-Fly-Carry-Bag-by-Wakeman-Outdoors_652db343-fb36-48ed-a9e6-bcd845268fd7_1.fdcf52e470534e424578bb10a0e7c66f.jpeg',
+      src: linkItm,
     });
     const titleConteiner = new BaseComponent({ tag: 'div', class: ['title-conteiner'] });
     const title = new BaseComponent({
       tag: 'h3',
       class: ['product-title'],
-      text: 'Camping tent - 2 SECONDS XL - 3 Person - Fresh & Black',
+      text: nameItm,
     });
-    const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: '150.00 $' });
-    if (productDiscount) {
-      price.html.textContent = '110.00 $';
-    }
+    const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: `${priceItm} $` });
+
     const qConteiner = new BaseComponent({ tag: 'div', class: ['quantity-container'] });
     const qMinus = new BaseComponent({ tag: 'button', class: ['quantity-minus'], text: '-' });
     const qValue = new BaseComponent({ tag: 'p', class: ['quantity-value'], text: '1' });
@@ -93,10 +124,14 @@ class Cart {
     const deleteItmBtn = new BaseComponent({ tag: 'div', class: ['delete-btn'] });
     const totalConteiner = new BaseComponent({ tag: 'div', class: ['total-itm-conteiner'] });
     const totalTitle = new BaseComponent({ tag: 'div', class: ['total-itm-title'], text: `Total: ` });
-    const totalPrice = new BaseComponent({ tag: 'div', class: ['total-itm-price'], text: `${price.html.textContent}` });
+    const totalPrice = new BaseComponent({
+      tag: 'div',
+      class: ['total-itm-price'],
+      text: `${priceItm * +qValue.html.textContent!} $`,
+    });
 
-    Cart.handleMinus(qMinus, qValue);
-    Cart.handlePlus(qPlus, qValue);
+    Cart.handleMinus(qMinus, qValue, totalPrice, priceItm);
+    Cart.handlePlus(qPlus, qValue, totalPrice, priceItm);
     Cart.handleDeleteItmBtnClick(deleteItmBtn, cartProduct);
 
     cartProduct.html.append(imgContainer.html, infoContainer.html);
@@ -110,19 +145,31 @@ class Cart {
     return cartProduct;
   }
 
-  private static handleMinus(qMinus: BaseComponent, qValue: BaseComponent): void {
+  private static handleMinus(
+    qMinus: BaseComponent,
+    qValue: BaseComponent,
+    totalPrice: BaseComponent,
+    priceItm: number,
+  ): void {
     qMinus.html.addEventListener('click', () => {
       const value = qValue.html.textContent;
       if (+value! > step) {
         qValue.html.textContent! = `${+value! - step}`;
+        totalPrice.html.textContent! = `${(priceItm * +qValue.html.textContent!).toFixed(TWO)} $`;
       }
     });
   }
 
-  private static handlePlus(qPlus: BaseComponent, qValue: BaseComponent): void {
+  private static handlePlus(
+    qPlus: BaseComponent,
+    qValue: BaseComponent,
+    totalPrice: BaseComponent,
+    priceItm: number,
+  ): void {
     qPlus.html.addEventListener('click', () => {
       const value = qValue.html.textContent;
       qValue.html.textContent! = `${+value! + step}`;
+      totalPrice.html.textContent! = `${(priceItm * +qValue.html.textContent!).toFixed(TWO)} $`;
     });
   }
 
