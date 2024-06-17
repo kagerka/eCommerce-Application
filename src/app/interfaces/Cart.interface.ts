@@ -80,6 +80,19 @@ export interface ILineItem {
     assets: [];
   };
   price: {
+    discounted?: {
+      discount: {
+        id: string;
+        typeId: string;
+      };
+      value: {
+        type: string;
+        currencyCode: string;
+        centAmount: number;
+        fractionDigits: number;
+        preciseAmount?: number;
+      };
+    };
     id: string;
     value: {
       type: string;
