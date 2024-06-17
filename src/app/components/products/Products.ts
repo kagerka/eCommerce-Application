@@ -6,6 +6,7 @@ import Cart from '../../pages/cart/Cart';
 import { LOAD_PRODUCTS_TIMEOUT } from '../../utils/constants';
 import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
+import Header from '../header/Header';
 import Input from '../input/Input';
 import LoaderIcon from '../loader-icon/LoaderIcon';
 import './Products.scss';
@@ -549,6 +550,7 @@ class Products {
       e.preventDefault();
       cartBtn.html.removeAttribute('disabled');
       cartBtn.html.removeAttribute('data-tooltip');
+      Header.updateOrdersNum();
     });
 
     Products.handleCartButton(cartBtn);
@@ -585,6 +587,7 @@ class Products {
         ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
           if (typeof res !== 'string') {
             ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
+              Header.updateOrdersNum();
               localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
               Cart.createFullCart();
             });
@@ -619,6 +622,7 @@ class Products {
           if (cartId) {
             ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
               if (typeof res !== 'string') {
+                Header.updateOrdersNum();
                 ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
               }
             });

@@ -1,7 +1,10 @@
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
+import { ICart } from '../../interfaces/Cart.interface';
 import BaseComponent from '../BaseComponent';
 import './Header.scss';
+
+const timeout = 100;
 
 class Header {
   private headerContainer: BaseComponent;
@@ -254,11 +257,24 @@ class Header {
   }
 
   private static createCartOrdersNum(): BaseComponent {
-    return new BaseComponent({
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    const orderNum = new BaseComponent({
       tag: 'div',
       class: ['cart-orders-num'],
-      text: '0',
     });
+
+    if (cartId) {
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        orderNum.html.textContent = `${(res as ICart).lineItems.length}`;
+      });
+    } else {
+      orderNum.html.textContent = '0';
+    }
+
+    return orderNum;
   }
 
   private static createLogoutButtonElement(): BaseComponent {
@@ -309,6 +325,24 @@ class Header {
     this.profileButton.html.addEventListener('click', (event: Event) => {
       event.preventDefault();
     });
+  }
+
+  static updateOrdersNum(): void {
+    setTimeout(() => {
+      const token = localStorage.getItem('tokenPassword')
+        ? localStorage.getItem('tokenPassword')
+        : localStorage.getItem('tokenAnonymous');
+      const cartId = localStorage.getItem('cartId');
+      if (cartId) {
+        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+          if (typeof res !== 'string') {
+            document.getElementsByClassName('cart-orders-num')[0].textContent = `${res.lineItems.length}`;
+          }
+        });
+      } else {
+        document.getElementsByClassName('cart-orders-num')[0].textContent = '0';
+      }
+    }, timeout);
   }
 
   get profileBtn(): BaseComponent {
