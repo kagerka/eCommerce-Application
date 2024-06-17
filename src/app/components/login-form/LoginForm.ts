@@ -18,6 +18,7 @@ import validateLength from '../../utils/validation/validateLength';
 import validateRegExp from '../../utils/validation/validateRegExp';
 import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
+import Header from '../header/Header';
 import Input from '../input/Input';
 import Products from '../products/Products';
 
@@ -434,6 +435,7 @@ class LoginForm {
             Products.resetCatalog();
           }
         }
+        Header.updateOrdersNum();
       }
     });
   }
