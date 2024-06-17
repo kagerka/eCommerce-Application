@@ -80,6 +80,19 @@ export interface ILineItem {
     assets: [];
   };
   price: {
+    discounted?: {
+      discount: {
+        id: string;
+        typeId: string;
+      };
+      value: {
+        type: string;
+        currencyCode: string;
+        centAmount: number;
+        fractionDigits: number;
+        preciseAmount?: number;
+      };
+    };
     id: string;
     value: {
       type: string;
@@ -111,6 +124,12 @@ export interface ILineItem {
     fractionDigits: number;
   };
   taxedPricePortions: [];
+}
+
+export interface IRemoveItemBodyRequest {
+  action: string;
+  lineItemId: string;
+  quantity: number;
 }
 
 export interface IDiscount {

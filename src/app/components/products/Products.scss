@@ -398,6 +398,16 @@
   color: $gray;
 }
 
+.toast-add-success {
+  padding: 20px;
+  max-width: 300px;
+  color: $white;
+  font-size: 18px;
+  line-height: 28px;
+  z-index: 100;
+  background-color: $darkGreen;
+}
+
 @media screen and (max-width: 1270px) {
   .products-list {
     grid-template-columns: repeat(2, 1fr);

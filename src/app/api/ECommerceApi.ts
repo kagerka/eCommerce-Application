@@ -1,7 +1,7 @@
 import IAPIClientDetails from '../interfaces/APIClientDetails.interface';
 import IAccessToken from '../interfaces/AccessToken.interface';
 import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
-import { ICart, IDiscount } from '../interfaces/Cart.interface';
+import { ICart, IRemoveItemBodyRequest, IDiscount } from '../interfaces/Cart.interface';
 import ICustomerData from '../interfaces/CustomerData.interface';
 import ICustomerProfile from '../interfaces/CustomerProfile.interface';
 import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface';
@@ -762,6 +762,93 @@ class ECommerceApi {
     }).then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    });
+  }
+
+  static async removeItemFromCart(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    cartId: string,
+    version: number,
+    lineItemId: string,
+  ): Promise<ICart> {
+    return fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        version,
+        actions: [
+          {
+            action: 'removeLineItem',
+            lineItemId,
+          },
+        ],
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        console.error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    });
+  }
+
+  static async changeLineItemQuantity(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    cartId: string,
+    version: number,
+    lineItemId: string,
+    quantity: number,
+  ): Promise<ICart> {
+    return fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        version,
+        actions: [
+          {
+            action: 'changeLineItemQuantity',
+            lineItemId,
+            quantity,
+          },
+        ],
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    });
+  }
+
+  static async removeAllItemsFromCart(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    cartId: string,
+    version: number,
+    actionsItems: IRemoveItemBodyRequest[],
+  ): Promise<ICart> {
+    return fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        version,
+        actions: actionsItems,
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        console.error(`HTTP error! Status: ${response.status}`);
       }
       return response.json();
     });

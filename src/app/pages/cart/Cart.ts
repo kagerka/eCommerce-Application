@@ -3,9 +3,10 @@ import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Header from '../../components/header/Header';
 import Input from '../../components/input/Input';
-import { ICart } from '../../interfaces/Cart.interface';
-import { LOAD_PRODUCTS_TIMEOUT } from '../../utils/constants';
+import Modal from '../../components/modal/modal';
+import { ICart, ILineItem, IRemoveItemBodyRequest } from '../../interfaces/Cart.interface';
 import './Cart.scss';
+import { LOAD_PRODUCTS_TIMEOUT } from '../../utils/constants';
 
 const step = 1;
 const cents = 100;
@@ -36,7 +37,8 @@ class Cart {
     if (cartId) {
       ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
         if (typeof res !== 'string') {
-          if (res.lineItems) {
+          const ZERO = 0;
+          if (res.lineItems.length > ZERO) {
             Cart.cartContent.html.append(Cart.fullCart.html);
           } else {
             this.cartContent.html.append(Cart.emptyCart.html);
@@ -84,6 +86,8 @@ class Cart {
     const discountedTitle = new BaseComponent({ tag: 'h4', class: ['total-title'], text: '' });
     const discountedPrice = new BaseComponent({ tag: 'div', class: ['discounted-price'], text: '' });
 
+    (promoInput.view.html as HTMLInputElement).value = 'TEA-TEAM';
+
     fullCart.html.append(cartTop.html, emptyButton.html);
     cartTop.html.append(cartProductsConteiner.html, priceConteiner.html);
     priceConteiner.html.append(promoConteiner.html, errorFormat.html, totalConteiner.html);
@@ -96,24 +100,33 @@ class Cart {
       ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
         Cart.handleEmptyCartBtnClick(emptyButton);
 
-        for (let i = 0; i < (res as ICart).lineItems?.length; i += step) {
-          const cartProduct = this.createCartItem(
-            (res as ICart).lineItems[i].name.en,
-            (res as ICart).lineItems[i].totalPrice.centAmount / cents,
-            (res as ICart).lineItems[i].variant.images[0].url,
-          );
-          cartProductsConteiner.html.append(cartProduct.html);
+        if (typeof res !== 'string') {
+          Cart.uploadCartItems(res, cartProductsConteiner);
+          totalConteiner.html.append(totalTitle.html, totalPrice.html);
         }
-
-        Cart.updateTotalPrice(totalPrice);
-        Cart.handlePromoSubmit(promoInput, promoBtn, errorFormat, totalPrice, discountedTitle, discountedPrice);
       });
+      Cart.updateTotalPrice();
+      Cart.handlePromoSubmit(promoInput, promoBtn, errorFormat, totalPrice, discountedTitle, discountedPrice);
     }
 
     return fullCart;
   }
 
-  static updateTotalPrice(totalPrice: BaseComponent): void {
+  private static uploadCartItems(res: ICart, cartProductsConteiner: BaseComponent): void {
+    for (let i = 0; i < res.lineItems?.length; i += step) {
+      const cartProduct = this.createCartItem(
+        res.lineItems[i].name.en,
+        res.lineItems[i].totalPrice.centAmount / res.lineItems[i].quantity / cents,
+        res.lineItems[i].totalPrice.centAmount / cents,
+        res.lineItems[i].variant.images[0].url,
+        res.lineItems[i].id,
+        `${res.lineItems[i].quantity}`,
+      );
+      cartProductsConteiner.html.append(cartProduct.html);
+    }
+  }
+
+  static updateTotalPrice(): void {
     setTimeout(() => {
       let totalPriceValue = 0.0;
       const token = localStorage.getItem('tokenPassword')
@@ -121,19 +134,31 @@ class Cart {
         : localStorage.getItem('tokenAnonymous');
       const cartId = localStorage.getItem('cartId');
       if (cartId) {
-        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-          if (typeof res !== 'string' && document.getElementsByClassName('total-price')[0]) {
-            for (let i = 0; i < res.lineItems?.length; i += step) {
-              totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
+        ECommerceApi.getCart(currentClient, token!, cartId!)
+          .then((res) => {
+            if (typeof res !== 'string') {
+              for (let i = 0; i < res.lineItems?.length; i += step) {
+                totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
+              }
+              if (document.getElementsByClassName('total-price')[0])
+                document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`;
             }
-            totalPrice.html.textContent = `${totalPriceValue.toFixed(TWO)} $`;
-          }
-        });
+          })
+          .catch((error) => {
+            console.error(`Error updateTotalPrice: ${error}`);
+          });
       }
     }, LOAD_PRODUCTS_TIMEOUT);
   }
 
-  private static createCartItem(nameItm: string, priceItm: number, linkItm: string): BaseComponent {
+  private static createCartItem(
+    nameItm: string,
+    priceItm: number,
+    totalPriceItm: number,
+    linkItm: string,
+    itemId: string,
+    quantity: string,
+  ): BaseComponent {
     const cartProduct = new BaseComponent({ tag: 'li', class: ['cart-itm'] });
     const imgContainer = new BaseComponent({ tag: 'div', class: ['cart-itm-img-container'] });
     const infoContainer = new BaseComponent({ tag: 'div', class: ['cart-itm-info-container'] });
@@ -151,21 +176,21 @@ class Cart {
     const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: `${priceItm} $` });
 
     const qConteiner = new BaseComponent({ tag: 'div', class: ['quantity-container'] });
-    const qMinus = new BaseComponent({ tag: 'button', class: ['quantity-minus'], text: '-' });
-    const qValue = new BaseComponent({ tag: 'p', class: ['quantity-value'], text: '1' });
-    const qPlus = new BaseComponent({ tag: 'button', class: ['quantity-plus'], text: '+' });
-    const deleteItmBtn = new BaseComponent({ tag: 'div', class: ['delete-btn'] });
+    const qMinus = new BaseComponent({ tag: 'button', class: ['quantity-minus'], text: '-', id: itemId });
+    const qValue = new BaseComponent({ tag: 'p', class: ['quantity-value'], text: quantity });
+    const qPlus = new BaseComponent({ tag: 'button', class: ['quantity-plus'], text: '+', id: itemId });
+    const deleteItmBtn = new BaseComponent({ tag: 'div', class: ['delete-btn'], id: itemId });
     const totalConteiner = new BaseComponent({ tag: 'div', class: ['total-itm-conteiner'] });
     const totalTitle = new BaseComponent({ tag: 'div', class: ['total-itm-title'], text: `Total: ` });
     const totalPrice = new BaseComponent({
       tag: 'div',
       class: ['total-itm-price'],
-      text: `${priceItm * +qValue.html.textContent!} $`,
+      text: `${totalPriceItm} $`,
     });
 
     Cart.handleMinus(qMinus, qValue, totalPrice, priceItm);
     Cart.handlePlus(qPlus, qValue, totalPrice, priceItm);
-    Cart.handleDeleteItmBtnClick(deleteItmBtn, cartProduct, totalPrice);
+    Cart.handleDeleteItmBtnClick(deleteItmBtn, cartProduct);
 
     cartProduct.html.append(imgContainer.html, infoContainer.html);
     imgContainer.html.append(img.html);
@@ -176,6 +201,20 @@ class Cart {
     qConteiner.html.append(qMinus.html, qValue.html, qPlus.html);
 
     return cartProduct;
+  }
+
+  private static changeQuantityItem(itemId: string, quantity: number): void {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    if (cartId) {
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        if (typeof res !== 'string') {
+          ECommerceApi.changeLineItemQuantity(currentClient, token!, res.id, res.version, itemId, quantity);
+        }
+      });
+    }
   }
 
   private static handleMinus(
@@ -189,8 +228,9 @@ class Cart {
       if (+value! > step) {
         qValue.html.textContent! = `${+value! - step}`;
         totalPrice.html.textContent! = `${(priceItm * +qValue.html.textContent!).toFixed(TWO)} $`;
+        Cart.changeQuantityItem(qMinus.html.getAttribute('id')!, +qValue.html.textContent!);
         Header.updateOrdersNum();
-        Cart.updateTotalPrice(totalPrice);
+        Cart.updateTotalPrice();
       }
     });
   }
@@ -205,21 +245,69 @@ class Cart {
       const value = qValue.html.textContent;
       qValue.html.textContent! = `${+value! + step}`;
       totalPrice.html.textContent! = `${(priceItm * +qValue.html.textContent!).toFixed(TWO)} $`;
+      Cart.changeQuantityItem(qPlus.html.getAttribute('id')!, +qValue.html.textContent!);
       Header.updateOrdersNum();
-      Cart.updateTotalPrice(totalPrice);
+      Cart.updateTotalPrice();
     });
   }
 
-  private static handleDeleteItmBtnClick(
-    deleteItmBtn: BaseComponent,
-    cartProduct: BaseComponent,
-    totalPrice: BaseComponent,
-  ): void {
+  private static handleDeleteItmBtnClick(deleteItmBtn: BaseComponent, cartProduct: BaseComponent): void {
     deleteItmBtn.html.addEventListener('click', () => {
       cartProduct.html.remove();
+      const token = localStorage.getItem('tokenPassword')
+        ? localStorage.getItem('tokenPassword')
+        : localStorage.getItem('tokenAnonymous');
+      const cartId = localStorage.getItem('cartId');
+      if (cartId) {
+        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+          if (typeof res !== 'string') {
+            const itemId = deleteItmBtn.html.getAttribute('id');
+            if (itemId !== null) {
+              ECommerceApi.removeItemFromCart(currentClient, token!, res.id, res.version, itemId);
+            }
+          }
+        });
+      }
       Header.updateOrdersNum();
-      Cart.updateTotalPrice(totalPrice);
+      Cart.updateTotalPrice();
     });
+  }
+
+  private static createModalContent(): {
+    modalContent: BaseComponent;
+    modalYesBtn: BaseComponent;
+    modalNoBtn: BaseComponent;
+  } {
+    const modalContent = new BaseComponent({ tag: 'div', class: ['modal-content'] });
+
+    const modalHeading = new BaseComponent({
+      tag: 'h2',
+      class: ['modal-heading'],
+      text: 'Empty the cart',
+    });
+
+    const modalQuestion = new BaseComponent({
+      tag: 'p',
+      class: ['modal-question'],
+      text: 'Are you sure you want to remove all products from the cart?',
+    });
+    const modalButtonContainer = new BaseComponent({
+      tag: 'div',
+      class: ['modal-button-container'],
+    });
+    const modalYesBtn = new BaseComponent({
+      tag: 'button',
+      class: ['modal-yes'],
+      text: 'Yes',
+    });
+    const modalNoBtn = new BaseComponent({
+      tag: 'button',
+      class: ['modal-no'],
+      text: 'No',
+    });
+    modalButtonContainer.html.append(modalYesBtn.html, modalNoBtn.html);
+    modalContent.html.append(modalHeading.html, modalQuestion.html, modalButtonContainer.html);
+    return { modalContent, modalYesBtn, modalNoBtn };
   }
 
   private static handlePromoSubmit(
@@ -238,7 +326,7 @@ class Cart {
         ECommerceApi.getCartDiscount(currentClient, token!).then((cartRes) => {
           if (res.results[0].code === (promoInput.view.html as HTMLInputElement).value) {
             errorFormat.html.textContent = '';
-            (promoInput.view.html as HTMLInputElement).value = '';
+            (promoInput.view.html as HTMLInputElement).value = 'TEA-TEAM';
             const prevPrice = +parseFloat(totalPrice.html.textContent!);
             const persent = cartRes.results[0].value.permyriad;
             totalPrice.html.classList.add('crossed');
@@ -261,17 +349,46 @@ class Cart {
     discountedTitle: BaseComponent,
   ): void {
     errorFormat.html.textContent = '';
-    (promoInput.view.html as HTMLInputElement).value = '';
+    (promoInput.view.html as HTMLInputElement).value = 'TEA-TEAM';
     totalPrice.html.classList.remove('crossed');
     discountedPrice.html.textContent = '';
     discountedTitle.html.textContent = '';
   }
 
   private static handleEmptyCartBtnClick(emptyButton: BaseComponent): void {
-    emptyButton.html.addEventListener('click', () => {
-      Cart.fullCart.html.remove();
-      this.cartContent.html.append(Cart.emptyCart.html);
-      Header.updateOrdersNum();
+    emptyButton.html.addEventListener('click', async () => {
+      const modal = new Modal();
+      const modalContainer = Cart.createModalContent();
+      modal.container.html.append(modalContainer.modalContent.html);
+      Cart.cartContent.html.append(modal.view.html);
+
+      modalContainer.modalNoBtn.html.addEventListener('click', () => {
+        modal.destroy();
+      });
+
+      modalContainer.modalYesBtn.html.addEventListener('click', async () => {
+        const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+        const cartId = localStorage.getItem('cartId');
+        if (token && cartId) {
+          const actions: IRemoveItemBodyRequest[] = [];
+          const res = (await ECommerceApi.getCart(currentClient, token, cartId)) as ICart;
+          if (res.lineItems) {
+            res.lineItems.forEach((product: ILineItem) => {
+              actions.push({
+                action: 'removeLineItem',
+                lineItemId: product.id,
+                quantity: product.quantity,
+              });
+            });
+          }
+          await ECommerceApi.removeAllItemsFromCart(currentClient, token, cartId, res.version, actions);
+          modal.destroy();
+        }
+
+        Cart.fullCart.html.remove();
+        this.cartContent.html.append(Cart.emptyCart.html);
+        Header.updateOrdersNum();
+      });
     });
   }
 

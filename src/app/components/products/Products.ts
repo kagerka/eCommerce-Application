@@ -1,3 +1,4 @@
+import Toastify from 'toastify-js';
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import { ICart, ILineItem } from '../../interfaces/Cart.interface';
@@ -486,8 +487,9 @@ class Products {
       ],
     });
 
-    productLink.html.addEventListener('click', () => {
+    productLink.html.addEventListener('click', async () => {
       localStorage.setItem('id', JSON.stringify(id));
+      localStorage.setItem('isProductPage', JSON.stringify(true));
     });
 
     return productLink;
@@ -577,31 +579,33 @@ class Products {
     }
   }
 
-  private static addItemToAnonymousCart(itemID: string): void {
+  private static async addItemToAnonymousCart(itemID: string): Promise<void> {
     const tokenPassword = localStorage.getItem('tokenPassword');
     const tokenAnonymous = localStorage.getItem('tokenAnonymous');
 
     if (tokenAnonymous && !tokenPassword) {
       const cartId = localStorage.getItem('cartId');
       if (cartId) {
-        ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
+        await ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
           if (typeof res !== 'string') {
             ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
-              Header.updateOrdersNum();
               localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+              Header.updateOrdersNum();
               Cart.createFullCart();
             });
           }
         });
+        await Products.toastAddSuccess();
       }
       if (cartId === null) {
-        ECommerceApi.createCart(currentClient, tokenAnonymous).then((res) => {
+        ECommerceApi.createCart(currentClient, tokenAnonymous).then(async (res) => {
           localStorage.setItem('cartId', res.id);
-          ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
+          await ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
             localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
-            Cart.createFullCart();
             Header.updateOrdersNum();
+            Cart.createFullCart();
           });
+          await Products.toastAddSuccess();
         });
       }
     }
@@ -621,19 +625,30 @@ class Products {
         if (tokenPassword && !tokenAnonymous) {
           const cartId = localStorage.getItem('cartId');
           if (cartId) {
-            ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
+            ECommerceApi.getCart(currentClient, tokenPassword, cartId).then(async (res) => {
               if (typeof res !== 'string') {
-                ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id).then(
-                  () => {
-                    Header.updateOrdersNum();
-                  },
-                );
+                Header.updateOrdersNum();
+                await ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
+                await Products.toastAddSuccess();
               }
             });
           }
         }
       }
     });
+  }
+
+  private static toastAddSuccess(): void {
+    Toastify({
+      text: 'This product has been added to the cart successfully',
+      className: 'toast-add-success',
+      gravity: 'bottom',
+      style: {
+        position: 'fixed',
+        bottom: '15px',
+        right: '15px',
+      },
+    }).showToast();
   }
 
   private static createProductCard(cardNumber: number, fullData: boolean, storage: string = 'products'): BaseComponent {
@@ -836,55 +851,6 @@ class Products {
     });
     return categoryNameEl;
   }
-
-  // private static handleCategoryClick(
-  //   categoryNameEl: BaseComponent,
-  //   pathPart: { name: { en: string }; parent: { id: string }; id: string },
-  //   token: string,
-  // ): void {
-  //   localStorage.removeItem('currentCategoryID');
-  //   categoryNameEl.html.addEventListener('click', async (e) => {
-  //     const form = Products.sortForm.html as HTMLFormElement;
-  //     form.reset();
-  //     categoryNameEl.html.classList.add('active');
-  //     const els = document.getElementsByClassName('subcategory');
-  //     Products.productsList.html.innerHTML = '';
-  //     Products.resetPriceRange();
-
-  //     const target = e.target as HTMLElement;
-  //     localStorage.setItem('currentCategoryID', target.id);
-
-  //     for (let i = 0; i < els.length; i += step) {
-  //       if (
-  //         els[i].className === `subcategory ${pathPart.id}` ||
-  //         els[i].className === `subcategory ${pathPart.id} active`
-  //       ) {
-  //         ECommerceApi.getSelectedProducts(currentClient, token, els[i].id).then((resp) => {
-  //           localStorage.setItem('products', JSON.stringify(resp.results));
-  //           Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
-  //             Products.productsList.html.append(productCard.html);
-  //           });
-  //         });
-  //       }
-  //     }
-  //   });
-  // }
-
-  // public static addPrice(): boolean {
-  //   let country;
-  //   if (!localStorage.getItem('customer')) {
-  //     const customerJSON = localStorage.getItem('customer');
-  //     const customer = JSON.parse(customerJSON!);
-  //     if (customer && customer.addresses[0].country === 'RU') {
-  //       country = true;
-  //     } else {
-  //       country = false;
-  //     }
-  //   } else {
-  //     country = false;
-  //   }
-  //   return country;
-  // }
 
   private static createCategory(categoryNumber: number): BaseComponent | null {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
@@ -1103,11 +1069,12 @@ class Products {
     });
   }
 
-  private static async checkIsProductInTheCart(id: string): Promise<boolean> {
+  static async checkIsProductInTheCart(id: string): Promise<boolean> {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
     const cardId = localStorage.getItem('cartId');
     let result = false;
-    if (token && cardId) {
+    const isProductPage = localStorage.getItem('isProductPage');
+    if (token && cardId && !isProductPage) {
       const res = (await ECommerceApi.getCart(currentClient, token, cardId)) as ICart;
       if (res.lineItems) {
         res.lineItems.forEach((product: ILineItem) => {
