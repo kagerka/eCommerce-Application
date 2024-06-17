@@ -65,7 +65,6 @@ class About {
       this.aboutContent.html.append(member.html);
     }
     this.aboutContent.html.append(this.headingCollab.html, this.collabInfo.html, this.rsLink.html);
-    // this.collabInfo.html.append(this.taksBoardImage.html);
   }
 
   private static createAboutContentElement(): BaseComponent {

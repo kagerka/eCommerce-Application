@@ -579,14 +579,14 @@ class Products {
     }
   }
 
-  private static addItemToAnonymousCart(itemID: string): void {
+  private static async addItemToAnonymousCart(itemID: string): Promise<void> {
     const tokenPassword = localStorage.getItem('tokenPassword');
     const tokenAnonymous = localStorage.getItem('tokenAnonymous');
 
     if (tokenAnonymous && !tokenPassword) {
       const cartId = localStorage.getItem('cartId');
       if (cartId) {
-        ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
+        await ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
           if (typeof res !== 'string') {
             ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
               Header.updateOrdersNum();
@@ -595,14 +595,16 @@ class Products {
             });
           }
         });
+        await Products.toastAddSuccess();
       }
       if (cartId === null) {
-        ECommerceApi.createCart(currentClient, tokenAnonymous).then((res) => {
+        ECommerceApi.createCart(currentClient, tokenAnonymous).then(async (res) => {
           localStorage.setItem('cartId', res.id);
-          ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
+          await ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
             localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
             Cart.createFullCart();
           });
+          await Products.toastAddSuccess();
         });
       }
     }
@@ -622,11 +624,11 @@ class Products {
         if (tokenPassword && !tokenAnonymous) {
           const cartId = localStorage.getItem('cartId');
           if (cartId) {
-            ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
+            ECommerceApi.getCart(currentClient, tokenPassword, cartId).then(async (res) => {
               if (typeof res !== 'string') {
                 Header.updateOrdersNum();
-                ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
-                Products.toastAddSuccess();
+                await ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
+                await Products.toastAddSuccess();
               }
             });
           }
@@ -641,7 +643,7 @@ class Products {
       className: 'toast-add-success',
       gravity: 'bottom',
       style: {
-        position: 'absolute',
+        position: 'fixed',
         bottom: '15px',
         right: '15px',
       },
@@ -848,55 +850,6 @@ class Products {
     });
     return categoryNameEl;
   }
-
-  // private static handleCategoryClick(
-  //   categoryNameEl: BaseComponent,
-  //   pathPart: { name: { en: string }; parent: { id: string }; id: string },
-  //   token: string,
-  // ): void {
-  //   localStorage.removeItem('currentCategoryID');
-  //   categoryNameEl.html.addEventListener('click', async (e) => {
-  //     const form = Products.sortForm.html as HTMLFormElement;
-  //     form.reset();
-  //     categoryNameEl.html.classList.add('active');
-  //     const els = document.getElementsByClassName('subcategory');
-  //     Products.productsList.html.innerHTML = '';
-  //     Products.resetPriceRange();
-
-  //     const target = e.target as HTMLElement;
-  //     localStorage.setItem('currentCategoryID', target.id);
-
-  //     for (let i = 0; i < els.length; i += step) {
-  //       if (
-  //         els[i].className === `subcategory ${pathPart.id}` ||
-  //         els[i].className === `subcategory ${pathPart.id} active`
-  //       ) {
-  //         ECommerceApi.getSelectedProducts(currentClient, token, els[i].id).then((resp) => {
-  //           localStorage.setItem('products', JSON.stringify(resp.results));
-  //           Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
-  //             Products.productsList.html.append(productCard.html);
-  //           });
-  //         });
-  //       }
-  //     }
-  //   });
-  // }
-
-  // public static addPrice(): boolean {
-  //   let country;
-  //   if (!localStorage.getItem('customer')) {
-  //     const customerJSON = localStorage.getItem('customer');
-  //     const customer = JSON.parse(customerJSON!);
-  //     if (customer && customer.addresses[0].country === 'RU') {
-  //       country = true;
-  //     } else {
-  //       country = false;
-  //     }
-  //   } else {
-  //     country = false;
-  //   }
-  //   return country;
-  // }
 
   private static createCategory(categoryNumber: number): BaseComponent | null {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
