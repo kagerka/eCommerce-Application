@@ -88,16 +88,16 @@ class Cart {
         Cart.handleEmptyCartBtnClick(emptyButton);
 
         if (typeof res !== 'string') {
-          for (let i = 0; i < res.lineItems?.length; i += step) {
-            const cartProduct = this.createCartItem(
-              res.lineItems[i].name.en,
-              res.lineItems[i].totalPrice.centAmount / cents,
-              res.lineItems[i].variant.images[0].url,
-            );
-            cartProductsConteiner.html.append(cartProduct.html);
-          }
-          const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: `0.00 $` });
-          totalConteiner.html.append(totalTitle.html, totalPrice.html);
+        for (let i = 0; i < (res).lineItems?.length; i += step) {
+          const cartProduct = this.createCartItem(
+            res.lineItems[i].name.en,
+            res.lineItems[i].totalPrice.centAmount / cents,
+            res.lineItems[i].variant.images[0].url,
+          );
+          cartProductsConteiner.html.append(cartProduct.html);
+        }
+        const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: `0.00 $` });
+        totalConteiner.html.append(totalTitle.html, totalPrice.html);
         }
       });
       Cart.updateTotalPrice();
@@ -106,22 +106,22 @@ class Cart {
     return fullCart;
   }
 
-  static updateTotalPrice(): void {
-    setTimeout(() => {
-      let totalPriceValue = 0.0;
-      const token = localStorage.getItem('tokenPassword')
-        ? localStorage.getItem('tokenPassword')
-        : localStorage.getItem('tokenAnonymous');
-      const cartId = localStorage.getItem('cartId');
-      if (cartId) {
-        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-          if (typeof res !== 'string') {
-            for (let i = 0; i < res.lineItems?.length; i += step) {
-              totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
-            }
-            document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`;
+  static updateTotalPrice():void {
+  setTimeout(() => {
+     let totalPriceValue = 0.00;
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    if (cartId) {
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        if (typeof res !== 'string') {
+          for (let i = 0; i < (res).lineItems?.length; i += step) {
+            totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
           }
-        });
+          document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`
+          }
+        })
       }
     }, timeout);
   }

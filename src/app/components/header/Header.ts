@@ -4,7 +4,7 @@ import { ICart } from '../../interfaces/Cart.interface';
 import BaseComponent from '../BaseComponent';
 import './Header.scss';
 
-const timeout = 100;
+const timeout = 700;
 
 class Header {
   private headerContainer: BaseComponent;
@@ -258,22 +258,22 @@ class Header {
 
   private static createCartOrdersNum(): BaseComponent {
     const token = localStorage.getItem('tokenPassword')
-      ? localStorage.getItem('tokenPassword')
-      : localStorage.getItem('tokenAnonymous');
+    ? localStorage.getItem('tokenPassword')
+    : localStorage.getItem('tokenAnonymous');
     const cartId = localStorage.getItem('cartId');
     const orderNum = new BaseComponent({
       tag: 'div',
       class: ['cart-orders-num'],
     });
-
+    
     if (cartId) {
       ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-        orderNum.html.textContent = `${(res as ICart).lineItems.length}`;
-      });
+        orderNum.html.textContent = `${(res as ICart).lineItems.length}`
+      })
     } else {
       orderNum.html.textContent = '0';
     }
-
+    
     return orderNum;
   }
 
@@ -330,18 +330,18 @@ class Header {
   static updateOrdersNum(): void {
     setTimeout(() => {
       const token = localStorage.getItem('tokenPassword')
-        ? localStorage.getItem('tokenPassword')
-        : localStorage.getItem('tokenAnonymous');
-      const cartId = localStorage.getItem('cartId');
-      if (cartId) {
-        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-          if (typeof res !== 'string') {
-            document.getElementsByClassName('cart-orders-num')[0].textContent = `${res.lineItems.length}`;
-          }
-        });
-      } else {
-        document.getElementsByClassName('cart-orders-num')[0].textContent = '0';
-      }
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    if (cartId) {
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        if (typeof res !== 'string') {
+          document.getElementsByClassName('cart-orders-num')[0].textContent = `${res.lineItems.length}`;
+        }
+      })
+    } else {
+      document.getElementsByClassName('cart-orders-num')[0].textContent = '0';
+    }
     }, timeout);
   }
 
