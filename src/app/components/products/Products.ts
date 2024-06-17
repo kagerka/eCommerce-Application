@@ -589,8 +589,8 @@ class Products {
         await ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
           if (typeof res !== 'string') {
             ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
-              Header.updateOrdersNum();
               localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+              Header.updateOrdersNum();
               Cart.createFullCart();
             });
           }
@@ -602,6 +602,7 @@ class Products {
           localStorage.setItem('cartId', res.id);
           await ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
             localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+            Header.updateOrdersNum();
             Cart.createFullCart();
           });
           await Products.toastAddSuccess();

@@ -1,7 +1,7 @@
 import IAPIClientDetails from '../interfaces/APIClientDetails.interface';
 import IAccessToken from '../interfaces/AccessToken.interface';
 import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
-import { ICart, IRemoveItemBodyRequest } from '../interfaces/Cart.interface';
+import { ICart, IRemoveItemBodyRequest, IDiscount } from '../interfaces/Cart.interface';
 import ICustomerData from '../interfaces/CustomerData.interface';
 import ICustomerProfile from '../interfaces/CustomerProfile.interface';
 import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface';
@@ -852,6 +852,30 @@ class ECommerceApi {
       }
       return response.json();
     });
+  }
+
+  static async getDiscountCode(clientDetails: IAPIClientDetails, token: string): Promise<IDiscount> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/discount-codes`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const json = await response.json();
+    return json;
+  }
+
+  static async getCartDiscount(clientDetails: IAPIClientDetails, token: string): Promise<IDiscount> {
+    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/cart-discounts`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const json = await response.json();
+    return json;
   }
 }
 

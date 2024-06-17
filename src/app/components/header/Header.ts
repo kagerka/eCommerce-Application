@@ -1,10 +1,9 @@
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import { ICart } from '../../interfaces/Cart.interface';
+
 import BaseComponent from '../BaseComponent';
 import './Header.scss';
-
-const timeout = 700;
 
 class Header {
   private headerContainer: BaseComponent;
@@ -328,21 +327,19 @@ class Header {
   }
 
   static updateOrdersNum(): void {
-    setTimeout(() => {
-      const token = localStorage.getItem('tokenPassword')
-        ? localStorage.getItem('tokenPassword')
-        : localStorage.getItem('tokenAnonymous');
-      const cartId = localStorage.getItem('cartId');
-      if (cartId) {
-        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-          if (typeof res !== 'string') {
-            document.getElementsByClassName('cart-orders-num')[0].textContent = `${res.lineItems.length}`;
-          }
-        });
-      } else {
-        document.getElementsByClassName('cart-orders-num')[0].textContent = '0';
-      }
-    }, timeout);
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    if (cartId) {
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        if (typeof res !== 'string') {
+          document.getElementsByClassName('cart-orders-num')[0].textContent = `${res.lineItems.length}`;
+        }
+      });
+    } else {
+      document.getElementsByClassName('cart-orders-num')[0].textContent = '0';
+    }
   }
 
   get profileBtn(): BaseComponent {
