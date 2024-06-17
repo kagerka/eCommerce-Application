@@ -725,7 +725,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        console.error(`HTTP error! Status: ${response.status}`);
       }
       return response.json();
     });
@@ -791,7 +791,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        console.error(`HTTP error! Status: ${response.status}`);
       }
       return response.json();
     });
@@ -848,7 +848,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        console.error(`HTTP error! Status: ${response.status}`);
       }
       return response.json();
     });

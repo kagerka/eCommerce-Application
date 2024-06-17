@@ -14,6 +14,7 @@ import leftArrowBtn from '../../utils/svg/leftArrow';
 import rightArrowBtn from '../../utils/svg/rightArrow';
 
 import './Product.scss';
+import Header from '../../components/header/Header';
 
 const gap = 16;
 const startPos = 0;
@@ -204,12 +205,13 @@ class Product {
       } else if (token && cartId && productId) {
         this.handleAddToCartBtn(token, cartId, productId);
       }
+      Header.updateOrdersNum();
     });
   }
 
   private static catchError(error: Error): void {
+    console.error(`Error checkAddToCartStatus: ${error}`);
     Product.toastError();
-    throw new Error(`Error checkAddToCartStatus: ${error}`);
   }
 
   private static toastRemoveSuccess(): void {

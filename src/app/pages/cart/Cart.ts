@@ -134,19 +134,24 @@ class Cart {
         : localStorage.getItem('tokenAnonymous');
       const cartId = localStorage.getItem('cartId');
       if (cartId) {
-        ECommerceApi.getCart(currentClient, token!, cartId!)
-          .then((res) => {
-            if (typeof res !== 'string') {
-              for (let i = 0; i < res.lineItems?.length; i += step) {
-                totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
-              }
-              if (document.getElementsByClassName('total-price')[0])
-                document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`;
+        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+          if (typeof res !== 'string') {
+            for (let i = 0; i < res.lineItems?.length; i += step) {
+              totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
             }
-          })
-          .catch((error) => {
-            throw new Error(`Error updateTotalPrice: ${error}`);
-          });
+            if (document.getElementsByClassName('total-price')[0])
+              document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`;
+            if (
+              document.getElementsByClassName('discounted-price')[0] &&
+              document.getElementsByClassName('discounted-price')[0].textContent !== ''
+            )
+              ECommerceApi.getCartDiscount(currentClient, token!).then((cartRes) => {
+                const persent = cartRes.results[0].value.permyriad;
+                document.getElementsByClassName('discounted-price')[0].textContent =
+                  `${((totalPriceValue / cents) * (cents - +persent)).toFixed(TWO)} $`;
+              });
+          }
+        });
       }
     }, LOAD_PRODUCTS_TIMEOUT);
   }
