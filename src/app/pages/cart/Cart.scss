@@ -79,10 +79,6 @@
   margin-top: 30px;
 }
 
-.discount {
-  color: $red;
-}
-
 .total-conteiner,
 .total-cont {
   display: flex;
@@ -107,9 +103,14 @@
   align-items: center;
 }
 
-.total-price {
+.total-price,
+.discounted-price {
   color: $green;
   font-weight: 600;
+}
+
+.crossed {
+  color: hsl(0, 3%, 45%);
 }
 
 .total-itm-title {
@@ -244,6 +245,19 @@
 .quantity-value {
   font-size: 1rem;
   font-weight: 500;
+}
+
+.promo-error {
+  font-weight: 500;
+  font-size: 11px;
+  color: $red;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 5px;
+}
+
+.total-title {
+  margin: 4% 0;
 }
 
 @media screen and (max-width: 1130px) {

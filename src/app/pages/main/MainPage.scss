@@ -57,17 +57,53 @@ a {
   }
 }
 
-.catalog-banner-text {
+.catalog-banner-text,
+.promo-text {
   position: absolute;
-  top: 20px;
   z-index: 2;
-  font-size: 32px;
   font-weight: bold;
   text-transform: uppercase;
   color: $white;
 }
+
+.catalog-banner-text {
+  top: 20px;
+  font-size: 32px;
+}
+
+.promo-text {
+  bottom: 0px;
+  display: flex;
+  margin: 0;
+  font-size: 24px;
+}
+
+.promo {
+  color: $red;
+  margin-right: 8px;
+  margin-left: 8px;
+}
+
 .catalog-banner-image {
   z-index: 1;
   position: relative;
   max-width: 100%;
+}
+
+@media screen and (max-width: 850px) {
+  .promo-text {
+    font-size: 1rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .promo-text {
+    font-size: 0.8rem;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .promo-text {
+    font-size: 0.65rem;
+  }
 }

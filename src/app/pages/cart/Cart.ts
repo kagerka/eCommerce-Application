@@ -3,11 +3,12 @@ import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Header from '../../components/header/Header';
 import Input from '../../components/input/Input';
+import { ICart } from '../../interfaces/Cart.interface';
+import { LOAD_PRODUCTS_TIMEOUT } from '../../utils/constants';
 import './Cart.scss';
 
 const step = 1;
 const cents = 100;
-const timeout = 10;
 const TWO = 2;
 
 class Cart {
@@ -77,39 +78,42 @@ class Cart {
     const promoBtn = new BaseComponent({ tag: 'button', class: ['promo-button'], text: 'Apply' });
     const totalConteiner = new BaseComponent({ tag: 'div', class: ['total-conteiner'] });
     const totalTitle = new BaseComponent({ tag: 'h4', class: ['total-title'], text: 'Total:' });
+    const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: `0.00 $` });
+    const errorFormat = new BaseComponent({ tag: 'div', class: ['promo-error'], text: '' });
+    const discountedConteiner = new BaseComponent({ tag: 'div', class: ['total-conteiner'] });
+    const discountedTitle = new BaseComponent({ tag: 'h4', class: ['total-title'], text: '' });
+    const discountedPrice = new BaseComponent({ tag: 'div', class: ['discounted-price'], text: '' });
 
     fullCart.html.append(cartTop.html, emptyButton.html);
     cartTop.html.append(cartProductsConteiner.html, priceConteiner.html);
-    priceConteiner.html.append(promoConteiner.html, totalConteiner.html, proceedButton.html);
+    priceConteiner.html.append(promoConteiner.html, errorFormat.html, totalConteiner.html);
+    priceConteiner.html.append(discountedConteiner.html, proceedButton.html);
     promoConteiner.html.append(promoInput.view.html, promoBtn.html);
+    totalConteiner.html.append(totalTitle.html, totalPrice.html);
+    discountedConteiner.html.append(discountedTitle.html, discountedPrice.html);
 
     if (cartId) {
       ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
         Cart.handleEmptyCartBtnClick(emptyButton);
 
-        if (typeof res !== 'string') {
-          for (let i = 0; i < res.lineItems?.length; i += step) {
-            const cartProduct = this.createCartItem(
-              res.lineItems[i].name.en,
-              res.lineItems[i].totalPrice.centAmount / res.lineItems[i].quantity / cents,
-              res.lineItems[i].totalPrice.centAmount / cents,
-              res.lineItems[i].variant.images[0].url,
-              res.lineItems[i].id,
-              `${res.lineItems[i].quantity}`,
-            );
-            cartProductsConteiner.html.append(cartProduct.html);
-          }
-          const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: `0.00 $` });
-          totalConteiner.html.append(totalTitle.html, totalPrice.html);
+        for (let i = 0; i < (res as ICart).lineItems?.length; i += step) {
+          const cartProduct = this.createCartItem(
+            (res as ICart).lineItems[i].name.en,
+            (res as ICart).lineItems[i].totalPrice.centAmount / cents,
+            (res as ICart).lineItems[i].variant.images[0].url,
+          );
+          cartProductsConteiner.html.append(cartProduct.html);
         }
+
+        Cart.updateTotalPrice(totalPrice);
+        Cart.handlePromoSubmit(promoInput, promoBtn, errorFormat, totalPrice, discountedTitle, discountedPrice);
       });
-      Cart.updateTotalPrice();
     }
 
     return fullCart;
   }
 
-  static updateTotalPrice(): void {
+  static updateTotalPrice(totalPrice: BaseComponent): void {
     setTimeout(() => {
       let totalPriceValue = 0.0;
       const token = localStorage.getItem('tokenPassword')
@@ -118,25 +122,18 @@ class Cart {
       const cartId = localStorage.getItem('cartId');
       if (cartId) {
         ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-          if (typeof res !== 'string') {
+          if (typeof res !== 'string' && document.getElementsByClassName('total-price')[0]) {
             for (let i = 0; i < res.lineItems?.length; i += step) {
               totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
             }
-            document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`;
+            totalPrice.html.textContent = `${totalPriceValue.toFixed(TWO)} $`;
           }
         });
       }
-    }, timeout);
+    }, LOAD_PRODUCTS_TIMEOUT);
   }
 
-  private static createCartItem(
-    nameItm: string,
-    priceItm: number,
-    totalPriceItm: number,
-    linkItm: string,
-    itemId: string,
-    quantity: string,
-  ): BaseComponent {
+  private static createCartItem(nameItm: string, priceItm: number, linkItm: string): BaseComponent {
     const cartProduct = new BaseComponent({ tag: 'li', class: ['cart-itm'] });
     const imgContainer = new BaseComponent({ tag: 'div', class: ['cart-itm-img-container'] });
     const infoContainer = new BaseComponent({ tag: 'div', class: ['cart-itm-info-container'] });
@@ -154,21 +151,21 @@ class Cart {
     const price = new BaseComponent({ tag: 'h4', class: ['product-price'], text: `${priceItm} $` });
 
     const qConteiner = new BaseComponent({ tag: 'div', class: ['quantity-container'] });
-    const qMinus = new BaseComponent({ tag: 'button', class: ['quantity-minus'], text: '-', id: itemId });
-    const qValue = new BaseComponent({ tag: 'p', class: ['quantity-value'], text: quantity });
-    const qPlus = new BaseComponent({ tag: 'button', class: ['quantity-plus'], text: '+', id: itemId });
+    const qMinus = new BaseComponent({ tag: 'button', class: ['quantity-minus'], text: '-' });
+    const qValue = new BaseComponent({ tag: 'p', class: ['quantity-value'], text: '1' });
+    const qPlus = new BaseComponent({ tag: 'button', class: ['quantity-plus'], text: '+' });
     const deleteItmBtn = new BaseComponent({ tag: 'div', class: ['delete-btn'] });
     const totalConteiner = new BaseComponent({ tag: 'div', class: ['total-itm-conteiner'] });
     const totalTitle = new BaseComponent({ tag: 'div', class: ['total-itm-title'], text: `Total: ` });
     const totalPrice = new BaseComponent({
       tag: 'div',
       class: ['total-itm-price'],
-      text: `${totalPriceItm} $`,
+      text: `${priceItm * +qValue.html.textContent!} $`,
     });
 
     Cart.handleMinus(qMinus, qValue, totalPrice, priceItm);
     Cart.handlePlus(qPlus, qValue, totalPrice, priceItm);
-    Cart.handleDeleteItmBtnClick(deleteItmBtn, cartProduct);
+    Cart.handleDeleteItmBtnClick(deleteItmBtn, cartProduct, totalPrice);
 
     cartProduct.html.append(imgContainer.html, infoContainer.html);
     imgContainer.html.append(img.html);
@@ -179,20 +176,6 @@ class Cart {
     qConteiner.html.append(qMinus.html, qValue.html, qPlus.html);
 
     return cartProduct;
-  }
-
-  private static changeQuantityItem(itemId: string, quantity: number): void {
-    const token = localStorage.getItem('tokenPassword')
-      ? localStorage.getItem('tokenPassword')
-      : localStorage.getItem('tokenAnonymous');
-    const cartId = localStorage.getItem('cartId');
-    if (cartId) {
-      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-        if (typeof res !== 'string') {
-          ECommerceApi.changeLineItemQuantity(currentClient, token!, res.id, res.version, itemId, quantity);
-        }
-      });
-    }
   }
 
   private static handleMinus(
@@ -206,9 +189,8 @@ class Cart {
       if (+value! > step) {
         qValue.html.textContent! = `${+value! - step}`;
         totalPrice.html.textContent! = `${(priceItm * +qValue.html.textContent!).toFixed(TWO)} $`;
-        Cart.changeQuantityItem(qMinus.html.getAttribute('id')!, +qValue.html.textContent!);
         Header.updateOrdersNum();
-        Cart.updateTotalPrice();
+        Cart.updateTotalPrice(totalPrice);
       }
     });
   }
@@ -223,18 +205,66 @@ class Cart {
       const value = qValue.html.textContent;
       qValue.html.textContent! = `${+value! + step}`;
       totalPrice.html.textContent! = `${(priceItm * +qValue.html.textContent!).toFixed(TWO)} $`;
-      Cart.changeQuantityItem(qPlus.html.getAttribute('id')!, +qValue.html.textContent!);
       Header.updateOrdersNum();
-      Cart.updateTotalPrice();
+      Cart.updateTotalPrice(totalPrice);
     });
   }
 
-  private static handleDeleteItmBtnClick(deleteItmBtn: BaseComponent, cartProduct: BaseComponent): void {
+  private static handleDeleteItmBtnClick(
+    deleteItmBtn: BaseComponent,
+    cartProduct: BaseComponent,
+    totalPrice: BaseComponent,
+  ): void {
     deleteItmBtn.html.addEventListener('click', () => {
       cartProduct.html.remove();
       Header.updateOrdersNum();
-      Cart.updateTotalPrice();
+      Cart.updateTotalPrice(totalPrice);
     });
+  }
+
+  private static handlePromoSubmit(
+    promoInput: Input,
+    promoBtn: BaseComponent,
+    errorFormat: BaseComponent,
+    totalPrice: BaseComponent,
+    discountedTitle: BaseComponent,
+    discountedPrice: BaseComponent,
+  ): void {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    promoBtn.html.addEventListener('click', () => {
+      ECommerceApi.getDiscountCode(currentClient, token!).then((res) => {
+        ECommerceApi.getCartDiscount(currentClient, token!).then((cartRes) => {
+          if (res.results[0].code === (promoInput.view.html as HTMLInputElement).value) {
+            errorFormat.html.textContent = '';
+            (promoInput.view.html as HTMLInputElement).value = '';
+            const prevPrice = +parseFloat(totalPrice.html.textContent!);
+            const persent = cartRes.results[0].value.permyriad;
+            totalPrice.html.classList.add('crossed');
+            discountedPrice.html.textContent = `${((prevPrice / cents) * (cents - +persent)).toFixed(TWO)} $`;
+            discountedTitle.html.textContent = 'Discounted:';
+          } else {
+            Cart.resetPromo(errorFormat, promoInput, totalPrice, discountedPrice, discountedTitle);
+            errorFormat.html.textContent = 'Invalid promocode';
+          }
+        });
+      });
+    });
+  }
+
+  private static resetPromo(
+    errorFormat: BaseComponent,
+    promoInput: Input,
+    totalPrice: BaseComponent,
+    discountedPrice: BaseComponent,
+    discountedTitle: BaseComponent,
+  ): void {
+    errorFormat.html.textContent = '';
+    (promoInput.view.html as HTMLInputElement).value = '';
+    totalPrice.html.classList.remove('crossed');
+    discountedPrice.html.textContent = '';
+    discountedTitle.html.textContent = '';
   }
 
   private static handleEmptyCartBtnClick(emptyButton: BaseComponent): void {

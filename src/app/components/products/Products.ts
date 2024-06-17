@@ -1,4 +1,3 @@
-import Toastify from 'toastify-js';
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import { ICart, ILineItem } from '../../interfaces/Cart.interface';
@@ -487,9 +486,8 @@ class Products {
       ],
     });
 
-    productLink.html.addEventListener('click', async () => {
+    productLink.html.addEventListener('click', () => {
       localStorage.setItem('id', JSON.stringify(id));
-      localStorage.setItem('isProductPage', JSON.stringify(true));
     });
 
     return productLink;
@@ -602,6 +600,7 @@ class Products {
           ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
             localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
             Cart.createFullCart();
+            Header.updateOrdersNum();
           });
         });
       }
@@ -624,28 +623,17 @@ class Products {
           if (cartId) {
             ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
               if (typeof res !== 'string') {
-                Header.updateOrdersNum();
-                ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
-                Products.toastAddSuccess();
+                ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id).then(
+                  () => {
+                    Header.updateOrdersNum();
+                  },
+                );
               }
             });
           }
         }
       }
     });
-  }
-
-  private static toastAddSuccess(): void {
-    Toastify({
-      text: 'This product has been added to the cart successfully',
-      className: 'toast-add-success',
-      gravity: 'bottom',
-      style: {
-        position: 'absolute',
-        bottom: '15px',
-        right: '15px',
-      },
-    }).showToast();
   }
 
   private static createProductCard(cardNumber: number, fullData: boolean, storage: string = 'products'): BaseComponent {
@@ -1115,12 +1103,11 @@ class Products {
     });
   }
 
-  static async checkIsProductInTheCart(id: string): Promise<boolean> {
+  private static async checkIsProductInTheCart(id: string): Promise<boolean> {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
     const cardId = localStorage.getItem('cartId');
     let result = false;
-    const isProductPage = localStorage.getItem('isProductPage');
-    if (token && cardId && !isProductPage) {
+    if (token && cardId) {
       const res = (await ECommerceApi.getCart(currentClient, token, cardId)) as ICart;
       if (res.lineItems) {
         res.lineItems.forEach((product: ILineItem) => {
