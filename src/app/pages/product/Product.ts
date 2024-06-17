@@ -1,6 +1,8 @@
+import Toastify from 'toastify-js';
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
+import { ICart, ILineItem } from '../../interfaces/Cart.interface';
 import { IProductImages } from '../../interfaces/Product.interface';
 import getBedrooms from '../../utils/productAttributes/getBedrooms';
 import getBrand from '../../utils/productAttributes/getBrand';
@@ -10,6 +12,7 @@ import getSizes from '../../utils/productAttributes/getSizes';
 import closeButton from '../../utils/svg/closeButton';
 import leftArrowBtn from '../../utils/svg/leftArrow';
 import rightArrowBtn from '../../utils/svg/rightArrow';
+
 import './Product.scss';
 
 const gap = 16;
@@ -98,7 +101,7 @@ class Product {
     this.modalContainer = Product.createModalContainerElement();
     this.addToCartBtn = Product.createAddToCartBtn();
     this.addImages(images, this.productImagesPreviewContainer.html);
-
+    this.checkAddToCartStatus();
     this.composeView();
   }
 
@@ -124,6 +127,126 @@ class Product {
       this.productBedrooms.html,
       this.productPersons.html,
     );
+  }
+
+  private static async isProductInCart(): Promise<{
+    isProductInTheCart: boolean;
+    lineItemsId: string;
+    version: number;
+  }> {
+    const productId = await localStorage.getItem('id')?.replace(/["]/gm, '');
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    let isProductInTheCart = false;
+    let lineItemsId = '';
+    let version = 0;
+    if (token && cartId) {
+      const res = (await ECommerceApi.getCart(currentClient, token, cartId)) as ICart;
+      version = await res.version;
+      if (res.lineItems) {
+        await res.lineItems.forEach(async (product: ILineItem) => {
+          if (product.productId === productId) {
+            isProductInTheCart = true;
+            lineItemsId = await product.id;
+          }
+        });
+      }
+    }
+    return { isProductInTheCart, lineItemsId, version };
+  }
+
+  private async checkAddToCartStatus(): Promise<void> {
+    const isProductPage = localStorage.getItem('isProductPage');
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    if (isProductPage) {
+      const cartInfo = await Product.isProductInCart();
+      if (cartInfo.isProductInTheCart && token && cartId) {
+        this.addToCartBtn.html.innerText = 'Remove from cart';
+      } else {
+        this.addToCartBtn.html.innerText = 'Add to cart';
+      }
+    }
+    this.addToCartBtn.html.addEventListener('click', async () => {
+      const productId = await localStorage.getItem('id')?.replace(/["]/gm, '');
+      if (token && cartId === null) {
+        ECommerceApi.createCart(currentClient, token).then((res) => {
+          localStorage.setItem('cartId', res.id);
+        });
+      }
+      if (token && cartId && productId) {
+        const getCartInfo = await Product.isProductInCart();
+        if (getCartInfo.isProductInTheCart) {
+          await ECommerceApi.removeItemFromCart(
+            currentClient,
+            token,
+            cartId,
+            getCartInfo.version,
+            getCartInfo.lineItemsId,
+          )
+            .then(() => {
+              this.addToCartBtn.html.innerText = 'Add to cart';
+              Product.toastRemoveSuccess();
+            })
+            .catch((error: Error) => {
+              Product.catchError(error);
+            });
+        } else {
+          await ECommerceApi.addItemToCart(currentClient, token, cartId, getCartInfo.version, productId)
+            .then(() => {
+              this.addToCartBtn.html.innerText = 'Remove from cart';
+              Product.toastAddSuccess();
+            })
+            .catch((error: Error) => {
+              Product.catchError(error);
+            });
+        }
+      }
+    });
+  }
+
+  private static catchError(error: Error): void {
+    console.error(`Error checkAddToCartStatus: ${error}`);
+    Product.toastError();
+  }
+
+  private static toastRemoveSuccess(): void {
+    Toastify({
+      text: 'This product has been deleted from the cart successfully',
+      className: 'toast-remove-success',
+      gravity: 'bottom',
+      style: {
+        position: 'absolute',
+        bottom: '15px',
+        right: '15px',
+      },
+    }).showToast();
+  }
+
+  private static toastAddSuccess(): void {
+    Toastify({
+      text: 'This product has been added to the cart successfully',
+      className: 'toast-add-success',
+      gravity: 'bottom',
+      style: {
+        position: 'absolute',
+        bottom: '15px',
+        right: '15px',
+      },
+    }).showToast();
+  }
+
+  private static toastError(): void {
+    Toastify({
+      text: 'Oops! Something went wrong :(',
+      className: 'toast-error',
+      gravity: 'bottom',
+      style: {
+        position: 'absolute',
+        bottom: '15px',
+        right: '15px',
+      },
+    }).showToast();
   }
 
   private static addResizeListener(): void {

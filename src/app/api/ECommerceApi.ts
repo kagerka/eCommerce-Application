@@ -764,6 +764,37 @@ class ECommerceApi {
       return response.json();
     });
   }
+
+  static async removeItemFromCart(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    cartId: string,
+    version: number,
+    lineItemId: string,
+  ): Promise<ICart> {
+    return fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}/me/carts/${cartId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        version,
+        actions: [
+          {
+            action: 'removeLineItem',
+            lineItemId,
+            quantity: 1,
+          },
+        ],
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        console.error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    });
+  }
 }
 
 export default ECommerceApi;

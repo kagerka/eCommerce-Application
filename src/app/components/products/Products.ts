@@ -1,3 +1,4 @@
+import Toastify from 'toastify-js';
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import { ICart, ILineItem } from '../../interfaces/Cart.interface';
@@ -484,8 +485,9 @@ class Products {
       ],
     });
 
-    productLink.html.addEventListener('click', () => {
+    productLink.html.addEventListener('click', async () => {
       localStorage.setItem('id', JSON.stringify(id));
+      localStorage.setItem('isProductPage', JSON.stringify(true));
     });
 
     return productLink;
@@ -617,12 +619,26 @@ class Products {
             ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
               if (typeof res !== 'string') {
                 ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
+                Products.toastAddSuccess();
               }
             });
           }
         }
       }
     });
+  }
+
+  private static toastAddSuccess(): void {
+    Toastify({
+      text: 'This product has been added to the cart successfully',
+      className: 'toast-add-success',
+      gravity: 'bottom',
+      style: {
+        position: 'absolute',
+        bottom: '15px',
+        right: '15px',
+      },
+    }).showToast();
   }
 
   private static createProductCard(cardNumber: number, fullData: boolean, storage: string = 'products'): BaseComponent {
@@ -1092,11 +1108,12 @@ class Products {
     });
   }
 
-  private static async checkIsProductInTheCart(id: string): Promise<boolean> {
+  static async checkIsProductInTheCart(id: string): Promise<boolean> {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
     const cardId = localStorage.getItem('cartId');
     let result = false;
-    if (token && cardId) {
+    const isProductPage = localStorage.getItem('isProductPage');
+    if (token && cardId && !isProductPage) {
       const res = (await ECommerceApi.getCart(currentClient, token, cardId)) as ICart;
       if (res.lineItems) {
         res.lineItems.forEach((product: ILineItem) => {
