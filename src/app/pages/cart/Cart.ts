@@ -157,7 +157,7 @@ class Cart {
     const qMinus = new BaseComponent({ tag: 'button', class: ['quantity-minus'], text: '-', id: itemId });
     const qValue = new BaseComponent({ tag: 'p', class: ['quantity-value'], text: quantity });
     const qPlus = new BaseComponent({ tag: 'button', class: ['quantity-plus'], text: '+', id: itemId });
-    const deleteItmBtn = new BaseComponent({ tag: 'div', class: ['delete-btn'] });
+    const deleteItmBtn = new BaseComponent({ tag: 'div', class: ['delete-btn'], id: itemId });
     const totalConteiner = new BaseComponent({ tag: 'div', class: ['total-itm-conteiner'] });
     const totalTitle = new BaseComponent({ tag: 'div', class: ['total-itm-title'], text: `Total: ` });
     const totalPrice = new BaseComponent({
@@ -232,6 +232,20 @@ class Cart {
   private static handleDeleteItmBtnClick(deleteItmBtn: BaseComponent, cartProduct: BaseComponent): void {
     deleteItmBtn.html.addEventListener('click', () => {
       cartProduct.html.remove();
+      const token = localStorage.getItem('tokenPassword')
+        ? localStorage.getItem('tokenPassword')
+        : localStorage.getItem('tokenAnonymous');
+      const cartId = localStorage.getItem('cartId');
+      if (cartId) {
+        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+          if (typeof res !== 'string') {
+            const itemId = deleteItmBtn.html.getAttribute('id');
+            if (itemId !== null) {
+              ECommerceApi.removeItemFromCart(currentClient, token!, res.id, res.version, itemId);
+            }
+          }
+        });
+      }
       Header.updateOrdersNum();
       Cart.updateTotalPrice();
     });
