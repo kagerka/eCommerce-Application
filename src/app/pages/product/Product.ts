@@ -13,6 +13,7 @@ import closeButton from '../../utils/svg/closeButton';
 import leftArrowBtn from '../../utils/svg/leftArrow';
 import rightArrowBtn from '../../utils/svg/rightArrow';
 
+import Header from '../../components/header/Header';
 import './Product.scss';
 
 const gap = 16;
@@ -161,6 +162,7 @@ class Product {
       await ECommerceApi.removeItemFromCart(currentClient, token, cartId, getCartInfo.version, getCartInfo.lineItemsId)
         .then(() => {
           this.addToCartBtn.html.innerText = 'Add to cart';
+          Header.updateOrdersNum();
           Product.toastRemoveSuccess();
         })
         .catch((error: Error) => {
@@ -170,6 +172,7 @@ class Product {
       await ECommerceApi.addItemToCart(currentClient, token, cartId, getCartInfo.version, productId)
         .then(() => {
           this.addToCartBtn.html.innerText = 'Remove from cart';
+          Header.updateOrdersNum();
           Product.toastAddSuccess();
         })
         .catch((error: Error) => {
