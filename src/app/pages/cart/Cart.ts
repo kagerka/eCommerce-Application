@@ -131,7 +131,7 @@ class Cart {
             }
           })
           .catch((error) => {
-            console.error(`Error updateTotalPrice: ${error}`);
+            throw new Error(`Error updateTotalPrice: ${error}`);
           });
       }
     }, timeout);

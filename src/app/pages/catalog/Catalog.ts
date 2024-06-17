@@ -60,7 +60,7 @@ class Catalog {
           })
           .then(async (productCards) => Products.displayProductCards(productCards));
       } catch (error) {
-        console.error(`Error displayProducts: ${error}`);
+        throw new Error(`Error displayProducts: ${error}`);
       }
       Products.handleLoadProductsAllButton();
     }
@@ -80,7 +80,7 @@ class Catalog {
           Products.brandsContainer.append(brands.html);
         });
       } catch (error) {
-        console.error(`Error displayBrands: ${error}`);
+        throw new Error(`Error displayBrands: ${error}`);
       }
     }
   }
@@ -106,7 +106,7 @@ class Catalog {
           });
         });
       } catch (error) {
-        console.error(`Error displayCategories: ${error}`);
+        throw new Error(`Error displayCategories: ${error}`);
       }
     }
   }
