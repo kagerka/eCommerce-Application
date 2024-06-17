@@ -1,10 +1,13 @@
+import Toastify from 'toastify-js';
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
+import { ICart, ILineItem } from '../../interfaces/Cart.interface';
 import { ICategories, IProducts, IQueryProducts } from '../../interfaces/Product.interface';
+import Cart from '../../pages/cart/Cart';
 import { LOAD_PRODUCTS_TIMEOUT } from '../../utils/constants';
-
 import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
+import Header from '../header/Header';
 import Input from '../input/Input';
 import LoaderIcon from '../loader-icon/LoaderIcon';
 import './Products.scss';
@@ -484,8 +487,9 @@ class Products {
       ],
     });
 
-    productLink.html.addEventListener('click', () => {
+    productLink.html.addEventListener('click', async () => {
       localStorage.setItem('id', JSON.stringify(id));
+      localStorage.setItem('isProductPage', JSON.stringify(true));
     });
 
     return productLink;
@@ -518,7 +522,15 @@ class Products {
     });
   }
 
-  private static renderProductElements(
+  private static createProductCartBtn(id: string): BaseComponent {
+    return new BaseComponent({
+      tag: 'button',
+      class: ['product-cart-button'],
+      id: `${id}`,
+    });
+  }
+
+  private static async renderProductElements(
     id: string,
     link: string,
     productImage: string,
@@ -528,8 +540,20 @@ class Products {
     productCard: BaseComponent,
     productDiscount: number,
     formattedDiscount: string,
-  ): void {
-    const cartBtn = new BaseComponent({ tag: 'button', class: ['product-cart-button'], id: `${id}` });
+  ): Promise<void> {
+    const cartBtn = Products.createProductCartBtn(id);
+    const isProductInTheCart = await Products.checkIsProductInTheCart(cartBtn.html.id);
+    if (isProductInTheCart) {
+      cartBtn.html.setAttribute('disabled', '');
+      cartBtn.html.setAttribute('data-tooltip', 'This product is already in the cart.');
+    }
+    const logout = document.querySelector('.logout-button');
+    logout?.addEventListener('click', (e) => {
+      e.preventDefault();
+      cartBtn.html.removeAttribute('disabled');
+      cartBtn.html.removeAttribute('data-tooltip');
+      Header.updateOrdersNum();
+    });
 
     Products.handleCartButton(cartBtn);
 
@@ -558,13 +582,16 @@ class Products {
   private static addItemToAnonymousCart(itemID: string): void {
     const tokenPassword = localStorage.getItem('tokenPassword');
     const tokenAnonymous = localStorage.getItem('tokenAnonymous');
+
     if (tokenAnonymous && !tokenPassword) {
       const cartId = localStorage.getItem('cartId');
       if (cartId) {
         ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
           if (typeof res !== 'string') {
             ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
+              Header.updateOrdersNum();
               localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+              Cart.createFullCart();
             });
           }
         });
@@ -574,6 +601,7 @@ class Products {
           localStorage.setItem('cartId', res.id);
           ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
             localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+            Cart.createFullCart();
           });
         });
       }
@@ -584,20 +612,40 @@ class Products {
     const tokenPassword = localStorage.getItem('tokenPassword');
     const tokenAnonymous = localStorage.getItem('tokenAnonymous');
 
-    cartBtn.html.addEventListener('click', () => {
-      Products.addItemToAnonymousCart(cartBtn.html.id);
-
-      if (tokenPassword && !tokenAnonymous) {
-        const cartId = localStorage.getItem('cartId');
-        if (cartId) {
-          ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
-            if (typeof res !== 'string') {
-              ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
-            }
-          });
+    cartBtn.html.addEventListener('click', async () => {
+      const isProductInTheCart = await Products.checkIsProductInTheCart(cartBtn.html.id);
+      if (isProductInTheCart) {
+        cartBtn.html.setAttribute('disabled', '');
+        cartBtn.html.setAttribute('data-tooltip', 'This product is already in the cart.');
+      } else {
+        Products.addItemToAnonymousCart(cartBtn.html.id);
+        if (tokenPassword && !tokenAnonymous) {
+          const cartId = localStorage.getItem('cartId');
+          if (cartId) {
+            ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
+              if (typeof res !== 'string') {
+                Header.updateOrdersNum();
+                ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
+                Products.toastAddSuccess();
+              }
+            });
+          }
         }
       }
     });
+  }
+
+  private static toastAddSuccess(): void {
+    Toastify({
+      text: 'This product has been added to the cart successfully',
+      className: 'toast-add-success',
+      gravity: 'bottom',
+      style: {
+        position: 'absolute',
+        bottom: '15px',
+        right: '15px',
+      },
+    }).showToast();
   }
 
   private static createProductCard(cardNumber: number, fullData: boolean, storage: string = 'products'): BaseComponent {
@@ -1065,6 +1113,24 @@ class Products {
     Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
       Products.productsList.html.append(productCard.html);
     });
+  }
+
+  static async checkIsProductInTheCart(id: string): Promise<boolean> {
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    const cardId = localStorage.getItem('cartId');
+    let result = false;
+    const isProductPage = localStorage.getItem('isProductPage');
+    if (token && cardId && !isProductPage) {
+      const res = (await ECommerceApi.getCart(currentClient, token, cardId)) as ICart;
+      if (res.lineItems) {
+        res.lineItems.forEach((product: ILineItem) => {
+          if (product.productId === id) {
+            result = true;
+          }
+        });
+      }
+    }
+    return result;
   }
 
   get view(): BaseComponent {

@@ -1,5 +1,5 @@
 import IAPIClientDetails from '../../interfaces/APIClientDetails.interface';
-import ICart from '../../interfaces/Cart.interface';
+import { ICart } from '../../interfaces/Cart.interface';
 
 interface IAddLineItem {
   action: string;
