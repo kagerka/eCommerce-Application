@@ -208,8 +208,8 @@ class Product {
   }
 
   private static catchError(error: Error): void {
-    console.error(`Error checkAddToCartStatus: ${error}`);
     Product.toastError();
+    throw new Error(`Error checkAddToCartStatus: ${error}`);
   }
 
   private static toastRemoveSuccess(): void {

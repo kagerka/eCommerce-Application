@@ -170,7 +170,7 @@ class Header {
   private static createHomeNavListLinkElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
-      class: ['nav-list-link'],
+      class: ['nav-list-link', 'header-home-link'],
       attribute: [
         ['href', '/'],
         ['data-navigo', ''],
@@ -186,7 +186,7 @@ class Header {
   private static createCatalogNavListLinkElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
-      class: ['nav-list-link'],
+      class: ['nav-list-link', 'header-catalog-link'],
       attribute: [
         ['href', '/catalog'],
         ['data-navigo', ''],
