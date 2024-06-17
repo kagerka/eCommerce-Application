@@ -6,6 +6,8 @@ type TTaxCalculationMode = 'LineItemLevel' | 'UnitPriceLevel';
 type TInventoryMode = 'None' | 'TrackOnly' | 'ReserveOnOrder';
 type TShippingMode = 'Single' | 'Multiple';
 
+type Url = { url: string };
+
 export interface ICart {
   type: string;
   id: string;
@@ -73,7 +75,7 @@ export interface ILineItem {
         };
       },
     ];
-    images: [];
+    images: Url[];
     attributes: [];
     assets: [];
   };

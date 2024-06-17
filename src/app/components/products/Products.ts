@@ -3,6 +3,7 @@ import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import { ICart, ILineItem } from '../../interfaces/Cart.interface';
 import { ICategories, IProducts, IQueryProducts } from '../../interfaces/Product.interface';
+import Cart from '../../pages/cart/Cart';
 import { LOAD_PRODUCTS_TIMEOUT } from '../../utils/constants';
 import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
@@ -587,6 +588,7 @@ class Products {
           if (typeof res !== 'string') {
             ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
               localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+              Cart.createFullCart();
             });
           }
         });
@@ -596,6 +598,7 @@ class Products {
           localStorage.setItem('cartId', res.id);
           ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
             localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+            Cart.createFullCart();
           });
         });
       }
