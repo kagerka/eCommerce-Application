@@ -3,6 +3,8 @@ import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Header from '../../components/header/Header';
 import Input from '../../components/input/Input';
+import Modal from '../../components/modal/modal';
+import { ICart, ILineItem, IRemoveItemBodyRequest } from '../../interfaces/Cart.interface';
 import './Cart.scss';
 
 const step = 1;
@@ -35,7 +37,8 @@ class Cart {
     if (cartId) {
       ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
         if (typeof res !== 'string') {
-          if (res.lineItems) {
+          const ZERO = 0;
+          if (res.lineItems.length > ZERO) {
             Cart.cartContent.html.append(Cart.fullCart.html);
           } else {
             this.cartContent.html.append(Cart.emptyCart.html);
@@ -88,16 +91,16 @@ class Cart {
         Cart.handleEmptyCartBtnClick(emptyButton);
 
         if (typeof res !== 'string') {
-        for (let i = 0; i < (res).lineItems?.length; i += step) {
-          const cartProduct = this.createCartItem(
-            res.lineItems[i].name.en,
-            res.lineItems[i].totalPrice.centAmount / cents,
-            res.lineItems[i].variant.images[0].url,
-          );
-          cartProductsConteiner.html.append(cartProduct.html);
-        }
-        const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: `0.00 $` });
-        totalConteiner.html.append(totalTitle.html, totalPrice.html);
+          for (let i = 0; i < res.lineItems?.length; i += step) {
+            const cartProduct = this.createCartItem(
+              res.lineItems[i].name.en,
+              res.lineItems[i].totalPrice.centAmount / cents,
+              res.lineItems[i].variant.images[0].url,
+            );
+            cartProductsConteiner.html.append(cartProduct.html);
+          }
+          const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: `0.00 $` });
+          totalConteiner.html.append(totalTitle.html, totalPrice.html);
         }
       });
       Cart.updateTotalPrice();
@@ -106,22 +109,27 @@ class Cart {
     return fullCart;
   }
 
-  static updateTotalPrice():void {
-  setTimeout(() => {
-     let totalPriceValue = 0.00;
-    const token = localStorage.getItem('tokenPassword')
-      ? localStorage.getItem('tokenPassword')
-      : localStorage.getItem('tokenAnonymous');
-    const cartId = localStorage.getItem('cartId');
-    if (cartId) {
-      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-        if (typeof res !== 'string') {
-          for (let i = 0; i < (res).lineItems?.length; i += step) {
-            totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
-          }
-          document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`
-          }
-        })
+  static updateTotalPrice(): void {
+    setTimeout(() => {
+      let totalPriceValue = 0.0;
+      const token = localStorage.getItem('tokenPassword')
+        ? localStorage.getItem('tokenPassword')
+        : localStorage.getItem('tokenAnonymous');
+      const cartId = localStorage.getItem('cartId');
+      if (cartId) {
+        ECommerceApi.getCart(currentClient, token!, cartId!)
+          .then((res) => {
+            if (typeof res !== 'string') {
+              for (let i = 0; i < res.lineItems?.length; i += step) {
+                totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
+              }
+              if (document.getElementsByClassName('total-price')[0])
+                document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`;
+            }
+          })
+          .catch((error) => {
+            console.error(`Error updateTotalPrice: ${error}`);
+          });
       }
     }, timeout);
   }
@@ -211,11 +219,77 @@ class Cart {
     });
   }
 
+  private static createModalContent(): {
+    modalContent: BaseComponent;
+    modalYesBtn: BaseComponent;
+    modalNoBtn: BaseComponent;
+  } {
+    const modalContent = new BaseComponent({ tag: 'div', class: ['modal-content'] });
+
+    const modalHeading = new BaseComponent({
+      tag: 'h2',
+      class: ['modal-heading'],
+      text: 'Empty the cart',
+    });
+
+    const modalQuestion = new BaseComponent({
+      tag: 'p',
+      class: ['modal-question'],
+      text: 'Are you sure you want to remove all products from the cart?',
+    });
+    const modalButtonContainer = new BaseComponent({
+      tag: 'div',
+      class: ['modal-button-container'],
+    });
+    const modalYesBtn = new BaseComponent({
+      tag: 'button',
+      class: ['modal-yes'],
+      text: 'Yes',
+    });
+    const modalNoBtn = new BaseComponent({
+      tag: 'button',
+      class: ['modal-no'],
+      text: 'No',
+    });
+    modalButtonContainer.html.append(modalYesBtn.html, modalNoBtn.html);
+    modalContent.html.append(modalHeading.html, modalQuestion.html, modalButtonContainer.html);
+    return { modalContent, modalYesBtn, modalNoBtn };
+  }
+
   private static handleEmptyCartBtnClick(emptyButton: BaseComponent): void {
-    emptyButton.html.addEventListener('click', () => {
-      Cart.fullCart.html.remove();
-      this.cartContent.html.append(Cart.emptyCart.html);
-      Header.updateOrdersNum();
+    emptyButton.html.addEventListener('click', async () => {
+      const modal = new Modal();
+      const modalContainer = Cart.createModalContent();
+      modal.container.html.append(modalContainer.modalContent.html);
+      Cart.cartContent.html.append(modal.view.html);
+
+      modalContainer.modalNoBtn.html.addEventListener('click', () => {
+        modal.destroy();
+      });
+
+      modalContainer.modalYesBtn.html.addEventListener('click', async () => {
+        const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+        const cartId = localStorage.getItem('cartId');
+        if (token && cartId) {
+          const actions: IRemoveItemBodyRequest[] = [];
+          const res = (await ECommerceApi.getCart(currentClient, token, cartId)) as ICart;
+          if (res.lineItems) {
+            res.lineItems.forEach((product: ILineItem) => {
+              actions.push({
+                action: 'removeLineItem',
+                lineItemId: product.id,
+                quantity: product.quantity,
+              });
+            });
+          }
+          await ECommerceApi.removeAllItemsFromCart(currentClient, token, cartId, res.version, actions);
+          modal.destroy();
+        }
+
+        Cart.fullCart.html.remove();
+        this.cartContent.html.append(Cart.emptyCart.html);
+        Header.updateOrdersNum();
+      });
     });
   }
 

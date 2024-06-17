@@ -242,6 +242,47 @@
   font-weight: 500;
 }
 
+.modal-heading {
+  text-align: center;
+}
+
+.modal-question {
+  max-width: 400px;
+  font-size: 18px;
+  line-height: 28px;
+}
+
+.modal-button-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.modal-yes,
+.modal-no {
+  width: 120px;
+  border-radius: 5px;
+  background-color: #46a358;
+  padding: 8px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: #ffffff;
+  text-align: center;
+  transition: 0.5s all;
+  outline: none;
+  border: none;
+  margin-top: 15px;
+  align-self: center;
+  cursor: pointer;
+  transition-duration: 0.5s;
+
+  &:hover {
+    background-color: $darkGreen;
+  }
+}
+
 @media screen and (max-width: 1130px) {
   .cart-itm-img-container {
     width: 25%;

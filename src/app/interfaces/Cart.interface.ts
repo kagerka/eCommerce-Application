@@ -112,3 +112,9 @@ export interface ILineItem {
   };
   taxedPricePortions: [];
 }
+
+export interface IRemoveItemBodyRequest {
+  action: string;
+  lineItemId: string;
+  quantity: number;
+}
