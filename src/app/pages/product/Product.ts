@@ -155,6 +155,29 @@ class Product {
     return { isProductInTheCart, lineItemsId, version };
   }
 
+  private async handleAddToCartBtn(token: string, cartId: string, productId: string): Promise<Promise<Promise<void>>> {
+    const getCartInfo = await Product.isProductInCart();
+    if (getCartInfo.isProductInTheCart) {
+      await ECommerceApi.removeItemFromCart(currentClient, token, cartId, getCartInfo.version, getCartInfo.lineItemsId)
+        .then(() => {
+          this.addToCartBtn.html.innerText = 'Add to cart';
+          Product.toastRemoveSuccess();
+        })
+        .catch((error: Error) => {
+          Product.catchError(error);
+        });
+    } else {
+      await ECommerceApi.addItemToCart(currentClient, token, cartId, getCartInfo.version, productId)
+        .then(() => {
+          this.addToCartBtn.html.innerText = 'Remove from cart';
+          Product.toastAddSuccess();
+        })
+        .catch((error: Error) => {
+          Product.catchError(error);
+        });
+    }
+  }
+
   private async checkAddToCartStatus(): Promise<void> {
     const isProductPage = localStorage.getItem('isProductPage');
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
@@ -170,37 +193,16 @@ class Product {
     this.addToCartBtn.html.addEventListener('click', async () => {
       const productId = await localStorage.getItem('id')?.replace(/["]/gm, '');
       if (token && cartId === null) {
-        ECommerceApi.createCart(currentClient, token).then((res) => {
-          localStorage.setItem('cartId', res.id);
-        });
-      }
-      if (token && cartId && productId) {
-        const getCartInfo = await Product.isProductInCart();
-        if (getCartInfo.isProductInTheCart) {
-          await ECommerceApi.removeItemFromCart(
-            currentClient,
-            token,
-            cartId,
-            getCartInfo.version,
-            getCartInfo.lineItemsId,
-          )
-            .then(() => {
-              this.addToCartBtn.html.innerText = 'Add to cart';
-              Product.toastRemoveSuccess();
-            })
-            .catch((error: Error) => {
-              Product.catchError(error);
-            });
-        } else {
-          await ECommerceApi.addItemToCart(currentClient, token, cartId, getCartInfo.version, productId)
-            .then(() => {
-              this.addToCartBtn.html.innerText = 'Remove from cart';
-              Product.toastAddSuccess();
-            })
-            .catch((error: Error) => {
-              Product.catchError(error);
-            });
-        }
+        await ECommerceApi.createCart(currentClient, token)
+          .then((res) => {
+            localStorage.setItem('cartId', res.id);
+          })
+          .then(() => {
+            const cartID = localStorage.getItem('cartId');
+            if (cartID && productId) this.handleAddToCartBtn(token, cartID, productId);
+          });
+      } else if (token && cartId && productId) {
+        this.handleAddToCartBtn(token, cartId, productId);
       }
     });
   }

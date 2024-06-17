@@ -3,6 +3,8 @@ import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
 import Header from '../../components/header/Header';
 import Input from '../../components/input/Input';
+import Modal from '../../components/modal/modal';
+import { ICart, ILineItem, IRemoveItemBodyRequest } from '../../interfaces/Cart.interface';
 import './Cart.scss';
 
 const step = 1;
@@ -35,7 +37,8 @@ class Cart {
     if (cartId) {
       ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
         if (typeof res !== 'string') {
-          if (res.lineItems) {
+          const ZERO = 0;
+          if (res.lineItems.length > ZERO) {
             Cart.cartContent.html.append(Cart.fullCart.html);
           } else {
             this.cartContent.html.append(Cart.emptyCart.html);
@@ -117,14 +120,19 @@ class Cart {
         : localStorage.getItem('tokenAnonymous');
       const cartId = localStorage.getItem('cartId');
       if (cartId) {
-        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-          if (typeof res !== 'string') {
-            for (let i = 0; i < res.lineItems?.length; i += step) {
-              totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
+        ECommerceApi.getCart(currentClient, token!, cartId!)
+          .then((res) => {
+            if (typeof res !== 'string') {
+              for (let i = 0; i < res.lineItems?.length; i += step) {
+                totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
+              }
+              if (document.getElementsByClassName('total-price')[0])
+                document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`;
             }
-            document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`;
-          }
-        });
+          })
+          .catch((error) => {
+            console.error(`Error updateTotalPrice: ${error}`);
+          });
       }
     }, timeout);
   }
@@ -157,7 +165,7 @@ class Cart {
     const qMinus = new BaseComponent({ tag: 'button', class: ['quantity-minus'], text: '-', id: itemId });
     const qValue = new BaseComponent({ tag: 'p', class: ['quantity-value'], text: quantity });
     const qPlus = new BaseComponent({ tag: 'button', class: ['quantity-plus'], text: '+', id: itemId });
-    const deleteItmBtn = new BaseComponent({ tag: 'div', class: ['delete-btn'] });
+    const deleteItmBtn = new BaseComponent({ tag: 'div', class: ['delete-btn'], id: itemId });
     const totalConteiner = new BaseComponent({ tag: 'div', class: ['total-itm-conteiner'] });
     const totalTitle = new BaseComponent({ tag: 'div', class: ['total-itm-title'], text: `Total: ` });
     const totalPrice = new BaseComponent({
@@ -232,16 +240,96 @@ class Cart {
   private static handleDeleteItmBtnClick(deleteItmBtn: BaseComponent, cartProduct: BaseComponent): void {
     deleteItmBtn.html.addEventListener('click', () => {
       cartProduct.html.remove();
+      const token = localStorage.getItem('tokenPassword')
+        ? localStorage.getItem('tokenPassword')
+        : localStorage.getItem('tokenAnonymous');
+      const cartId = localStorage.getItem('cartId');
+      if (cartId) {
+        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+          if (typeof res !== 'string') {
+            const itemId = deleteItmBtn.html.getAttribute('id');
+            if (itemId !== null) {
+              ECommerceApi.removeItemFromCart(currentClient, token!, res.id, res.version, itemId);
+            }
+          }
+        });
+      }
       Header.updateOrdersNum();
       Cart.updateTotalPrice();
     });
   }
 
+  private static createModalContent(): {
+    modalContent: BaseComponent;
+    modalYesBtn: BaseComponent;
+    modalNoBtn: BaseComponent;
+  } {
+    const modalContent = new BaseComponent({ tag: 'div', class: ['modal-content'] });
+
+    const modalHeading = new BaseComponent({
+      tag: 'h2',
+      class: ['modal-heading'],
+      text: 'Empty the cart',
+    });
+
+    const modalQuestion = new BaseComponent({
+      tag: 'p',
+      class: ['modal-question'],
+      text: 'Are you sure you want to remove all products from the cart?',
+    });
+    const modalButtonContainer = new BaseComponent({
+      tag: 'div',
+      class: ['modal-button-container'],
+    });
+    const modalYesBtn = new BaseComponent({
+      tag: 'button',
+      class: ['modal-yes'],
+      text: 'Yes',
+    });
+    const modalNoBtn = new BaseComponent({
+      tag: 'button',
+      class: ['modal-no'],
+      text: 'No',
+    });
+    modalButtonContainer.html.append(modalYesBtn.html, modalNoBtn.html);
+    modalContent.html.append(modalHeading.html, modalQuestion.html, modalButtonContainer.html);
+    return { modalContent, modalYesBtn, modalNoBtn };
+  }
+
   private static handleEmptyCartBtnClick(emptyButton: BaseComponent): void {
-    emptyButton.html.addEventListener('click', () => {
-      Cart.fullCart.html.remove();
-      this.cartContent.html.append(Cart.emptyCart.html);
-      Header.updateOrdersNum();
+    emptyButton.html.addEventListener('click', async () => {
+      const modal = new Modal();
+      const modalContainer = Cart.createModalContent();
+      modal.container.html.append(modalContainer.modalContent.html);
+      Cart.cartContent.html.append(modal.view.html);
+
+      modalContainer.modalNoBtn.html.addEventListener('click', () => {
+        modal.destroy();
+      });
+
+      modalContainer.modalYesBtn.html.addEventListener('click', async () => {
+        const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+        const cartId = localStorage.getItem('cartId');
+        if (token && cartId) {
+          const actions: IRemoveItemBodyRequest[] = [];
+          const res = (await ECommerceApi.getCart(currentClient, token, cartId)) as ICart;
+          if (res.lineItems) {
+            res.lineItems.forEach((product: ILineItem) => {
+              actions.push({
+                action: 'removeLineItem',
+                lineItemId: product.id,
+                quantity: product.quantity,
+              });
+            });
+          }
+          await ECommerceApi.removeAllItemsFromCart(currentClient, token, cartId, res.version, actions);
+          modal.destroy();
+        }
+
+        Cart.fullCart.html.remove();
+        this.cartContent.html.append(Cart.emptyCart.html);
+        Header.updateOrdersNum();
+      });
     });
   }
 
