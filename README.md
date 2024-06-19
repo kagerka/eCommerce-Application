@@ -29,7 +29,7 @@ HTML, CSS, SCSS, TypeScript, Vite, Vitest, Git.
 ## Links:
 
 - [Deploy](https://ecommerce-application-tea-team-s4.netlify.app/)
-- [Presentation](https://kagerka.github.io/final-task-presentation-JSFE2023Q4/) [in progress]
+- [Presentation](https://kagerka.github.io/final-task-presentation-JSFE2023Q4/)
 - [Pull request. Sprint 1](https://github.com/kagerka/eCommerce-Application/pull/65)
 - [Pull request. Sprint 2](https://github.com/kagerka/eCommerce-Application/pull/135)
 - [Pull request. Sprint 3](https://github.com/kagerka/eCommerce-Application/pull/156)
