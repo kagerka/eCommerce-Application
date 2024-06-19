@@ -725,7 +725,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        console.error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     });
@@ -761,7 +761,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        console.error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     });
@@ -791,7 +791,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        console.error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     });
@@ -823,7 +823,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        console.error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     });
@@ -848,7 +848,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        console.error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     });
@@ -860,7 +860,7 @@ class ECommerceApi {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
-      console.error(`HTTP error! Status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     const json = await response.json();
     return json;
@@ -872,7 +872,7 @@ class ECommerceApi {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
-      console.error(`HTTP error! Status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     const json = await response.json();
     return json;
