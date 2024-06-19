@@ -71,12 +71,13 @@ class Catalog {
     if (token) {
       try {
         const allProducts = await ECommerceApi.getAllProducts(currentClient, token);
-        localStorage.setItem('allProducts', JSON.stringify(allProducts.results));
-        localStorage.setItem('products', JSON.stringify(allProducts.results));
-        Products.createProductCardsFromLocalStorage(true).forEach(() => {
-          const brands = Products.displayBrands();
-          Products.brandsContainer.html.innerHTML = '';
-          Products.brandsContainer.append(brands.html);
+        await Products.createProductCardsFromLocalStorage(true).forEach(() => {
+          localStorage.setItem('allProducts', JSON.stringify(allProducts.results));
+          Products.createProductCardsFromLocalStorage(true).forEach(() => {
+            const brands = Products.displayBrands();
+            Products.brandsContainer.html.innerHTML = '';
+            Products.brandsContainer.append(brands.html);
+          });
         });
       } catch (error) {
         console.error(error);
