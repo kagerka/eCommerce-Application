@@ -28,9 +28,12 @@ HTML, CSS, SCSS, TypeScript, Vite, Vitest, Git.
 
 ## Links:
 
-- [Deploy]() [in progress]
-- [Video review]() [in progress]
-- [Final pull request]() [in progress]
+- [Deploy](https://ecommerce-application-tea-team-s4.netlify.app/)
+- [Presentation](https://kagerka.github.io/final-task-presentation-JSFE2023Q4/)
+- [Pull request. Sprint 1](https://github.com/kagerka/eCommerce-Application/pull/65)
+- [Pull request. Sprint 2](https://github.com/kagerka/eCommerce-Application/pull/135)
+- [Pull request. Sprint 3](https://github.com/kagerka/eCommerce-Application/pull/156)
+- [Pull request. Sprint 4](https://github.com/kagerka/eCommerce-Application/pull/175)
 
 ## Setting up the project:
 
