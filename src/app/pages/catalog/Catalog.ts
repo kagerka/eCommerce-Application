@@ -105,7 +105,7 @@ class Catalog {
           });
         });
       } catch (error) {
-        console.error(`Error displayCategories: ${error}`);
+        console.error(error);
       }
     }
   }
