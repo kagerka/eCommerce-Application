@@ -18,7 +18,7 @@ class Catalog {
     this.banner = new Banner();
     this.products = new Products();
     this.composeView();
-    Catalog.displayBrands();
+    Catalog.displayBrandItms();
   }
 
   private composeView(): void {
@@ -60,27 +60,26 @@ class Catalog {
           })
           .then(async (productCards) => Products.displayProductCards(productCards));
       } catch (error) {
-        console.error(error);
+        console.error(`Error displayProducts: ${error}`);
       }
       Products.handleLoadProductsAllButton();
     }
   }
 
-  static async displayBrands(): Promise<void> {
-    const token = localStorage.getItem('tokenPassword')
-      ? localStorage.getItem('tokenPassword')
-      : localStorage.getItem('tokenAnonymous');
+  static async displayBrandItms(): Promise<void> {
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
     if (token) {
       try {
         const allProducts = await ECommerceApi.getAllProducts(currentClient, token);
         localStorage.setItem('allProducts', JSON.stringify(allProducts.results));
-        await Products.createProductCardsFromLocalStorage(true).forEach(() => {
+        localStorage.setItem('products', JSON.stringify(allProducts.results));
+        Products.createProductCardsFromLocalStorage(true).forEach(() => {
           const brands = Products.displayBrands();
           Products.brandsContainer.html.innerHTML = '';
           Products.brandsContainer.append(brands.html);
         });
       } catch (error) {
-        console.error(error);
+        throw new Error(`Error displayProducts: ${error}`);
       }
     }
   }
@@ -106,7 +105,7 @@ class Catalog {
           });
         });
       } catch (error) {
-        console.error(error);
+        console.error(`Error displayCategories: ${error}`);
       }
     }
   }

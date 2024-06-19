@@ -121,6 +121,7 @@ class Products {
         event.preventDefault();
         Products.searchProducts();
         localStorage.removeItem('loadedProducts');
+        Products.loadMoreButton.view.html.setAttribute('disabled', '');
       }
     });
   }
@@ -130,9 +131,19 @@ class Products {
     if (token) {
       const inputRes = (Products.searchInput.view.html as HTMLInputElement).value;
       ECommerceApi.getSearching(currentClient, token, inputRes).then((res) => {
+        localStorage.removeItem('currentCategoryID');
+        localStorage.removeItem('currentBrand');
+
+        const form = Products.sortForm.html as HTMLFormElement;
+        form.reset();
+
+        (Products.searchInput.view.html as HTMLInputElement).value = '';
+
+        Products.resetCategoriesClass();
+        Products.resetPriceRange();
+
         Products.productsList.html.innerHTML = '';
         Products.addProductCards(res);
-        Products.resetCatalog();
       });
     }
   }
@@ -339,7 +350,7 @@ class Products {
             })
             .then(async (productCards) => Products.addLoaderToPage(productCards));
         } catch (error) {
-          console.error(error);
+          throw new Error(`Error displayProducts: ${error}`);
         }
       }
     };
@@ -530,24 +541,6 @@ class Products {
     });
   }
 
-  private static handleHeaderLinks(cartBtn: BaseComponent): void {
-    const removeDisableAttributes = (e: Event): void => {
-      e.preventDefault();
-      cartBtn.html.removeAttribute('disabled');
-      cartBtn.html.removeAttribute('data-tooltip');
-      Header.updateOrdersNum();
-    };
-
-    const logout = document.querySelector('.logout-button');
-    logout?.addEventListener('click', (e) => removeDisableAttributes(e));
-
-    const catalogLink = document.querySelector('.header-catalog-link');
-    catalogLink?.addEventListener('click', (e) => removeDisableAttributes(e));
-
-    const homeLink = document.querySelector('.header-home-link');
-    homeLink?.addEventListener('click', (e) => removeDisableAttributes(e));
-  }
-
   private static async renderProductElements(
     id: string,
     link: string,
@@ -565,8 +558,14 @@ class Products {
       cartBtn.html.setAttribute('disabled', '');
       cartBtn.html.setAttribute('data-tooltip', 'This product is already in the cart.');
     }
+    const logout = document.querySelector('.logout-button');
+    logout?.addEventListener('click', (e) => {
+      e.preventDefault();
+      cartBtn.html.removeAttribute('disabled');
+      cartBtn.html.removeAttribute('data-tooltip');
+      Header.updateOrdersNum();
+    });
 
-    Products.handleHeaderLinks(cartBtn);
     Products.handleCartButton(cartBtn);
 
     const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });
@@ -951,7 +950,7 @@ class Products {
               Products.addLoaderToPage(productCards);
             });
         } catch (error) {
-          console.error(error);
+          throw new Error(`Error displayProducts: ${error}`);
         }
       }
     };
@@ -985,7 +984,7 @@ class Products {
               Products.addLoaderToPage(productCards);
             });
         } catch (error) {
-          console.error(error);
+          throw new Error(`Error displayProducts: ${error}`);
         }
       }
     };

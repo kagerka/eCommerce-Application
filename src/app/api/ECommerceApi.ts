@@ -1,7 +1,7 @@
 import IAPIClientDetails from '../interfaces/APIClientDetails.interface';
 import IAccessToken from '../interfaces/AccessToken.interface';
 import IAddShippingAddressID from '../interfaces/AddShippingAddressID.interface';
-import { ICart, IDiscount, IRemoveItemBodyRequest } from '../interfaces/Cart.interface';
+import { ICart, IRemoveItemBodyRequest, IDiscount } from '../interfaces/Cart.interface';
 import ICustomerData from '../interfaces/CustomerData.interface';
 import ICustomerProfile from '../interfaces/CustomerProfile.interface';
 import ICustomerSignInResult from '../interfaces/CustomerSignInResult.interface';
@@ -488,7 +488,7 @@ class ECommerceApi {
   }
 
   static async getSearching(clientDetails: IAPIClientDetails, token: string, inputRes: string): Promise<ICategories> {
-    const path = `/product-projections/search?limit=12&offset=12&text.en=${inputRes}`;
+    const path = `/product-projections/search?text.en=${inputRes}&limit=12`;
 
     const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
       method: 'GET',
@@ -725,7 +725,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error(`HTTP error! Status: ${response.status}`);
       }
       return response.json();
     });
@@ -761,7 +761,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
       return response.json();
     });
@@ -791,7 +791,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error(`HTTP error! Status: ${response.status}`);
       }
       return response.json();
     });
@@ -823,7 +823,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
       return response.json();
     });
@@ -848,7 +848,7 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error(`HTTP error! Status: ${response.status}`);
       }
       return response.json();
     });
@@ -860,7 +860,7 @@ class ECommerceApi {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
     const json = await response.json();
     return json;
@@ -872,7 +872,7 @@ class ECommerceApi {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
     const json = await response.json();
     return json;

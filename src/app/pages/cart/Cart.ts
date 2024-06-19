@@ -35,18 +35,16 @@ class Cart {
       : localStorage.getItem('tokenAnonymous');
     const cartId = localStorage.getItem('cartId');
     if (cartId) {
-      ECommerceApi.getCart(currentClient, token!, cartId!)
-        .then((res) => {
-          if (typeof res !== 'string') {
-            const ZERO = 0;
-            if (res.lineItems.length > ZERO) {
-              Cart.cartContent.html.append(Cart.fullCart.html);
-            } else {
-              this.cartContent.html.append(Cart.emptyCart.html);
-            }
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        if (typeof res !== 'string') {
+          const ZERO = 0;
+          if (res.lineItems.length > ZERO) {
+            Cart.cartContent.html.append(Cart.fullCart.html);
+          } else {
+            this.cartContent.html.append(Cart.emptyCart.html);
           }
-        })
-        .catch((error) => console.error(error));
+        }
+      });
     } else {
       this.cartContent.html.append(Cart.emptyCart.html);
     }
