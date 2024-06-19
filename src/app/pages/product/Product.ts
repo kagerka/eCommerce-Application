@@ -211,8 +211,8 @@ class Product {
   }
 
   private static catchError(error: Error): void {
-    console.error(`Error checkAddToCartStatus: ${error}`);
     Product.toastError();
+    console.error(error);
   }
 
   private static toastRemoveSuccess(): void {
@@ -603,7 +603,8 @@ class Product {
         const res = await ECommerceApi.getProductByID(currentClient, token, id);
         localStorage.setItem('productData', JSON.stringify(res));
       } catch (error) {
-        throw new Error(`Error displayCategories: ${error}`);
+        Product.toastError();
+        console.error(error);
       }
     }
   }

@@ -60,7 +60,7 @@ class Catalog {
           })
           .then(async (productCards) => Products.displayProductCards(productCards));
       } catch (error) {
-        console.error(`Error displayProducts: ${error}`);
+        console.error(error);
       }
       Products.handleLoadProductsAllButton();
     }
@@ -79,7 +79,7 @@ class Catalog {
           Products.brandsContainer.append(brands.html);
         });
       } catch (error) {
-        throw new Error(`Error displayProducts: ${error}`);
+        console.error(error);
       }
     }
   }
