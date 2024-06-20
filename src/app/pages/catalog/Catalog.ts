@@ -38,6 +38,11 @@ class Catalog {
   }
 
   static async handleCatalog(): Promise<void> {
+    localStorage.removeItem('currentCategoryID');
+    localStorage.removeItem('currentBrand');
+    localStorage.removeItem('loadedProducts');
+    localStorage.removeItem('isSearching');
+
     const token = localStorage.getItem('tokenPassword')
       ? localStorage.getItem('tokenPassword')
       : localStorage.getItem('tokenAnonymous');

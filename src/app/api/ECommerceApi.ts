@@ -487,16 +487,24 @@ class ECommerceApi {
     }
   }
 
-  static async getSearching(clientDetails: IAPIClientDetails, token: string, inputRes: string): Promise<ICategories> {
-    const path = `/product-projections/search?text.en=${inputRes}&limit=12`;
-
-    const response = await fetch(`${clientDetails.APIURL}/${clientDetails.projectKey}${path}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+  static async getSearching(
+    clientDetails: IAPIClientDetails,
+    token: string,
+    inputRes: string,
+    pageNumber: number,
+  ): Promise<IQueryProducts> {
+    const ONE = 1;
+    const path = `/product-projections/search?text.en=${inputRes}&limit=12&offset=`;
+    const response = await fetch(
+      `${clientDetails.APIURL}/${clientDetails.projectKey}${path}${CARDS_PER_PAGE * (pageNumber - ONE)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     } else {
@@ -725,7 +733,8 @@ class ECommerceApi {
       }),
     }).then((response) => {
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error(`HTTP error! status: ${response.status}`);
+        return false;
       }
       return response.json();
     });
