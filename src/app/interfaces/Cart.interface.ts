@@ -131,3 +131,20 @@ export interface IRemoveItemBodyRequest {
   lineItemId: string;
   quantity: number;
 }
+
+export interface IDiscount {
+  limit: number;
+  offset: number;
+  count: number;
+  total: number;
+  results: IDiscountResults[];
+}
+
+interface IDiscountResults {
+  cartDiscounts: [];
+  code: string;
+  id: string;
+  value: {
+    permyriad: string;
+  };
+}

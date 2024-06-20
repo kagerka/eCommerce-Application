@@ -2,6 +2,7 @@ import Toastify from 'toastify-js';
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
+import Header from '../../components/header/Header';
 import { ICart, ILineItem } from '../../interfaces/Cart.interface';
 import { IProductImages } from '../../interfaces/Product.interface';
 import getBedrooms from '../../utils/productAttributes/getBedrooms';
@@ -12,7 +13,6 @@ import getSizes from '../../utils/productAttributes/getSizes';
 import closeButton from '../../utils/svg/closeButton';
 import leftArrowBtn from '../../utils/svg/leftArrow';
 import rightArrowBtn from '../../utils/svg/rightArrow';
-
 import './Product.scss';
 
 const gap = 16;
@@ -161,6 +161,7 @@ class Product {
       await ECommerceApi.removeItemFromCart(currentClient, token, cartId, getCartInfo.version, getCartInfo.lineItemsId)
         .then(() => {
           this.addToCartBtn.html.innerText = 'Add to cart';
+          Header.updateOrdersNum();
           Product.toastRemoveSuccess();
         })
         .catch((error: Error) => {
@@ -170,6 +171,7 @@ class Product {
       await ECommerceApi.addItemToCart(currentClient, token, cartId, getCartInfo.version, productId)
         .then(() => {
           this.addToCartBtn.html.innerText = 'Remove from cart';
+          Header.updateOrdersNum();
           Product.toastAddSuccess();
         })
         .catch((error: Error) => {
@@ -204,12 +206,13 @@ class Product {
       } else if (token && cartId && productId) {
         this.handleAddToCartBtn(token, cartId, productId);
       }
+      Header.updateOrdersNum();
     });
   }
 
   private static catchError(error: Error): void {
-    console.error(`Error checkAddToCartStatus: ${error}`);
     Product.toastError();
+    console.error(error);
   }
 
   private static toastRemoveSuccess(): void {
@@ -600,7 +603,8 @@ class Product {
         const res = await ECommerceApi.getProductByID(currentClient, token, id);
         localStorage.setItem('productData', JSON.stringify(res));
       } catch (error) {
-        throw new Error(`Error displayCategories: ${error}`);
+        Product.toastError();
+        console.error(error);
       }
     }
   }

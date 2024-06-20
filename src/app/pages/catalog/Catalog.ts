@@ -18,7 +18,6 @@ class Catalog {
     this.banner = new Banner();
     this.products = new Products();
     this.composeView();
-    Catalog.displayBrands();
   }
 
   private composeView(): void {
@@ -39,6 +38,11 @@ class Catalog {
   }
 
   static async handleCatalog(): Promise<void> {
+    localStorage.removeItem('currentCategoryID');
+    localStorage.removeItem('currentBrand');
+    localStorage.removeItem('loadedProducts');
+    localStorage.removeItem('isSearching');
+
     const token = localStorage.getItem('tokenPassword')
       ? localStorage.getItem('tokenPassword')
       : localStorage.getItem('tokenAnonymous');
@@ -60,27 +64,27 @@ class Catalog {
           })
           .then(async (productCards) => Products.displayProductCards(productCards));
       } catch (error) {
-        console.error(`Error displayProducts: ${error}`);
+        console.error(error);
       }
       Products.handleLoadProductsAllButton();
     }
   }
 
-  static async displayBrands(): Promise<void> {
-    const token = localStorage.getItem('tokenPassword')
-      ? localStorage.getItem('tokenPassword')
-      : localStorage.getItem('tokenAnonymous');
+  static async displayBrandItms(): Promise<void> {
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
     if (token) {
       try {
         const allProducts = await ECommerceApi.getAllProducts(currentClient, token);
-        localStorage.setItem('allProducts', JSON.stringify(allProducts.results));
         await Products.createProductCardsFromLocalStorage(true).forEach(() => {
-          const brands = Products.displayBrands();
-          Products.brandsContainer.html.innerHTML = '';
-          Products.brandsContainer.append(brands.html);
+          localStorage.setItem('allProducts', JSON.stringify(allProducts.results));
+          Products.createProductCardsFromLocalStorage(true).forEach(() => {
+            const brands = Products.displayBrands();
+            Products.brandsContainer.html.innerHTML = '';
+            Products.brandsContainer.append(brands.html);
+          });
         });
       } catch (error) {
-        console.error(`Error displayBrands: ${error}`);
+        console.error(error);
       }
     }
   }
@@ -106,7 +110,7 @@ class Catalog {
           });
         });
       } catch (error) {
-        console.error(`Error displayCategories: ${error}`);
+        console.error(error);
       }
     }
   }

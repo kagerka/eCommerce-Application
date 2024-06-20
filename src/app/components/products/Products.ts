@@ -4,7 +4,7 @@ import currentClient from '../../api/data/currentClient';
 import { ICart, ILineItem } from '../../interfaces/Cart.interface';
 import { ICategories, IProducts, IQueryProducts } from '../../interfaces/Product.interface';
 import Cart from '../../pages/cart/Cart';
-import { LOAD_PRODUCTS_TIMEOUT } from '../../utils/constants';
+import { CARDS_PER_PAGE, LOAD_PRODUCTS_TIMEOUT } from '../../utils/constants';
 import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
 import Header from '../header/Header';
@@ -111,28 +111,92 @@ class Products {
   private handleSearchEvents(): void {
     this.searchButtonImg.html.addEventListener('click', (event: Event) => {
       event.preventDefault();
-      Products.searchProducts();
       Products.clearStorageFilter();
-      Products.loadMoreButton.view.html.removeAttribute('disabled');
+      Products.searchProducts();
     });
     Products.searchInput.view.html.addEventListener('keydown', (event) => {
       const keyboardEvent = <KeyboardEvent>event;
       if (keyboardEvent.key === 'Enter') {
         event.preventDefault();
+        Products.clearStorageFilter();
         Products.searchProducts();
-        localStorage.removeItem('loadedProducts');
       }
     });
   }
 
   private static searchProducts(): void {
+    let pageNumber = 1;
+    const inputRes = (Products.searchInput.view.html as HTMLInputElement).value;
+    localStorage.setItem('isSearching', 'true');
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    if (token) Products.loadFirstSearch(token, inputRes, pageNumber);
+
+    const fn = async (): Promise<void> => {
+      const ONE = 1;
+      pageNumber += ONE;
+      document.addEventListener('click', () => {
+        if (!localStorage.getItem('isSearching')) {
+          Products.loadMoreButton.view.html.removeEventListener('click', fn);
+        }
+      });
+      if (token) {
+        try {
+          await ECommerceApi.getSearching(currentClient, token, inputRes, pageNumber)
+            .then(async (resp) => {
+              const products = await Products.getProductCards(resp, false);
+              return products;
+            })
+            .then((resp) => {
+              if (
+                resp.resp.offset + resp.resp.count < resp.resp.total &&
+                !localStorage.getItem('currentCategoryID') &&
+                !localStorage.getItem('currentBrand')
+              ) {
+                ECommerceApi.getSearching(currentClient, token, inputRes, pageNumber + ONE).then(() => {
+                  Products.disableLoadButton(false);
+                });
+              } else {
+                Products.disableLoadButton(true);
+                Products.loadMoreButton.view.html.removeEventListener('click', fn);
+              }
+              return resp.productCards;
+            })
+            .then(async (productCards) => Products.addLoaderToPage(productCards));
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    Products.loadMoreButton.view.html.addEventListener('click', fn);
+
+    document.addEventListener('click', () => {
+      if (!localStorage.getItem('isSearching')) {
+        Products.loadMoreButton.view.html.removeEventListener('click', fn);
+      }
+    });
+  }
+
+  private static loadFirstSearch(token: string, inputRes: string, pageNumber: number): void {
     if (token) {
-      const inputRes = (Products.searchInput.view.html as HTMLInputElement).value;
-      ECommerceApi.getSearching(currentClient, token, inputRes).then((res) => {
+      ECommerceApi.getSearching(currentClient, token, inputRes, pageNumber).then((res) => {
+        if (res.total < CARDS_PER_PAGE) {
+          Products.disableLoadButton(true);
+        } else {
+          Products.disableLoadButton(false);
+        }
+        console.log(res.offset);
+
+        const form = Products.sortForm.html as HTMLFormElement;
+        form.reset();
+
+        (Products.searchInput.view.html as HTMLInputElement).value = '';
+
+        Products.resetCategoriesClass();
+        Products.resetPriceRange();
+
         Products.productsList.html.innerHTML = '';
         Products.addProductCards(res);
-        Products.resetCatalog();
       });
     }
   }
@@ -144,24 +208,43 @@ class Products {
     });
   }
 
-  static resetCatalog(): void {
+  static async resetCatalog(): Promise<void> {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
     if (token) {
       localStorage.removeItem('currentCategoryID');
       localStorage.removeItem('currentBrand');
-      const subcategory = document.getElementsByClassName('subcategory');
+      localStorage.removeItem('loadedProducts');
+      localStorage.removeItem('isSearching');
 
       const form = Products.sortForm.html as HTMLFormElement;
       form.reset();
 
       (Products.searchInput.view.html as HTMLInputElement).value = '';
 
-      for (let i = 0; i < subcategory.length; i += iteratorStep) {
-        ECommerceApi.getSelectedProducts(currentClient, token, subcategory[i].id).then((res) => {
-          Products.resetCategoriesClass();
-          Products.resetPriceRange();
-          Products.addProductCards(res);
-        });
+      Products.productsList.html.innerHTML = '';
+      const pageNumber = 1;
+      const ONE = 1;
+      if (token) {
+        try {
+          await ECommerceApi.getProducts(currentClient, token, pageNumber)
+            .then(async (resp) => Products.getProductCards(resp, true))
+            .then((resp) => {
+              Products.resetCategoriesClass();
+              Products.resetPriceRange();
+              if (resp.resp.offset + resp.resp.count < resp.resp.total && !localStorage.getItem('currentCategoryID')) {
+                ECommerceApi.getProducts(currentClient, token, pageNumber + ONE).then(() => {
+                  Products.disableLoadButton(false);
+                });
+              } else {
+                Products.disableLoadButton(true);
+              }
+              return resp.productCards;
+            })
+            .then(async (productCards) => Products.addLoaderToPage(productCards));
+        } catch (error) {
+          console.error(error);
+        }
+        Products.handleLoadProductsAllButton();
       }
     }
   }
@@ -339,15 +422,26 @@ class Products {
             })
             .then(async (productCards) => Products.addLoaderToPage(productCards));
         } catch (error) {
-          throw new Error(`Error displayProducts: ${error}`);
+          console.error(error);
         }
       }
     };
-
     Products.loadMoreButton.view.html.addEventListener('click', fn);
-
     document.addEventListener('click', () => {
-      if (localStorage.getItem('currentCategoryID') || localStorage.getItem('currentBrand')) {
+      if (
+        localStorage.getItem('currentCategoryID') ||
+        localStorage.getItem('currentBrand') ||
+        localStorage.getItem('isSearching')
+      ) {
+        Products.loadMoreButton.view.html.removeEventListener('click', fn);
+      }
+    });
+    document.addEventListener('keydown', () => {
+      if (
+        localStorage.getItem('currentCategoryID') ||
+        localStorage.getItem('currentBrand') ||
+        localStorage.getItem('isSearching')
+      ) {
         Products.loadMoreButton.view.html.removeEventListener('click', fn);
       }
     });
@@ -530,6 +624,23 @@ class Products {
     });
   }
 
+  private static handleHeaderLinks(cartBtn: BaseComponent): void {
+    const removeDisableAttributes = (e: Event): void => {
+      e.preventDefault();
+      cartBtn.html.removeAttribute('disabled');
+      cartBtn.html.removeAttribute('data-tooltip');
+    };
+
+    const logout = document.querySelector('.logout-button');
+    logout?.addEventListener('click', (e) => removeDisableAttributes(e));
+
+    const catalogLink = document.querySelector('.header-catalog-link');
+    catalogLink?.addEventListener('click', (e) => removeDisableAttributes(e));
+
+    const homeLink = document.querySelector('.header-home-link');
+    homeLink?.addEventListener('click', (e) => removeDisableAttributes(e));
+  }
+
   private static async renderProductElements(
     id: string,
     link: string,
@@ -547,14 +658,8 @@ class Products {
       cartBtn.html.setAttribute('disabled', '');
       cartBtn.html.setAttribute('data-tooltip', 'This product is already in the cart.');
     }
-    const logout = document.querySelector('.logout-button');
-    logout?.addEventListener('click', (e) => {
-      e.preventDefault();
-      cartBtn.html.removeAttribute('disabled');
-      cartBtn.html.removeAttribute('data-tooltip');
-      Header.updateOrdersNum();
-    });
 
+    Products.handleHeaderLinks(cartBtn);
     Products.handleCartButton(cartBtn);
 
     const imgContainer = new BaseComponent({ tag: 'div', class: ['img-container'] });
@@ -579,30 +684,33 @@ class Products {
     }
   }
 
-  private static addItemToAnonymousCart(itemID: string): void {
+  private static async addItemToAnonymousCart(itemID: string): Promise<void> {
     const tokenPassword = localStorage.getItem('tokenPassword');
     const tokenAnonymous = localStorage.getItem('tokenAnonymous');
 
     if (tokenAnonymous && !tokenPassword) {
       const cartId = localStorage.getItem('cartId');
       if (cartId) {
-        ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
+        await ECommerceApi.getCart(currentClient, tokenAnonymous, cartId).then((res) => {
           if (typeof res !== 'string') {
             ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
-              Header.updateOrdersNum();
               localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+              Header.updateOrdersNum();
               Cart.createFullCart();
             });
           }
         });
+        await Products.toastAddSuccess();
       }
       if (cartId === null) {
-        ECommerceApi.createCart(currentClient, tokenAnonymous).then((res) => {
+        ECommerceApi.createCart(currentClient, tokenAnonymous).then(async (res) => {
           localStorage.setItem('cartId', res.id);
-          ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
+          await ECommerceApi.addItemToCart(currentClient, tokenAnonymous, res.id, res.version, itemID).then((resp) => {
             localStorage.setItem('lineItems', JSON.stringify(resp.lineItems));
+            Header.updateOrdersNum();
             Cart.createFullCart();
           });
+          await Products.toastAddSuccess();
         });
       }
     }
@@ -622,11 +730,11 @@ class Products {
         if (tokenPassword && !tokenAnonymous) {
           const cartId = localStorage.getItem('cartId');
           if (cartId) {
-            ECommerceApi.getCart(currentClient, tokenPassword, cartId).then((res) => {
+            ECommerceApi.getCart(currentClient, tokenPassword, cartId).then(async (res) => {
               if (typeof res !== 'string') {
                 Header.updateOrdersNum();
-                ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
-                Products.toastAddSuccess();
+                await ECommerceApi.addItemToCart(currentClient, tokenPassword, res.id, res.version, cartBtn.html.id);
+                await Products.toastAddSuccess();
               }
             });
           }
@@ -641,7 +749,7 @@ class Products {
       className: 'toast-add-success',
       gravity: 'bottom',
       style: {
-        position: 'absolute',
+        position: 'fixed',
         bottom: '15px',
         right: '15px',
       },
@@ -849,55 +957,6 @@ class Products {
     return categoryNameEl;
   }
 
-  // private static handleCategoryClick(
-  //   categoryNameEl: BaseComponent,
-  //   pathPart: { name: { en: string }; parent: { id: string }; id: string },
-  //   token: string,
-  // ): void {
-  //   localStorage.removeItem('currentCategoryID');
-  //   categoryNameEl.html.addEventListener('click', async (e) => {
-  //     const form = Products.sortForm.html as HTMLFormElement;
-  //     form.reset();
-  //     categoryNameEl.html.classList.add('active');
-  //     const els = document.getElementsByClassName('subcategory');
-  //     Products.productsList.html.innerHTML = '';
-  //     Products.resetPriceRange();
-
-  //     const target = e.target as HTMLElement;
-  //     localStorage.setItem('currentCategoryID', target.id);
-
-  //     for (let i = 0; i < els.length; i += step) {
-  //       if (
-  //         els[i].className === `subcategory ${pathPart.id}` ||
-  //         els[i].className === `subcategory ${pathPart.id} active`
-  //       ) {
-  //         ECommerceApi.getSelectedProducts(currentClient, token, els[i].id).then((resp) => {
-  //           localStorage.setItem('products', JSON.stringify(resp.results));
-  //           Products.createProductCardsFromLocalStorage(false).forEach((productCard) => {
-  //             Products.productsList.html.append(productCard.html);
-  //           });
-  //         });
-  //       }
-  //     }
-  //   });
-  // }
-
-  // public static addPrice(): boolean {
-  //   let country;
-  //   if (!localStorage.getItem('customer')) {
-  //     const customerJSON = localStorage.getItem('customer');
-  //     const customer = JSON.parse(customerJSON!);
-  //     if (customer && customer.addresses[0].country === 'RU') {
-  //       country = true;
-  //     } else {
-  //       country = false;
-  //     }
-  //   } else {
-  //     country = false;
-  //   }
-  //   return country;
-  // }
-
   private static createCategory(categoryNumber: number): BaseComponent | null {
     const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
     if (!token) return null;
@@ -922,15 +981,16 @@ class Products {
     localStorage.removeItem('currentCategoryID');
     localStorage.removeItem('currentBrand');
     localStorage.removeItem('loadedProducts');
+    localStorage.removeItem('isSearching');
   }
 
   private static handleCategoryClick(categoryNameEl: BaseComponent, token: string): void {
     const fn = async (e: Event): Promise<void> => {
+      Products.productsList.html.innerHTML = '';
       Products.clearStorageFilter();
       const form = Products.sortForm.html as HTMLFormElement;
       form.reset();
       categoryNameEl.html.classList.add('active');
-      Products.productsList.html.innerHTML = '';
       Products.resetPriceRange();
       const target = e.target as HTMLElement;
       localStorage.setItem('currentCategoryID', target.id);
@@ -938,11 +998,14 @@ class Products {
       const categoryId = localStorage.getItem('currentCategoryID');
       if (categoryId) {
         await ECommerceApi.getSelectedProducts(currentClient, token, categoryId)
-          .then((res) => {
-            Products.addProductCards(res);
-            return res;
-          })
+          .then(
+            (res) =>
+              // Products.addProductCards(res);
+
+              res,
+          )
           .then((resp) => {
+            Products.loader.view.html.classList.remove('active');
             if (resp.offset + resp.count < resp.total) {
               Products.disableLoadButton(false);
               Products.handleLoadProductsByCategoryButton(categoryId);
@@ -953,8 +1016,13 @@ class Products {
           .then(() => Products.loader.view.html.classList.remove('active'));
       }
     };
-    categoryNameEl.html.removeEventListener('click', fn);
     categoryNameEl.html.addEventListener('click', fn);
+
+    document.addEventListener('click', () => {
+      if (!localStorage.getItem('currentCategoryID')) {
+        Products.loadMoreButton.view.html.removeEventListener('click', fn);
+      }
+    });
   }
 
   private static handleLoadProductsByCategoryButton(categoryId: string): void {
@@ -985,11 +1053,17 @@ class Products {
               Products.addLoaderToPage(productCards);
             });
         } catch (error) {
-          throw new Error(`Error displayProducts: ${error}`);
+          console.error(error);
         }
       }
     };
     Products.loadMoreButton.view.html.addEventListener('click', fn);
+
+    document.addEventListener('click', () => {
+      if (!localStorage.getItem('currentCategoryID')) {
+        Products.loadMoreButton.view.html.removeEventListener('click', fn);
+      }
+    });
   }
 
   private static handleLoadProductsByBrandButton(brandName: string): void {
@@ -1019,11 +1093,17 @@ class Products {
               Products.addLoaderToPage(productCards);
             });
         } catch (error) {
-          throw new Error(`Error displayProducts: ${error}`);
+          console.error(error);
         }
       }
     };
     Products.loadMoreButton.view.html.addEventListener('click', fn);
+
+    document.addEventListener('click', () => {
+      if (!localStorage.getItem('currentBrand')) {
+        Products.loadMoreButton.view.html.removeEventListener('click', fn);
+      }
+    });
   }
 
   static addLoaderToPage(productCards: BaseComponent[]): void {
@@ -1081,6 +1161,7 @@ class Products {
     const fn = async (): Promise<void> => {
       localStorage.removeItem('loadedProducts');
       localStorage.removeItem('currentCategoryID');
+      localStorage.removeItem('isSearching');
       localStorage.setItem('currentBrand', brandName);
       const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
 
@@ -1104,8 +1185,13 @@ class Products {
           });
       }
     };
-    brand.html.removeEventListener('click', fn);
     brand.html.addEventListener('click', fn);
+
+    document.addEventListener('click', () => {
+      if (!localStorage.getItem('currentBrand')) {
+        Products.loadMoreButton.view.html.removeEventListener('click', fn);
+      }
+    });
   }
 
   private static addProductCards(res: IQueryProducts | ICategories): void {

@@ -795,7 +795,7 @@ class Profile {
         });
       })
       .catch((error) => {
-        throw new Error(`Error update authentication: ${error}`);
+        console.error(error);
       });
   }
 

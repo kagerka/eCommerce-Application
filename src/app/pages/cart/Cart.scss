@@ -107,9 +107,14 @@
   align-items: center;
 }
 
-.total-price {
+.total-price,
+.discounted-price {
   color: $green;
   font-weight: 600;
+}
+
+.crossed {
+  color: hsl(0, 3%, 45%);
 }
 
 .total-itm-title {
@@ -173,6 +178,19 @@
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   width: 30%;
+}
+
+.promo-error {
+  font-weight: 500;
+  font-size: 11px;
+  color: $red;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 5px;
+}
+
+.total-title {
+  margin: 4% 0;
 }
 
 .cart-itms-conteiner {

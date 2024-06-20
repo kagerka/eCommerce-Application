@@ -5,11 +5,11 @@ import Header from '../../components/header/Header';
 import Input from '../../components/input/Input';
 import Modal from '../../components/modal/modal';
 import { ICart, ILineItem, IRemoveItemBodyRequest } from '../../interfaces/Cart.interface';
+import { LOAD_PRODUCTS_TIMEOUT } from '../../utils/constants';
 import './Cart.scss';
 
 const step = 1;
 const cents = 100;
-const timeout = 10;
 const TWO = 2;
 
 class Cart {
@@ -35,16 +35,18 @@ class Cart {
       : localStorage.getItem('tokenAnonymous');
     const cartId = localStorage.getItem('cartId');
     if (cartId) {
-      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-        if (typeof res !== 'string') {
-          const ZERO = 0;
-          if (res.lineItems.length > ZERO) {
-            Cart.cartContent.html.append(Cart.fullCart.html);
-          } else {
-            this.cartContent.html.append(Cart.emptyCart.html);
+      ECommerceApi.getCart(currentClient, token!, cartId!)
+        .then((res) => {
+          if (typeof res !== 'string') {
+            const ZERO = 0;
+            if (res.lineItems.length > ZERO) {
+              Cart.cartContent.html.append(Cart.fullCart.html);
+            } else {
+              this.cartContent.html.append(Cart.emptyCart.html);
+            }
           }
-        }
-      });
+        })
+        .catch((error) => console.error(error));
     } else {
       this.cartContent.html.append(Cart.emptyCart.html);
     }
@@ -80,36 +82,50 @@ class Cart {
     const promoBtn = new BaseComponent({ tag: 'button', class: ['promo-button'], text: 'Apply' });
     const totalConteiner = new BaseComponent({ tag: 'div', class: ['total-conteiner'] });
     const totalTitle = new BaseComponent({ tag: 'h4', class: ['total-title'], text: 'Total:' });
+    const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: `0.00 $` });
+    const errorFormat = new BaseComponent({ tag: 'div', class: ['promo-error'], text: '' });
+    const discountedConteiner = new BaseComponent({ tag: 'div', class: ['total-conteiner'] });
+    const discountedTitle = new BaseComponent({ tag: 'h4', class: ['total-title'], text: '' });
+    const discountedPrice = new BaseComponent({ tag: 'div', class: ['discounted-price'], text: '' });
+
+    (promoInput.view.html as HTMLInputElement).value = 'TEA-TEAM';
 
     fullCart.html.append(cartTop.html, emptyButton.html);
     cartTop.html.append(cartProductsConteiner.html, priceConteiner.html);
-    priceConteiner.html.append(promoConteiner.html, totalConteiner.html, proceedButton.html);
+    priceConteiner.html.append(promoConteiner.html, errorFormat.html, totalConteiner.html);
+    priceConteiner.html.append(discountedConteiner.html, proceedButton.html);
     promoConteiner.html.append(promoInput.view.html, promoBtn.html);
+    totalConteiner.html.append(totalTitle.html, totalPrice.html);
+    discountedConteiner.html.append(discountedTitle.html, discountedPrice.html);
 
     if (cartId) {
       ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
         Cart.handleEmptyCartBtnClick(emptyButton);
 
         if (typeof res !== 'string') {
-          for (let i = 0; i < res.lineItems?.length; i += step) {
-            const cartProduct = this.createCartItem(
-              res.lineItems[i].name.en,
-              res.lineItems[i].totalPrice.centAmount / res.lineItems[i].quantity / cents,
-              res.lineItems[i].totalPrice.centAmount / cents,
-              res.lineItems[i].variant.images[0].url,
-              res.lineItems[i].id,
-              `${res.lineItems[i].quantity}`,
-            );
-            cartProductsConteiner.html.append(cartProduct.html);
-          }
-          const totalPrice = new BaseComponent({ tag: 'div', class: ['total-price'], text: `0.00 $` });
+          Cart.uploadCartItems(res, cartProductsConteiner);
           totalConteiner.html.append(totalTitle.html, totalPrice.html);
         }
       });
       Cart.updateTotalPrice();
+      Cart.handlePromoSubmit(promoInput, promoBtn, errorFormat, totalPrice, discountedTitle, discountedPrice);
     }
 
     return fullCart;
+  }
+
+  private static uploadCartItems(res: ICart, cartProductsConteiner: BaseComponent): void {
+    for (let i = 0; i < res.lineItems?.length; i += step) {
+      const cartProduct = this.createCartItem(
+        res.lineItems[i].name.en,
+        res.lineItems[i].totalPrice.centAmount / res.lineItems[i].quantity / cents,
+        res.lineItems[i].totalPrice.centAmount / cents,
+        res.lineItems[i].variant.images[0].url,
+        res.lineItems[i].id,
+        `${res.lineItems[i].quantity}`,
+      );
+      cartProductsConteiner.html.append(cartProduct.html);
+    }
   }
 
   static updateTotalPrice(): void {
@@ -120,21 +136,26 @@ class Cart {
         : localStorage.getItem('tokenAnonymous');
       const cartId = localStorage.getItem('cartId');
       if (cartId) {
-        ECommerceApi.getCart(currentClient, token!, cartId!)
-          .then((res) => {
-            if (typeof res !== 'string') {
-              for (let i = 0; i < res.lineItems?.length; i += step) {
-                totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
-              }
-              if (document.getElementsByClassName('total-price')[0])
-                document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`;
+        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+          if (typeof res !== 'string') {
+            for (let i = 0; i < res.lineItems?.length; i += step) {
+              totalPriceValue += res.lineItems[i].totalPrice.centAmount / cents;
             }
-          })
-          .catch((error) => {
-            console.error(`Error updateTotalPrice: ${error}`);
-          });
+            if (document.getElementsByClassName('total-price')[0])
+              document.getElementsByClassName('total-price')[0].textContent = `${totalPriceValue.toFixed(TWO)} $`;
+            if (
+              document.getElementsByClassName('discounted-price')[0] &&
+              document.getElementsByClassName('discounted-price')[0].textContent !== ''
+            )
+              ECommerceApi.getCartDiscount(currentClient, token!).then((cartRes) => {
+                const persent = cartRes.results[0].value.permyriad;
+                document.getElementsByClassName('discounted-price')[0].textContent =
+                  `${((totalPriceValue / cents) * (cents - +persent)).toFixed(TWO)} $`;
+              });
+          }
+        });
       }
-    }, timeout);
+    }, LOAD_PRODUCTS_TIMEOUT);
   }
 
   private static createCartItem(
@@ -249,7 +270,13 @@ class Cart {
           if (typeof res !== 'string') {
             const itemId = deleteItmBtn.html.getAttribute('id');
             if (itemId !== null) {
-              ECommerceApi.removeItemFromCart(currentClient, token!, res.id, res.version, itemId);
+              ECommerceApi.removeItemFromCart(currentClient, token!, res.id, res.version, itemId).then((resp) => {
+                if (!(resp as ICart).lineItems.length) {
+                  this.cartContent.html.innerHTML = '';
+                  this.cartContent.html.append(Cart.emptyCart.html);
+                  Header.updateOrdersNum();
+                }
+              });
             }
           }
         });
@@ -294,6 +321,51 @@ class Cart {
     modalButtonContainer.html.append(modalYesBtn.html, modalNoBtn.html);
     modalContent.html.append(modalHeading.html, modalQuestion.html, modalButtonContainer.html);
     return { modalContent, modalYesBtn, modalNoBtn };
+  }
+
+  private static handlePromoSubmit(
+    promoInput: Input,
+    promoBtn: BaseComponent,
+    errorFormat: BaseComponent,
+    totalPrice: BaseComponent,
+    discountedTitle: BaseComponent,
+    discountedPrice: BaseComponent,
+  ): void {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    promoBtn.html.addEventListener('click', () => {
+      ECommerceApi.getDiscountCode(currentClient, token!).then((res) => {
+        ECommerceApi.getCartDiscount(currentClient, token!).then((cartRes) => {
+          if (res.results[0].code === (promoInput.view.html as HTMLInputElement).value) {
+            errorFormat.html.textContent = '';
+            (promoInput.view.html as HTMLInputElement).value = 'TEA-TEAM';
+            const prevPrice = +parseFloat(totalPrice.html.textContent!);
+            const persent = cartRes.results[0].value.permyriad;
+            totalPrice.html.classList.add('crossed');
+            discountedPrice.html.textContent = `${((prevPrice / cents) * (cents - +persent)).toFixed(TWO)} $`;
+            discountedTitle.html.textContent = 'Discounted:';
+          } else {
+            Cart.resetPromo(errorFormat, promoInput, totalPrice, discountedPrice, discountedTitle);
+            errorFormat.html.textContent = 'Invalid promocode';
+          }
+        });
+      });
+    });
+  }
+
+  private static resetPromo(
+    errorFormat: BaseComponent,
+    promoInput: Input,
+    totalPrice: BaseComponent,
+    discountedPrice: BaseComponent,
+    discountedTitle: BaseComponent,
+  ): void {
+    errorFormat.html.textContent = '';
+    (promoInput.view.html as HTMLInputElement).value = 'TEA-TEAM';
+    totalPrice.html.classList.remove('crossed');
+    discountedPrice.html.textContent = '';
+    discountedTitle.html.textContent = '';
   }
 
   private static handleEmptyCartBtnClick(emptyButton: BaseComponent): void {

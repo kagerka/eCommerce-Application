@@ -1,10 +1,10 @@
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
-import { ICart } from '../../interfaces/Cart.interface';
 import BaseComponent from '../BaseComponent';
 import './Header.scss';
 
 const timeout = 700;
+const step = 1;
 
 class Header {
   private headerContainer: BaseComponent;
@@ -171,7 +171,7 @@ class Header {
   private static createHomeNavListLinkElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
-      class: ['nav-list-link'],
+      class: ['nav-list-link', 'header-home-link'],
       attribute: [
         ['href', '/'],
         ['data-navigo', ''],
@@ -187,7 +187,7 @@ class Header {
   private static createCatalogNavListLinkElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
-      class: ['nav-list-link'],
+      class: ['nav-list-link', 'header-catalog-link'],
       attribute: [
         ['href', '/catalog'],
         ['data-navigo', ''],
@@ -268,7 +268,13 @@ class Header {
 
     if (cartId) {
       ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
-        orderNum.html.textContent = `${(res as ICart).lineItems.length}`;
+        if (typeof res !== 'string') {
+          let num = 0;
+          for (let i = 0; i < res.lineItems.length; i += step) {
+            num += res.lineItems[i].quantity;
+          }
+          orderNum.html.textContent = `${num}`;
+        }
       });
     } else {
       orderNum.html.textContent = '0';
@@ -333,10 +339,15 @@ class Header {
         ? localStorage.getItem('tokenPassword')
         : localStorage.getItem('tokenAnonymous');
       const cartId = localStorage.getItem('cartId');
+      let num = 0;
       if (cartId) {
         ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
           if (typeof res !== 'string') {
-            document.getElementsByClassName('cart-orders-num')[0].textContent = `${res.lineItems.length}`;
+            for (let i = 0; i < res.lineItems.length; i += step) {
+              num += res.lineItems[i].quantity;
+            }
+
+            document.getElementsByClassName('cart-orders-num')[0].textContent = `${num}`;
           }
         });
       } else {
