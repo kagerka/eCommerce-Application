@@ -404,6 +404,7 @@ class LoginForm {
               addItemsToCart(currentClient, res.access_token, resp.id, resp.version).then((response) => {
                 localStorage.setItem('cartId', response.id);
                 localStorage.removeItem('lineItems');
+                Header.updateOrdersNum();
               });
             });
           });
