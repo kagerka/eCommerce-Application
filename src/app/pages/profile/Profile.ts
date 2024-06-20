@@ -2,15 +2,15 @@ import Toastify from 'toastify-js';
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
-import AddressCard from '../../components/address-card/AddressCard';
-import Addresses from '../../components/addresses/Addresses';
 import Button from '../../components/button/Button';
-import EditAddressForm from '../../components/edit-address-form/EditAddressForm';
 import EditForm from '../../components/edit-form/EditForm';
 import EditPasswordForm from '../../components/edit-password-form/EditPasswordForm';
 import Modal from '../../components/modal/modal';
 import ICustomerData from '../../interfaces/CustomerData.interface';
 import './Profile.scss';
+import Addresses from '../../components/addresses/Addresses';
+import EditAddressForm from '../../components/edit-address-form/EditAddressForm';
+import AddressCard from '../../components/address-card/AddressCard';
 
 const EMPTY_ARR_LENGTH = 0;
 const SINGLE = 1;
