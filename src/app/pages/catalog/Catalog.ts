@@ -18,7 +18,6 @@ class Catalog {
     this.banner = new Banner();
     this.products = new Products();
     this.composeView();
-    Catalog.displayBrandItms();
   }
 
   private composeView(): void {
