@@ -415,7 +415,7 @@ class Profile {
     });
   }
 
-  private static getTokenPassword(): string | null {
+  private static getTokenPasswordFromStorage(): string | null {
     if (localStorage.getItem('tokenPassword') !== null) {
       const tokenPsw = localStorage.getItem('tokenPassword');
       return tokenPsw;
@@ -452,7 +452,7 @@ class Profile {
   private updateShippingAddress(address: IAddress): void {
     const customerID = Profile.getCustomerIDFromStorage();
     const version = Profile.getVersionFromStorage();
-    const token = Profile.getTokenPassword();
+    const token = Profile.getTokenPasswordFromStorage();
     if (customerID && version && token && address.id) {
       ECommerceApi.removeShippingAddressID(currentClient, {
         id: customerID,
@@ -493,7 +493,7 @@ class Profile {
   private updateBillingAddress(address: IAddress): void {
     const customerID = Profile.getCustomerIDFromStorage();
     const version = Profile.getVersionFromStorage();
-    const token = Profile.getTokenPassword();
+    const token = Profile.getTokenPasswordFromStorage();
     if (customerID && version && token && address.id) {
       ECommerceApi.removeBillingAddressID(currentClient, {
         id: customerID,
@@ -638,31 +638,47 @@ class Profile {
             const { version } = response;
             const addressId = response.addresses[response.addresses.length - SINGLE].id;
             if (addressId !== undefined) {
-              ECommerceApi.addShippingAddressID(currentClient, {
-                id: customer.id,
-                token: tokenPsw,
-                version,
-                addressId,
-              }).then((shippingRes) => {
-                const newVersion = shippingRes.version;
-                const newAddressId = response.addresses[response.addresses.length - SINGLE].id;
-                if (newAddressId !== undefined) {
-                  ECommerceApi.addBillingAddressID(currentClient, {
-                    id: customer.id,
-                    token: tokenPsw,
-                    version: newVersion,
-                    addressId: newAddressId,
-                  }).then((customerData) => {
-                    localStorage.setItem('customer', JSON.stringify(customerData));
-                    this.rerenderAllAddresses();
-                  });
-                }
-              });
+              this.updateShippingAddressID(
+                { id: customer.id, token: tokenPsw, version, addressId },
+                tokenPsw,
+                customer.id,
+              );
             }
           });
         }
       }
     }
+  }
+
+  private updateShippingAddressID(
+    shippingData: {
+      id: string;
+      token: string;
+      version: number;
+      addressId: string;
+    },
+    token: string,
+    id: string,
+  ): void {
+    ECommerceApi.addShippingAddressID(currentClient, shippingData).then((shippingRes) => {
+      const newVersion = shippingRes.version;
+      const newAddressId = shippingRes.addresses[shippingRes.addresses.length - SINGLE].id;
+      if (newAddressId !== undefined) {
+        this.updateBillingAddressID({
+          id,
+          token,
+          version: newVersion,
+          addressId: newAddressId,
+        });
+      }
+    });
+  }
+
+  private updateBillingAddressID(data: { id: string; token: string; version: number; addressId: string }): void {
+    ECommerceApi.addBillingAddressID(currentClient, data).then((customerData) => {
+      localStorage.setItem('customer', JSON.stringify(customerData));
+      this.rerenderAllAddresses();
+    });
   }
 
   private static toastSuccess(): void {
@@ -779,7 +795,7 @@ class Profile {
         });
       })
       .catch((error) => {
-        throw new Error(`Error update authentication: ${error}`);
+        console.error(error);
       });
   }
 

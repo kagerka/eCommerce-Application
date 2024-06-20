@@ -7,6 +7,7 @@ import Breadcrumb from './components/breadcrumb/Breadcrumb';
 import Footer from './components/footer/Footer';
 import Header from './components/header/Header';
 import About from './pages/about/About';
+import Cart from './pages/cart/Cart';
 import Catalog from './pages/catalog/Catalog';
 import Login from './pages/login/Login';
 import MainPage from './pages/main/MainPage';
@@ -135,19 +136,19 @@ class App {
     this.router
       .on('/about', () => {
         this.onAbout();
-        this.checkBreadcrumbs(['Home', 'About']);
       })
       .on('/login', () => {
         this.onLogin();
-        this.checkBreadcrumbs(['Home', 'Login']);
       })
       .on('/logout', () => {
         this.onLogout();
-        this.checkBreadcrumbs(['Home', 'Logout']);
       })
       .on('/registration', () => {
         this.onReg();
-        this.checkBreadcrumbs(['Home', 'Registration']);
+      })
+      .on('/cart', () => {
+        this.onCart();
+        this.checkBreadcrumbs(['Home', 'Your Cart']);
       })
       .on('/', () => {
         this.onMain();
@@ -176,6 +177,7 @@ class App {
     this.pageContent.html.append(this.notFound.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    localStorage.removeItem('isProductPage');
   }
 
   private onAbout(): void {
@@ -183,6 +185,8 @@ class App {
     this.pageContent.html.append(this.aboutPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    this.checkBreadcrumbs(['Home', 'About Us']);
+    localStorage.removeItem('isProductPage');
   }
 
   private onMain(): void {
@@ -190,6 +194,7 @@ class App {
     this.pageContent.html.append(this.mainPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    localStorage.removeItem('isProductPage');
   }
 
   private onLogout(): void {
@@ -197,6 +202,7 @@ class App {
     this.pageContent.html.append(this.mainPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    this.checkBreadcrumbs(['Home', 'Logout']);
   }
 
   private onCatalog(): void {
@@ -204,6 +210,17 @@ class App {
     this.pageContent.html.append(this.catalogPage.view.html);
     this.checkBtns();
     this.setLoginBtnHref();
+    localStorage.removeItem('isProductPage');
+  }
+
+  private onCart(): void {
+    this.pageContent.html.innerHTML = '';
+    const cartPage = new Cart();
+    this.pageContent.html.append(cartPage.view.html);
+    this.checkBtns();
+    this.setLoginBtnHref();
+    Cart.composeView();
+    localStorage.removeItem('isProductPage');
   }
 
   private async onProduct(): Promise<void> {
@@ -214,7 +231,6 @@ class App {
       product.images,
       product.formattedPrice,
       product.formattedDiscount,
-      product.currencySymbol,
       product.productDiscount,
       product.brand,
       product.sizes,
@@ -246,6 +262,8 @@ class App {
       this.checkBtns();
       this.setLoginBtnHref();
     }
+    this.checkBreadcrumbs(['Home', 'Login']);
+    localStorage.removeItem('isProductPage');
   }
 
   private onReg(): void {
@@ -264,6 +282,8 @@ class App {
       this.checkBtns();
       this.setLoginBtnHref();
     }
+    this.checkBreadcrumbs(['Home', 'Registration']);
+    localStorage.removeItem('isProductPage');
   }
 
   private onProfile(): void {
@@ -278,10 +298,10 @@ class App {
         this.profilePage.dateOfBirth.html.textContent = customer.dateOfBirth;
         this.profilePage.email.html.textContent = customer.email;
         if (customer.shippingAddressIds.length === EMPTY_ARR_LENGTH) {
-          customer.shippingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE].id);
+          customer.shippingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE]?.id);
         }
         if (customer.billingAddressIds.length === EMPTY_ARR_LENGTH) {
-          customer.billingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE].id);
+          customer.billingAddressIds.push(customer.addresses[customer.addresses.length - SINGLE]?.id);
         }
         localStorage.setItem('customer', JSON.stringify(customer));
         this.profilePage.rerenderAllAddresses();
@@ -295,6 +315,7 @@ class App {
       this.checkBtns();
       this.setLoginBtnHref();
     }
+    localStorage.removeItem('isProductPage');
   }
 
   private setLoginBtnHref(): void {
@@ -333,14 +354,14 @@ class App {
   run(): void {
     App.container.append(this.content.html);
     if (!localStorage.getItem('tokenAnonymous') && !localStorage.getItem('tokenPassword')) {
-      ECommerceApi.getAccessToken(currentClient).then((res) => {
+      ECommerceApi.getAnonymousToken(currentClient).then((res) => {
         localStorage.setItem('tokenAnonymous', res.access_token);
-        Catalog.displayProducts();
         Catalog.displayCategories();
+        Catalog.displayCatalog();
       });
     }
-    Catalog.displayProducts();
     Catalog.displayCategories();
+    Catalog.displayCatalog();
     this.createRouter();
   }
 }

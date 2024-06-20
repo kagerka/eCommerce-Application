@@ -3,6 +3,9 @@ import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../BaseComponent';
 import './Header.scss';
 
+const timeout = 700;
+const step = 1;
+
 class Header {
   private headerContainer: BaseComponent;
 
@@ -44,6 +47,12 @@ class Header {
 
   private regButton: BaseComponent;
 
+  private cartBtn: BaseComponent;
+
+  private cartLink: BaseComponent;
+
+  private cartOrdersNum: BaseComponent;
+
   constructor() {
     this.headerContainer = Header.createHeaderContainerElement();
     this.headerLogoContainer = Header.createHeaderLogoContainerElement();
@@ -61,6 +70,9 @@ class Header {
     this.catalogNavListLink = Header.createCatalogNavListLinkElement();
     this.aboutNavListItem = Header.createAboutNavListItemElement();
     this.aboutNavListLink = Header.createAboutNavListLinkElement();
+    this.cartBtn = Header.createCartBtn();
+    this.cartLink = Header.createCartLink();
+    this.cartOrdersNum = Header.createCartOrdersNum();
 
     this.headerButtonsContainer = Header.createHeaderButtonsContainerElement();
     this.profileButton = Header.createProfileButtonElement();
@@ -83,10 +95,16 @@ class Header {
 
     this.headerNavContainer.html.append(this.headerNav.html);
     this.headerNav.html.append(this.navList.html);
-    this.navList.html.append(this.homeNavListItem.html, this.catalogNavListItem.html, this.aboutNavListItem.html);
+    this.navList.html.append(
+      this.homeNavListItem.html,
+      this.catalogNavListItem.html,
+      this.aboutNavListItem.html,
+      this.cartBtn.html,
+    );
     this.homeNavListItem.html.append(this.homeNavListLink.html);
     this.catalogNavListItem.html.append(this.catalogNavListLink.html);
     this.aboutNavListItem.html.append(this.aboutNavListLink.html);
+    this.cartBtn.html.append(this.cartLink.html, this.cartOrdersNum.html);
     this.headerButtonsContainer.html.append(
       this.profileButton.html,
       this.loginButton.html,
@@ -153,7 +171,7 @@ class Header {
   private static createHomeNavListLinkElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
-      class: ['nav-list-link'],
+      class: ['nav-list-link', 'header-home-link'],
       attribute: [
         ['href', '/'],
         ['data-navigo', ''],
@@ -169,7 +187,7 @@ class Header {
   private static createCatalogNavListLinkElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
-      class: ['nav-list-link'],
+      class: ['nav-list-link', 'header-catalog-link'],
       attribute: [
         ['href', '/catalog'],
         ['data-navigo', ''],
@@ -190,7 +208,7 @@ class Header {
         ['href', '/about'],
         ['data-navigo', ''],
       ],
-      text: 'About',
+      text: 'About Us',
     });
   }
 
@@ -222,6 +240,49 @@ class Header {
     });
   }
 
+  private static createCartBtn(): BaseComponent {
+    return new BaseComponent({ tag: 'li', class: ['nav-list-item'] });
+  }
+
+  private static createCartLink(): BaseComponent {
+    return new BaseComponent({
+      tag: 'div',
+      class: ['cart-button'],
+      attribute: [
+        ['href', '/cart'],
+        ['data-navigo', ''],
+      ],
+      text: '',
+    });
+  }
+
+  private static createCartOrdersNum(): BaseComponent {
+    const token = localStorage.getItem('tokenPassword')
+      ? localStorage.getItem('tokenPassword')
+      : localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    const orderNum = new BaseComponent({
+      tag: 'div',
+      class: ['cart-orders-num'],
+    });
+
+    if (cartId) {
+      ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+        if (typeof res !== 'string') {
+          let num = 0;
+          for (let i = 0; i < res.lineItems.length; i += step) {
+            num += res.lineItems[i].quantity;
+          }
+          orderNum.html.textContent = `${num}`;
+        }
+      });
+    } else {
+      orderNum.html.textContent = '0';
+    }
+
+    return orderNum;
+  }
+
   private static createLogoutButtonElement(): BaseComponent {
     return new BaseComponent({
       tag: 'a',
@@ -250,10 +311,11 @@ class Header {
     this.logoutButton.html.addEventListener('click', (event: Event) => {
       event.preventDefault();
       if (localStorage.getItem('tokenPassword')) {
-        ECommerceApi.getAccessToken(currentClient).then((res) => {
+        ECommerceApi.getAnonymousToken(currentClient).then((res) => {
           localStorage.setItem('tokenAnonymous', res.access_token);
           localStorage.removeItem('tokenPassword');
           localStorage.removeItem('isAuth');
+          localStorage.removeItem('cartId');
           localStorage.removeItem('customer');
           this.loginButton.html.classList.remove('hide');
           this.loginButton.html.setAttribute('href', '/login');
@@ -269,6 +331,29 @@ class Header {
     this.profileButton.html.addEventListener('click', (event: Event) => {
       event.preventDefault();
     });
+  }
+
+  static updateOrdersNum(): void {
+    setTimeout(() => {
+      const token = localStorage.getItem('tokenPassword')
+        ? localStorage.getItem('tokenPassword')
+        : localStorage.getItem('tokenAnonymous');
+      const cartId = localStorage.getItem('cartId');
+      let num = 0;
+      if (cartId) {
+        ECommerceApi.getCart(currentClient, token!, cartId!).then((res) => {
+          if (typeof res !== 'string') {
+            for (let i = 0; i < res.lineItems.length; i += step) {
+              num += res.lineItems[i].quantity;
+            }
+
+            document.getElementsByClassName('cart-orders-num')[0].textContent = `${num}`;
+          }
+        });
+      } else {
+        document.getElementsByClassName('cart-orders-num')[0].textContent = '0';
+      }
+    }, timeout);
   }
 
   get profileBtn(): BaseComponent {

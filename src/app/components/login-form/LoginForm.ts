@@ -1,5 +1,7 @@
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
+import ICustomerData from '../../interfaces/CustomerData.interface';
+import addItemsToCart from '../../utils/addLineItems/addLineItems';
 import {
   INCORRECTLY_ENTER,
   MIN_PASSWORD_LENGTH,
@@ -16,8 +18,10 @@ import validateLength from '../../utils/validation/validateLength';
 import validateRegExp from '../../utils/validation/validateRegExp';
 import BaseComponent from '../BaseComponent';
 import Button from '../button/Button';
+import Header from '../header/Header';
 import Input from '../input/Input';
 import Products from '../products/Products';
+
 import './LoginForm.scss';
 
 class LoginForm {
@@ -291,14 +295,14 @@ class LoginForm {
     }
   }
 
-  private static addClassError(elemen: HTMLElement): void {
-    elemen.classList.remove('success');
-    elemen.classList.add('error');
+  private static addClassError(element: HTMLElement): void {
+    element.classList.remove('success');
+    element.classList.add('error');
   }
 
-  private static addClassSuccess(elemen: HTMLElement): void {
-    elemen.classList.remove('error');
-    elemen.classList.add('success');
+  private static addClassSuccess(element: HTMLElement): void {
+    element.classList.remove('error');
+    element.classList.add('success');
   }
 
   private validateEmailInput(): void {
@@ -385,6 +389,34 @@ class LoginForm {
     });
   }
 
+  private authRequest(customer: ICustomerData): void {
+    ECommerceApi.getTokenPassword(currentClient, customer)
+      .then((res) => {
+        const tokenAnonymous = localStorage.getItem('tokenAnonymous');
+        if (tokenAnonymous) {
+          localStorage.removeItem('tokenAnonymous');
+          ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
+            window.history.pushState({}, '', '/');
+            this.loginButton.view.html.setAttribute('login-success', 'true');
+            localStorage.setItem('isAuth', JSON.stringify(true));
+            localStorage.setItem('customer', JSON.stringify(data.customer));
+            ECommerceApi.checkCartExistsByCustomerID(currentClient, res.access_token, data.customer.id).then((resp) => {
+              addItemsToCart(currentClient, res.access_token, resp.id, resp.version).then((response) => {
+                localStorage.setItem('cartId', response.id);
+                localStorage.removeItem('lineItems');
+                Header.updateOrdersNum();
+              });
+            });
+          });
+        }
+        this.clearFields();
+        localStorage.setItem('tokenPassword', res.access_token);
+      })
+      .catch(() => {
+        this.displayErrorEnter();
+      });
+  }
+
   private submitLoginForm(): void {
     this.loginFormContainer.html.addEventListener('submit', (event: Event) => {
       event.preventDefault();
@@ -392,28 +424,11 @@ class LoginForm {
         this.emailInput.view.html instanceof HTMLInputElement &&
         this.passwordInput.view.html instanceof HTMLInputElement
       ) {
-        const customer: { email: string; password: string } = {
-          email: this.emailInput.view.html.value,
-          password: this.passwordInput.view.html.value,
-        };
         if (!localStorage.getItem('tokenPassword')) {
-          ECommerceApi.getTokenPassword(currentClient, customer)
-            .then((res) => {
-              if (localStorage.getItem('tokenAnonymous')) {
-                localStorage.removeItem('tokenAnonymous');
-              }
-              this.clearFields();
-              localStorage.setItem('tokenPassword', res.access_token);
-              ECommerceApi.authCustomer(currentClient, customer, res.access_token).then((data) => {
-                window.history.pushState({}, '', '/');
-                this.loginButton.view.html.setAttribute('login-success', 'true');
-                localStorage.setItem('isAuth', JSON.stringify(true));
-                localStorage.setItem('customer', JSON.stringify(data.customer));
-              });
-            })
-            .catch(() => {
-              this.displayErrorEnter();
-            });
+          this.authRequest({
+            email: this.emailInput.view.html.value,
+            password: this.passwordInput.view.html.value,
+          });
         } else {
           const token = localStorage.getItem('tokenPassword');
           if (token) {
@@ -421,6 +436,7 @@ class LoginForm {
             Products.resetCatalog();
           }
         }
+        Header.updateOrdersNum();
       }
     });
   }

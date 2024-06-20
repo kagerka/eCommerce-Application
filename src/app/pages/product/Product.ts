@@ -1,6 +1,9 @@
+import Toastify from 'toastify-js';
 import ECommerceApi from '../../api/ECommerceApi';
 import currentClient from '../../api/data/currentClient';
 import BaseComponent from '../../components/BaseComponent';
+import Header from '../../components/header/Header';
+import { ICart, ILineItem } from '../../interfaces/Cart.interface';
 import { IProductImages } from '../../interfaces/Product.interface';
 import getBedrooms from '../../utils/productAttributes/getBedrooms';
 import getBrand from '../../utils/productAttributes/getBrand';
@@ -29,7 +32,6 @@ type TProductDetails = {
   images: IProductImages[];
   formattedPrice: string;
   formattedDiscount: string;
-  currencySymbol: string;
   productDiscount: number;
   brand: string;
   sizes: string[];
@@ -68,13 +70,14 @@ class Product {
 
   private modalContainer: BaseComponent;
 
+  private addToCartBtn: BaseComponent;
+
   constructor(
     name: string,
     description: string,
     images: IProductImages[],
     formattedPrice: string,
     formattedDiscount: string,
-    currencySymbol: string,
     productDiscount: number,
     brand: string,
     sizes: string[],
@@ -89,20 +92,16 @@ class Product {
     Product.productImagesSelectedContent = Product.createProductImagesSelectedContentElement();
     this.productInfoContent = Product.createProductInfoContentElement();
     this.productName = Product.createProductNameContainerElement(name);
-    this.productPrice = Product.createProductPriceContainerElement(
-      formattedPrice,
-      formattedDiscount,
-      currencySymbol,
-      productDiscount,
-    );
+    this.productPrice = Product.createProductPriceContainerElement(formattedPrice, formattedDiscount, productDiscount);
     this.productDescription = Product.createProductDescriptionContainerElement(description);
     this.productBrand = Product.createProductBrandContainerElement(brand);
     this.productSizes = Product.createProductSizeContainerElement(sizes);
     this.productBedrooms = Product.createProductBedroomsContainerElement(bedrooms);
     this.productPersons = Product.createProductPersonsContainerElement(persons);
     this.modalContainer = Product.createModalContainerElement();
+    this.addToCartBtn = Product.createAddToCartBtn();
     this.addImages(images, this.productImagesPreviewContainer.html);
-
+    this.checkAddToCartStatus();
     this.composeView();
   }
 
@@ -121,12 +120,138 @@ class Product {
     this.productInfoContent.html.append(
       this.productName.html,
       this.productPrice.html,
+      this.addToCartBtn.html,
       this.productDescription.html,
       this.productBrand.html,
       this.productSizes.html,
       this.productBedrooms.html,
       this.productPersons.html,
     );
+  }
+
+  private static async isProductInCart(): Promise<{
+    isProductInTheCart: boolean;
+    lineItemsId: string;
+    version: number;
+  }> {
+    const productId = await localStorage.getItem('id')?.replace(/["]/gm, '');
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    let isProductInTheCart = false;
+    let lineItemsId = '';
+    let version = 0;
+    if (token && cartId) {
+      const res = (await ECommerceApi.getCart(currentClient, token, cartId)) as ICart;
+      version = await res.version;
+      if (res.lineItems) {
+        await res.lineItems.forEach(async (product: ILineItem) => {
+          if (product.productId === productId) {
+            isProductInTheCart = true;
+            lineItemsId = await product.id;
+          }
+        });
+      }
+    }
+    return { isProductInTheCart, lineItemsId, version };
+  }
+
+  private async handleAddToCartBtn(token: string, cartId: string, productId: string): Promise<Promise<Promise<void>>> {
+    const getCartInfo = await Product.isProductInCart();
+    if (getCartInfo.isProductInTheCart) {
+      await ECommerceApi.removeItemFromCart(currentClient, token, cartId, getCartInfo.version, getCartInfo.lineItemsId)
+        .then(() => {
+          this.addToCartBtn.html.innerText = 'Add to cart';
+          Header.updateOrdersNum();
+          Product.toastRemoveSuccess();
+        })
+        .catch((error: Error) => {
+          Product.catchError(error);
+        });
+    } else {
+      await ECommerceApi.addItemToCart(currentClient, token, cartId, getCartInfo.version, productId)
+        .then(() => {
+          this.addToCartBtn.html.innerText = 'Remove from cart';
+          Header.updateOrdersNum();
+          Product.toastAddSuccess();
+        })
+        .catch((error: Error) => {
+          Product.catchError(error);
+        });
+    }
+  }
+
+  private async checkAddToCartStatus(): Promise<void> {
+    const isProductPage = localStorage.getItem('isProductPage');
+    const token = localStorage.getItem('tokenPassword') || localStorage.getItem('tokenAnonymous');
+    const cartId = localStorage.getItem('cartId');
+    if (isProductPage) {
+      const cartInfo = await Product.isProductInCart();
+      if (cartInfo.isProductInTheCart && token && cartId) {
+        this.addToCartBtn.html.innerText = 'Remove from cart';
+      } else {
+        this.addToCartBtn.html.innerText = 'Add to cart';
+      }
+    }
+    this.addToCartBtn.html.addEventListener('click', async () => {
+      const productId = await localStorage.getItem('id')?.replace(/["]/gm, '');
+      if (token && cartId === null) {
+        await ECommerceApi.createCart(currentClient, token)
+          .then((res) => {
+            localStorage.setItem('cartId', res.id);
+          })
+          .then(() => {
+            const cartID = localStorage.getItem('cartId');
+            if (cartID && productId) this.handleAddToCartBtn(token, cartID, productId);
+          });
+      } else if (token && cartId && productId) {
+        this.handleAddToCartBtn(token, cartId, productId);
+      }
+      Header.updateOrdersNum();
+    });
+  }
+
+  private static catchError(error: Error): void {
+    Product.toastError();
+    console.error(error);
+  }
+
+  private static toastRemoveSuccess(): void {
+    Toastify({
+      text: 'This product has been deleted from the cart successfully',
+      className: 'toast-remove-success',
+      gravity: 'bottom',
+      style: {
+        position: 'absolute',
+        bottom: '15px',
+        right: '15px',
+      },
+    }).showToast();
+  }
+
+  private static toastAddSuccess(): void {
+    Toastify({
+      text: 'This product has been added to the cart successfully',
+      className: 'toast-add-success',
+      gravity: 'bottom',
+      style: {
+        position: 'absolute',
+        bottom: '15px',
+        right: '15px',
+      },
+    }).showToast();
+  }
+
+  private static toastError(): void {
+    Toastify({
+      text: 'Oops! Something went wrong :(',
+      className: 'toast-error',
+      gravity: 'bottom',
+      style: {
+        position: 'absolute',
+        bottom: '15px',
+        right: '15px',
+      },
+    }).showToast();
   }
 
   private static addResizeListener(): void {
@@ -164,6 +289,10 @@ class Product {
 
   private static createModalContainerElement(): BaseComponent {
     return new BaseComponent({ tag: 'div', class: ['modal-container', 'hidden'] });
+  }
+
+  private static createAddToCartBtn(): BaseComponent {
+    return new BaseComponent({ tag: 'button', class: ['add-to-cart-btn'], text: 'Add to cart' });
   }
 
   private createImageModalContentElement(images: IProductImages[], imageEl: HTMLElement): BaseComponent {
@@ -373,15 +502,14 @@ class Product {
   private static createProductPriceContainerElement(
     formattedPrice: string,
     formattedDiscount: string,
-    currencySymbol: string,
     productDiscount: number,
   ): BaseComponent {
     const priceContainer = new BaseComponent({ tag: 'div', class: ['product-page-price-container'] });
-    const priceText = `${formattedPrice} ${currencySymbol}`;
+    const priceText = `${formattedPrice} $`;
     const price = new BaseComponent({ tag: 'h4', class: ['product-page-price'], text: priceText });
     priceContainer.html.append(price.html);
     if (productDiscount) {
-      const discountText = `${formattedDiscount} ${currencySymbol}`;
+      const discountText = `${formattedDiscount} $`;
       const discount = new BaseComponent({ tag: 'h4', class: ['product-page-discount'], text: discountText });
       priceContainer.html.append(discount.html);
       price.html.classList.add('crossed');
@@ -475,7 +603,8 @@ class Product {
         const res = await ECommerceApi.getProductByID(currentClient, token, id);
         localStorage.setItem('productData', JSON.stringify(res));
       } catch (error) {
-        throw new Error(`Error displayCategories: ${error}`);
+        Product.toastError();
+        console.error(error);
       }
     }
   }
@@ -497,7 +626,6 @@ class Product {
     const prices = getPrices(product);
     const { formattedPrice } = prices;
     const { formattedDiscount } = prices;
-    const { currencySymbol } = prices;
     const { productDiscount } = prices;
     const bedrooms = getBedrooms(variants, attributes);
     const persons = getPersons(variants, attributes);
@@ -508,7 +636,6 @@ class Product {
       images,
       formattedPrice,
       formattedDiscount,
-      currencySymbol,
       productDiscount,
       brand,
       sizes,

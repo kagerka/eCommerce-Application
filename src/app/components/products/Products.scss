@@ -38,6 +38,7 @@
 }
 
 .products-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 75%;
@@ -57,7 +58,9 @@
 }
 
 .product-card {
+  position: relative;
   list-style-type: none;
+  z-index: 1;
   width: 100%;
   font-size: 0.85rem;
   outline: 0.2rem solid hwb(0 92% 7%);
@@ -67,11 +70,50 @@
   transition-duration: 0.9s;
 }
 
+.product-cart-button {
+  position: absolute;
+  background: white;
+  background-image: url('./../../../assets/images/cart-btn.svg');
+  border: 3px solid $lightGray;
+  cursor: pointer;
+  border-radius: 25%;
+  z-index: 2;
+  height: 2.5rem;
+  width: 2.5rem;
+  top: 4%;
+  left: 7%;
+  transition-duration: 0.5s;
+}
+
 .product-card:hover,
 .product-card:active,
 .product-card:focus {
   outline-color: $green;
   scale: 1.05;
+}
+
+.product-cart-button {
+  transition: 0.5s all;
+
+  &:hover {
+    border-color: $green;
+    background-image: url('./../../../assets/images/cart-btn.svg');
+  }
+
+  &:focus {
+    border-color: $green;
+    background-image: url('./../../../assets/images/cart-btn.svg');
+    background-color: $lightGreen;
+  }
+
+  &:disabled {
+    cursor: default;
+    border: 3px solid $lightGray;
+
+    &:focus {
+      background-color: $white;
+    }
+  }
 }
 
 .img-container {
@@ -110,6 +152,7 @@
 
 .product-price {
   font-size: 1rem;
+  line-height: 1.4rem;
   margin: 0;
 }
 
@@ -263,7 +306,8 @@
   padding: 0;
 }
 
-.reset-button {
+.reset-button,
+.load-more-button {
   width: 120px;
   border-radius: 5px;
   background-color: #46a358;
@@ -285,6 +329,10 @@
   &:hover {
     background-color: $darkGreen;
   }
+}
+
+.load-more-button {
+  width: 100%;
 }
 
 .prices-conteiner {
@@ -337,6 +385,29 @@
   padding: 0;
 }
 
+[data-tooltip]:hover::after {
+  display: block;
+  position: absolute;
+  content: attr(data-tooltip);
+  border: 2px solid $red;
+  border-radius: 10px;
+  background: $lightRed;
+  padding: 0.25em;
+  width: 150px;
+  font-size: 18px;
+  color: $gray;
+}
+
+.toast-add-success {
+  padding: 20px;
+  max-width: 300px;
+  color: $white;
+  font-size: 18px;
+  line-height: 28px;
+  z-index: 100;
+  background-color: $darkGreen;
+}
+
 @media screen and (max-width: 1270px) {
   .products-list {
     grid-template-columns: repeat(2, 1fr);
@@ -353,10 +424,6 @@
 
   .product-card {
     width: 80%;
-  }
-
-  .img-container {
-    margin: 0 1rem;
   }
 
   .products-container {
@@ -435,6 +502,13 @@
 
   .product-discount {
     font-size: 0.9rem;
+  }
+}
+
+@media screen and (max-width: 590px) {
+  .product-cart-button {
+    width: 2rem;
+    height: 2rem;
   }
 }
 
