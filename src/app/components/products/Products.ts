@@ -629,6 +629,7 @@ class Products {
       e.preventDefault();
       cartBtn.html.removeAttribute('disabled');
       cartBtn.html.removeAttribute('data-tooltip');
+      Header.updateOrdersNum();
     };
 
     const logout = document.querySelector('.logout-button');
