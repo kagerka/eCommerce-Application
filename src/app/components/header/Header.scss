@@ -1,0 +1,220 @@
+@import './../../../styles/colors';
+@import './../../../styles/variables';
+
+.header {
+  width: 100%;
+  height: $headerHeight;
+  min-height: $headerHeight;
+  padding: 10px 20px;
+  border-bottom: 1px solid $green;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo-container {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  height: 60px;
+  width: 60px;
+  background: url('../../../assets/images/sport-logo.svg') no-repeat;
+}
+
+.header-logo-title {
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 28px;
+  color: $gray;
+}
+
+.header-logo-title-shop {
+  color: $green;
+}
+
+.nav-container {
+  height: 35px;
+  display: flex;
+  align-items: center;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  gap: 50px;
+  padding-left: 0;
+}
+
+.nav-list-link,
+.cart-button {
+  position: relative;
+  text-decoration: none;
+  font-size: 16px;
+  color: $gray;
+
+  &::after {
+    display: block;
+    position: absolute;
+    top: 46px;
+    left: 0;
+    width: 0;
+    height: 4px;
+    background-color: $green;
+    content: '';
+    transition: width 0.3s ease-out;
+  }
+
+  &:hover::after,
+  &:focus::after {
+    font-weight: 700;
+    width: 100%;
+  }
+
+  &.active {
+    font-weight: 700;
+
+    &::after {
+      width: 100%;
+    }
+  }
+}
+
+.buttons-container {
+  height: 35px;
+  display: flex;
+  justify-content: right;
+  gap: 20px;
+}
+
+.profile-button,
+.login-button,
+.logout-button,
+.registration-button {
+  width: 120px;
+  border-radius: 5px;
+  background-color: $green;
+  padding: 0 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: $white;
+  text-align: center;
+  transition: 0.5s all;
+  outline: none;
+  border: none;
+
+  &:hover {
+    background-color: $darkGreen;
+  }
+}
+
+.profile-button.hide,
+.login-button.hide,
+.logout-button.hide,
+.registration-button.hide {
+  display: none;
+}
+
+.nav-list-item:last-child {
+  display: flex;
+  align-items: flex-start;
+}
+
+.cart-button {
+  background-image: url('./../../../assets/images/cart-btn.svg');
+  width: 20px;
+  height: 20px;
+  margin-right: 1px;
+  cursor: pointer;
+}
+
+.cart-orders-num {
+  font-size: 12px;
+  text-align: center;
+  color: white;
+  height: 14px;
+  width: 14px;
+  background-color: $green;
+  border-radius: 4px;
+}
+
+@media screen and (max-width: 1000px) {
+  .header-logo-title {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .logo-container {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 750px) {
+  .header {
+    height: 90px;
+  }
+
+  .logo-container {
+    display: none;
+  }
+
+  .nav-list {
+    gap: 20px;
+  }
+
+  .nav-list-link {
+    &::after {
+      top: 36px;
+      left: 0;
+      width: 0;
+      height: 4px;
+    }
+  }
+
+  .buttons-container {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .profile-button,
+  .login-button,
+  .logout-button,
+  .registration-button {
+    height: 45px;
+    padding: 5px 20px;
+  }
+}
+
+@media screen and (max-width: 520px) {
+  .header {
+    height: 120px;
+  }
+
+  .nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-block-start: 0;
+    margin-block-end: 0;
+  }
+
+  .nav-list-link,
+  .cart-button {
+    &::after {
+      top: 20px;
+      left: 0;
+      width: 0;
+      height: 4px;
+    }
+  }
+}
