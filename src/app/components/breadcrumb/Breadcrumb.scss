@@ -1,0 +1,28 @@
+@import './../../../styles/colors';
+
+.breadcrumb-container {
+  border-bottom: 1px solid $green;
+  padding: 4px;
+}
+
+.breadcrumb-list {
+  display: flex;
+  list-style: none;
+  gap: 10px;
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
+
+.breadcrumb-item {
+  text-transform: capitalize;
+
+  &:not(:last-child)::after {
+    content: '/';
+    padding-left: 10px;
+  }
+
+  &:last-of-type a {
+    color: $green;
+    pointer-events: none;
+  }
+}

@@ -1,0 +1,17 @@
+@import './../../../styles/colors';
+
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  cursor: default;
+  background: $lightGreen;
+
+  &:hover {
+    background: $lightGreen;
+  }
+}

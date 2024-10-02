@@ -1,0 +1,123 @@
+@import './../../../styles/colors.scss';
+
+.addresses {
+  border-top: 1px solid $green;
+  padding-top: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 15px;
+}
+
+.addresses-title-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  align-items: end;
+}
+
+.add-addresses-btn {
+  min-width: 120px;
+  width: 120px;
+  height: 35px;
+  border-radius: 5px;
+  background-color: $green;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  color: $white;
+  text-align: center;
+  transition: 0.5s all;
+  outline: none;
+  border: none;
+  margin-top: 10px;
+
+  &:hover {
+    background-color: $darkGreen;
+  }
+}
+
+.addresses-container {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+}
+
+.shipping-address-container,
+.billing-address-container {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  padding: 0 20px;
+  gap: 10px;
+}
+
+.shipping-address-title,
+.billing-address-title {
+  font-weight: 500;
+}
+
+.shipping-address,
+.billing-address {
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+
+.country-container {
+  display: flex;
+  gap: 5px;
+}
+
+.label {
+  display: none;
+  font-weight: 300;
+  font-size: 12px;
+  color: $white;
+  background-color: $darkGreen;
+  border-radius: 3px;
+  padding: 3px;
+}
+
+.label.show {
+  display: block;
+}
+
+.message {
+  font-weight: 400;
+}
+
+.edit-btn {
+  margin-top: 5px;
+  background-color: $green;
+  border: 0;
+  color: $white;
+  border-radius: 3px;
+  width: 70px;
+  height: 25px;
+}
+
+@media screen and (max-width: 800px) {
+  .addresses-title {
+    padding: 0 20px;
+    text-align: start;
+  }
+
+  .addresses-container {
+    flex-direction: column;
+  }
+
+  .shipping-address-container,
+  .billing-address-container {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  .add-addresses-btn {
+    height: 28px;
+  }
+}
